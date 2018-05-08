@@ -1,0 +1,1 @@
+﻿在项目中建立XmlConfig文件夹，将log4net.config复制到文件夹下面，然后选择log4net.config文件，右键-属性-复制到输出目录-始终复制
