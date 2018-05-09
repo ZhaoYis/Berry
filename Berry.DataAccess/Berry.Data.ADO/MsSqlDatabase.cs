@@ -2,6 +2,7 @@
 using Berry.Log;
 using Berry.Util;
 using Berry.Util.CustomException;
+using LambdaToSQL;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,7 +10,6 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
-using LambdaToSQL;
 
 namespace Berry.Data.ADO
 {
@@ -235,7 +235,7 @@ namespace Berry.Data.ADO
                 string sql = DatabaseCommon.InsertSql<T>(entity).ToString();
                 DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
 
-                SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
 
                 //res = this.Commit();
             }
@@ -300,9 +300,9 @@ namespace Berry.Data.ADO
                 string sql = DatabaseCommon.DeleteSql<T>(entity).ToString();
                 DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
 
-                SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
 
-                return this.Commit();
+                //return this.Commit();
             }
             return res;
         }
@@ -314,7 +314,23 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public int Delete<T>(IEnumerable<T> entity) where T : class
         {
-            throw new NotImplementedException();
+            if (SqlTransaction == null)
+            {
+                BeginTrans();
+                foreach (var item in entity)
+                {
+                    Delete<T>(item);
+                }
+                return this.Commit();
+            }
+            else
+            {
+                foreach (var item in entity)
+                {
+                    Delete<T>(item);
+                }
+                return 1;
+            }
         }
 
         /// <summary>
@@ -324,17 +340,25 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public int Delete<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
+            int res = 0;
             LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
             lambda.AddAndWhere(condition);
             string where = lambda.Where();
-
             string sql = DatabaseCommon.DeleteSql<T>(where).ToString();
-            int res = 0;
-            using (var conn = Connection)
-            {
-                res = SqlHelper.ExecuteNonQuery(conn, CommandType.Text, sql);
-            }
 
+            if (SqlTransaction == null)
+            {
+                using (var conn = Connection)
+                {
+                    res = SqlHelper.ExecuteNonQuery(conn, CommandType.Text, sql);
+                }
+            }
+            else
+            {
+                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql);
+
+                //res = this.Commit();
+            }
             return res;
         }
 
@@ -345,22 +369,32 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public int Delete<T>(object keyValue) where T : class
         {
+            int res = 0;
+
             string keyField = EntityAttributeHelper.GetEntityKey<T>();
             string where = $"Where [{keyField}] = ";
             if (keyValue is int)
             {
                 where += $"{keyValue}";
-            }else if (keyValue is string || keyValue is DateTime)
+            }
+            else if (keyValue is string)
             {
                 where += $"'{keyValue}'";
             }
-
             string sql = DatabaseCommon.DeleteSql<T>(where).ToString();
 
-            int res = 0;
-            using (var conn = Connection)
+            if (SqlTransaction == null)
             {
-                res = SqlHelper.ExecuteNonQuery(conn, CommandType.Text, sql);
+                using (var conn = Connection)
+                {
+                    res = SqlHelper.ExecuteNonQuery(conn, CommandType.Text, sql);
+                }
+            }
+            else
+            {
+                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql);
+
+                //res = this.Commit();
             }
             return res;
         }
@@ -372,7 +406,24 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public int Delete<T>(object[] keyValue) where T : class
         {
-            throw new NotImplementedException();
+            int res = 0;
+            if (SqlTransaction == null)
+            {
+                this.BeginTrans();
+                foreach (object t in keyValue)
+                {
+                    this.Delete<T>(t);
+                }
+                res = this.Commit();
+            }
+            else
+            {
+                foreach (object t in keyValue)
+                {
+                    this.Delete<T>(t);
+                }
+            }
+            return res;
         }
 
         /// <summary>
@@ -393,7 +444,25 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public int Update<T>(T entity) where T : class
         {
-            throw new NotImplementedException();
+            int res = 0;
+            if (SqlTransaction == null)
+            {
+                string sql = DatabaseCommon.UpdateSql<T>(entity).ToString();
+                DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
+
+                using (var conn = Connection)
+                {
+                    res = SqlHelper.ExecuteNonQuery(conn, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+                }
+            }
+            else
+            {
+                string sql = DatabaseCommon.UpdateSql<T>(entity).ToString();
+                DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
+
+                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+            }
+            return res;
         }
 
         /// <summary>
@@ -403,29 +472,54 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public int Update<T>(IEnumerable<T> entity) where T : class
         {
-            throw new NotImplementedException();
+            int res = 0;
+            if (SqlTransaction == null)
+            {
+                this.BeginTrans();
+                foreach (T t in entity)
+                {
+                    this.Update<T>(t);
+                }
+                res = this.Commit();
+            }
+            else
+            {
+                foreach (T t in entity)
+                {
+                    this.Update<T>(t);
+                }
+            }
+            return res;
         }
 
         /// <summary>
         /// 根据条件更新
         /// </summary>
-        /// <param name="condition">条件</param>
-        /// <returns></returns>
-        public int Update<T>(Expression<Func<T, bool>> condition) where T : class, new()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 批量修改
-        /// </summary>
         /// <param name="modelModifyProps">要修改的列及修改后列的值集合</param>
-        /// <param name="where">修改的条件</param>
-        /// <param name="paramModifyNames">修改列的名称的集合</param>
+        /// <param name="condition">修改的条件</param>
         /// <returns>返回受影响行数</returns>
-        public int Modify<T>(T modelModifyProps, Expression<Func<T, bool>> @where, params string[] paramModifyNames) where T : class, new()
+        public int Update<T>(T modelModifyProps, Expression<Func<T, bool>> condition) where T : class, new()
         {
-            throw new NotImplementedException();
+            int res = 0;
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
+            string sql = DatabaseCommon.UpdateSql<T>(modelModifyProps, "", where).ToString();
+
+            if (SqlTransaction == null)
+            {
+                using (var conn = Connection)
+                {
+                    res = SqlHelper.ExecuteNonQuery(conn, CommandType.Text, sql);
+                }
+            }
+            else
+            {
+                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql);
+
+                //res = this.Commit();
+            }
+            return res;
         }
 
         /// <summary>
@@ -564,8 +658,7 @@ namespace Berry.Data.ADO
         /// <param name="pageIndex">索引</param>
         /// <param name="total">总记录</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition, string orderField, bool isAsc, int pageSize, int pageIndex,
-            out int total) where T : class, new()
+        public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
             throw new NotImplementedException();
         }
@@ -598,8 +691,7 @@ namespace Berry.Data.ADO
         /// <param name="pageIndex">索引</param>
         /// <param name="total">总记录</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize,
-            int pageIndex, out int total) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class
         {
             throw new NotImplementedException();
         }
@@ -651,8 +743,7 @@ namespace Berry.Data.ADO
         /// <param name="pageIndex">索引</param>
         /// <param name="total">总记录</param>
         /// <returns></returns>
-        public DataTable FindTable(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize,
-            int pageIndex, out int total)
+        public DataTable FindTable(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total)
         {
             throw new NotImplementedException();
         }

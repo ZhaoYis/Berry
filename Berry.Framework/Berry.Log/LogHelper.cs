@@ -168,7 +168,7 @@ namespace Berry.Log
         /// <param name="finallHandel">最终处理方式</param>
         public static void Logger(Type type, string desc, ErrorHandel errorHandel, Action tryHandel, Action<Exception> catchHandel = null, Action finallHandel = null)
         {
-            log4net.ILog log = LogManager.GetLogger(type);
+            ILog log = LogManager.GetLogger(type);
             try
             {
                 //log.Debug(desc + "\r\n");

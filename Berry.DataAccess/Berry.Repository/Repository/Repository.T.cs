@@ -216,29 +216,18 @@ namespace Berry.Data.Repository
         {
             return db.Update<T>(entity);
         }
-
+        
         /// <summary>
         /// 根据条件更新
         /// </summary>
-        /// <param name="condition">条件</param>
-        /// <returns></returns>
-        public int Update(Expression<Func<T, bool>> condition)
-        {
-            return db.Update<T>(condition);
-        }
-
-        /// <summary>
-        /// 批量修改
-        /// </summary>
         /// <param name="modelModifyProps">要修改的列及修改后列的值集合</param>
         /// <param name="where">修改的条件</param>
-        /// <param name="paramModifyStrings">修改列的名称的集合</param>
         /// <returns>返回受影响行数</returns>
-        public int Modify(T modelModifyProps, Expression<Func<T, bool>> where, params string[] paramModifyStrings)
+        public int Update(T modelModifyProps, Expression<Func<T, bool>> where)
         {
             int req = -1;
 
-            req = db.Modify(modelModifyProps, where, paramModifyStrings);
+            req = db.Update(modelModifyProps, where);
 
             return req;
         }

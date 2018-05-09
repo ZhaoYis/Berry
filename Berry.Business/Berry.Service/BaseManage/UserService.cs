@@ -44,7 +44,7 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool AddUser(UserEntity userEntity)
         {
-            ;int res = this.BaseRepository().Insert(userEntity);
+            ; int res = this.BaseRepository().Insert(userEntity);
 
             if (res > 0)
             {
@@ -207,7 +207,7 @@ namespace Berry.Service.BaseManage
         /// <param name="keyValue">主键</param>
         public void RemoveUserByKey(string keyValue)
         {
-            this.BaseRepository().Update<UserEntity>(u => u.DeleteMark == true && u.EnabledMark == false);
+            this.BaseRepository().Update<UserEntity>(new UserEntity { Id = keyValue }, u => u.DeleteMark == true && u.EnabledMark == false);
         }
 
         /// <summary>

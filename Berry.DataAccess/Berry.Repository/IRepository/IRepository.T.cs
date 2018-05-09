@@ -136,22 +136,14 @@ namespace Berry.Data.Repository
         /// <param name="entity">实体对象集合</param>
         /// <returns></returns>
         int Update(List<T> entity);
-
+        
         /// <summary>
         /// 根据条件更新
         /// </summary>
-        /// <param name="condition">条件</param>
-        /// <returns></returns>
-        int Update(Expression<Func<T, bool>> condition);
-
-        /// <summary>
-        /// 批量修改
-        /// </summary>
         /// <param name="modelModifyProps">要修改的列及修改后列的值集合</param>
-        /// <param name="where">修改的条件</param>
-        /// <param name="paramModifyNames">修改列的名称的集合</param>
+        /// <param name="condition">修改的条件</param>
         /// <returns>返回受影响行数</returns>
-        int Modify(T modelModifyProps, Expression<Func<T, bool>> where, params string[] paramModifyNames);
+        int Update(T modelModifyProps, Expression<Func<T, bool>> condition);
 
         /// <summary>
         /// 根据主键获取一条数据

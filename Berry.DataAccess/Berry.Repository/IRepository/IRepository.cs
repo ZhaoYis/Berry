@@ -139,9 +139,10 @@ namespace Berry.Data.Repository
         /// <summary>
         /// 根据条件更新
         /// </summary>
-        /// <param name="condition">条件</param>
-        /// <returns></returns>
-        int Update<T>(Expression<Func<T, bool>> condition) where T : class, new();
+        /// <param name="modelModifyProps">要修改的列及修改后列的值集合</param>
+        /// <param name="condition">修改的条件</param>
+        /// <returns>返回受影响行数</returns>
+        int Update<T>(T modelModifyProps, Expression<Func<T, bool>> condition) where T : class, new();
 
         /// <summary>
         /// 根据主键获取一条数据

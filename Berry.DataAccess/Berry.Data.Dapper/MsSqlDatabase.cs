@@ -476,37 +476,13 @@ namespace Berry.Data.Dapper
         }
 
         /// <summary>
-        /// 根据条件更新
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="condition"></param>
-        /// <returns></returns>
-        public int Update<T>(Expression<Func<T, bool>> condition) where T : class, new()
-        {
-            bool isTrans = true;
-            if (DbTransaction == null)
-            {
-                BeginTrans();
-                isTrans = false;
-            }
-            IEnumerable<T> entities = DbTransaction.Connection.Query<T>(new SQLinq<T>(EntityAttributeHelper.GetEntityTable<T>()).Where(condition));
-            Update<T>(entities);
-            if (!isTrans)
-            {
-                return Commit();
-            }
-            return 0;
-        }
-
-        /// <summary>
         /// 根据条件以及指定属性名称更新
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="modelModifyProps"></param>
-        /// <param name="where"></param>
-        /// <param name="paramModifyNames"></param>
+        /// <param name="condition"></param>
         /// <returns></returns>
-        public int Modify<T>(T modelModifyProps, Expression<Func<T, bool>> where, params string[] paramModifyNames) where T : class, new()
+        public int Update<T>(T modelModifyProps, Expression<Func<T, bool>> condition) where T : class, new()
         {
             throw new NotImplementedException();
         }

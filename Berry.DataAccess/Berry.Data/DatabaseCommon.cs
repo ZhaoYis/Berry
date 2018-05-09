@@ -185,8 +185,9 @@ namespace Berry.Data
         /// </summary>
         /// <param name="entity">实体类</param>
         /// <param name="pkName">主键</param>
+        /// <param name="where">自定义条件</param>
         /// <returns>int</returns>
-        public static StringBuilder UpdateSql<T>(T entity, string pkName)
+        public static StringBuilder UpdateSql<T>(T entity, string pkName = "", string where = "")
         {
             Type type = entity.GetType();
             //表名
@@ -225,7 +226,15 @@ namespace Berry.Data
                     }
                 }
             }
-            sb.Append(" Where ").Append(pkName).Append("=").Append(DbParameters.CreateDbParmCharacter() + pkName);
+
+            if (!string.IsNullOrEmpty(pkName))
+            {
+                sb.Append(" Where ").Append(pkName).Append("=").Append(DbParameters.CreateDbParmCharacter() + pkName);
+            }
+            else if (!string.IsNullOrEmpty(where))
+            {
+                sb.Append(" " + where);
+            }
             return sb;
         }
 

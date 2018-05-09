@@ -2,7 +2,11 @@
 using System;
 using System.Data;
 using System.Data.Common;
+using System.Data.OleDb;
 using System.Data.SqlClient;
+using System.Data.SQLite;
+using MySql.Data.MySqlClient;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Berry.Data.Extension
 {
@@ -83,59 +87,59 @@ namespace Berry.Data.Extension
         /// <summary>
         /// 转换对应的数据库参数
         /// </summary>
-        /// <param name="dbParameter">参数</param>
+        /// <param name="parameter">参数</param>
         /// <returns></returns>
-        public static DbParameter[] ToDbParameter(DbParameter[] dbParameter)
+        public static DbParameter[] ToDbParameter(DbParameter[] parameter)
         {
             int i = 0;
-            int size = dbParameter.Length;
-            DbParameter[] _dbParameter = null;
+            int size = parameter.Length;
+            DbParameter[] dbParameter = null;
             switch (DbHelper.DbType)
             {
                 case DatabaseType.SqlServer:
-                    _dbParameter = new SqlParameter[size];
+                    dbParameter = new DbParameter[size];
                     while (i < size)
                     {
-                        _dbParameter[i] = new SqlParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
+                        dbParameter[i] = new SqlParameter(parameter[i].ParameterName, parameter[i].Value);
                         i++;
                     }
                     break;
-                //case DatabaseType.MySql:
-                //    _dbParameter = new MySqlParameter[size];
-                //    while (i < size)
-                //    {
-                //        _dbParameter[i] = new MySqlParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
-                //        i++;
-                //    }
-                //    break;
-                //case DatabaseType.Oracle:
-                //    _dbParameter = new OracleParameter[size];
-                //    while (i < size)
-                //    {
-                //        _dbParameter[i] = new OracleParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
-                //        i++;
-                //    }
-                //    break;
-                //case DatabaseType.Access:
-                //    _dbParameter = new OleDbParameter[size];
-                //    while (i < size)
-                //    {
-                //        _dbParameter[i] = new OleDbParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
-                //        i++;
-                //    }
-                //    break;
+                case DatabaseType.MySql:
+                    dbParameter = new DbParameter[size];
+                    while (i < size)
+                    {
+                        dbParameter[i] = new MySqlParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
+                        i++;
+                    }
+                    break;
+                case DatabaseType.Oracle:
+                    dbParameter = new DbParameter[size];
+                    while (i < size)
+                    {
+                        dbParameter[i] = new OracleParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
+                        i++;
+                    }
+                    break;
+                case DatabaseType.Access:
+                    dbParameter = new DbParameter[size];
+                    while (i < size)
+                    {
+                        dbParameter[i] = new OleDbParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
+                        i++;
+                    }
+                    break;
                 //case DatabaseType.SqLite:
-                //    _dbParameter = new SQLiteParameter[size];
+                //    dbParameter = new DbParameter[size];
                 //    while (i < size)
                 //    {
-                //        _dbParameter[i] = new SQLiteParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
+                //        dbParameter[i] = new SQLiteParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
                 //        i++;
                 //    }
                 //    break;
                 default:
                     throw new Exception("数据库类型目前不支持！");
             }
-            return _dbParameter;
+            return dbParameter;
         }
     }
 }

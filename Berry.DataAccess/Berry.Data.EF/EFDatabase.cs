@@ -410,13 +410,12 @@ namespace Berry.Data.EF
         }
 
         /// <summary>
-        /// 批量修改
+        /// 根据条件更新
         /// </summary>
         /// <param name="modelModifyProps">要修改的列及修改后列的值集合</param>
         /// <param name="where">修改的条件</param>
-        /// <param name="paramModifyStrings">修改列的名称的集合</param>
         /// <returns>返回受影响行数</returns>
-        public int Modify<T>(T modelModifyProps, Expression<Func<T, bool>> where, params string[] paramModifyStrings) where T : class, new()
+        public int Update<T>(T modelModifyProps, Expression<Func<T, bool>> where) where T : class, new()
         {
             int req = -1;
 
@@ -428,6 +427,17 @@ namespace Berry.Data.EF
             List<PropertyInfo> propertyInfos = t.GetProperties(BindingFlags.Instance | BindingFlags.Public).ToList();
             //实体-属性集合字典
             Dictionary<string, PropertyInfo> dictionaryProps = new Dictionary<string, PropertyInfo>();
+
+            //获取实体字段不为空的字段名
+            string[] paramModifyStrings = new string[propertyInfos.Count];
+            for (int i = 0; i < propertyInfos.Count; i++)
+            {
+                if (propertyInfos[i].GetValue(modelModifyProps, null) != null)
+                {
+                    paramModifyStrings[i] = propertyInfos[i].Name;
+                }
+            }
+
             //将实体属性重要修改属性，添加到集合中 Key-属性名 Value-属性对象
             propertyInfos.ForEach(p =>
             {
@@ -436,11 +446,12 @@ namespace Berry.Data.EF
                     dictionaryProps.Add(p.Name, p);
                 }
             });
+
             //循环要修改的属性名
             foreach (string paramModifyString in paramModifyStrings)
             {
                 //判断要修改的属性名是否在实体类的属性集合中
-                if (dictionaryProps.ContainsKey(paramModifyString))
+                if (!string.IsNullOrWhiteSpace(paramModifyString) && dictionaryProps.ContainsKey(paramModifyString))
                 {
                     //如果存在则去除要修改属性对象
                     PropertyInfo info = dictionaryProps[paramModifyString];
@@ -459,17 +470,6 @@ namespace Berry.Data.EF
             req = DbTransaction == null ? this.Commit() : 0;
 
             return req;
-        }
-
-        /// <summary>
-        /// 根据条件更新
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="condition"></param>
-        /// <returns></returns>
-        public int Update<T>(Expression<Func<T, bool>> condition) where T : class, new()
-        {
-            return 0;
         }
 
         #endregion 对象实体 添加、修改、删除
