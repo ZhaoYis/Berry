@@ -1,0 +1,1 @@
+1、EF实体属性配置实例参考：https://www.cnblogs.com/nianming/archive/2012/11/07/2757997.html

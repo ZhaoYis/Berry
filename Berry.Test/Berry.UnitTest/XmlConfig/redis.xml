@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Redis配置文件-->
+<RedisSetting>
+  <Setting>
+    <!--可写的Redis链接地址-->
+    <WriteServerList>127.0.0.1:6379</WriteServerList>
+    <!--可读的Redis链接地址-->
+    <ReadServerList>127.0.0.1:6379</ReadServerList>
+    <!--最大写链接数-->
+    <MaxWritePoolSize>6000</MaxWritePoolSize>
+    <!--最大读链接数-->
+    <MaxReadPoolSize>6000</MaxReadPoolSize>
+    <!--自动重启-->
+    <AutoStart>true</AutoStart>
+    <!--本地缓存到期时间，单位:秒-->
+    <LocalCacheTime>600</LocalCacheTime>
+    <!--是否记录日志,该设置仅用于排查redis运行时出现的问题,如redis工作正常,请关闭该项-->
+    <RecordeLog>true</RecordeLog>
+  </Setting>
+</RedisSetting>

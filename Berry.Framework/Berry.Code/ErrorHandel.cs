@@ -1,4 +1,4 @@
-﻿namespace Berry.Log
+﻿namespace Berry.Code
 {
     /// <summary>
     /// 系统发生错误时处理方式

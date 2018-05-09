@@ -1,4 +1,5 @@
 ﻿using System;
+using Berry.Code;
 
 namespace Berry.Log
 {
