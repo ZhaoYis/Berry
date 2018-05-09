@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="ConvertExtension.cs" />
     <Compile Include="EnumExtension.cs" />
+    <Compile Include="HideSensitiveInfoExtension.cs" />
     <Compile Include="JsonExtension.cs" />
     <Compile Include="LambdaExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
