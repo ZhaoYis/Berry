@@ -6,7 +6,7 @@ using System;
 namespace Berry.IOC
 {
     /// <summary>
-    /// 描 述：UnityIoc
+    /// UnityIoc帮助类
     /// </summary>
     public sealed class UnityIocHelper : IServiceProvider
     {

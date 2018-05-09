@@ -21,7 +21,7 @@ namespace Berry.Entity.Mapping.BaseManage
 
             #region 配置关系
 
-            this.Ignore(t => t.PK);
+            //this.Ignore(t => t.PK);
 
             #endregion 配置关系
         }

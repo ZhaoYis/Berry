@@ -49,7 +49,8 @@
     <Compile Include="ConfigHelper.cs" />
     <Compile Include="CookieHelper.cs" />
     <Compile Include="CustomException\DataAccessException.cs" />
-    <Compile Include="DESEncryptHelper.cs" />
+    <Compile Include="Encrypt\BigInteger.cs" />
+    <Compile Include="Encrypt\DESEncryptHelper.cs" />
     <Compile Include="EntityAttributeHelper.cs" />
     <Compile Include="ExceptionMessageHelper.cs" />
     <Compile Include="HttpHelper.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Md5Helper.cs" />
     <Compile Include="NetHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Encrypt\RSAEncryptHelper.cs" />
     <Compile Include="SessionHelper.cs" />
     <Compile Include="Stopwatch\BaseStopwatch.cs" />
     <Compile Include="Stopwatch\StopwatchHelper.cs" />

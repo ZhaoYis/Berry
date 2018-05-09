@@ -2,7 +2,6 @@
 using Berry.Log;
 using Berry.Util;
 using Berry.Util.CustomException;
-using LambdaToSQL;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,6 +9,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using Berry.Util.LambdaToSQL;
 
 namespace Berry.Data.ADO
 {
@@ -212,6 +212,8 @@ namespace Berry.Data.ADO
         }
 
         #endregion 执行 SQL 语句
+
+        #region 对象实体 添加、修改、删除，直接调用执行SQl方法
 
         /// <summary>
         /// 插入一条数据
@@ -520,29 +522,9 @@ namespace Berry.Data.ADO
                 //res = this.Commit();
             }
             return res;
-        }
-
-        /// <summary>
-        /// 返回Object
-        /// </summary>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <returns></returns>
-        public object FindObject(string strSql)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 返回Object
-        /// </summary>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <param name="dbParameter">DbCommand参数</param>
-        /// <returns></returns>
-        public object FindObject(string strSql, DbParameter[] dbParameter)
-        {
-            throw new NotImplementedException();
-        }
-
+        } 
+        #endregion
+        
         /// <summary>
         /// 根据主键获取一条数据
         /// </summary>
@@ -744,6 +726,27 @@ namespace Berry.Data.ADO
         /// <param name="total">总记录</param>
         /// <returns></returns>
         public DataTable FindTable(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 返回Object
+        /// </summary>
+        /// <param name="strSql">T-SQL语句</param>
+        /// <returns></returns>
+        public object FindObject(string strSql)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 返回Object
+        /// </summary>
+        /// <param name="strSql">T-SQL语句</param>
+        /// <param name="dbParameter">DbCommand参数</param>
+        /// <returns></returns>
+        public object FindObject(string strSql, DbParameter[] dbParameter)
         {
             throw new NotImplementedException();
         }

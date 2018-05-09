@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 
-namespace LambdaToSQL
+namespace Berry.Util.LambdaToSQL
 {
     internal abstract class ExpressionVisitor
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace LambdaToSQL
+namespace Berry.Util.LambdaToSQL
 {
     /// <summary>
     /// 类型关系帮助方法

@@ -5,7 +5,7 @@ using System.Text;
 namespace Berry.Util
 {
     /// <summary>
-    /// 加密、解密帮助类
+    /// 加密、解密帮助类，对称加密
     /// </summary>
     public class DESEncryptHelper
     {

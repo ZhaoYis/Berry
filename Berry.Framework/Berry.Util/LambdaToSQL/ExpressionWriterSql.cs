@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace LambdaToSQL
+namespace Berry.Util.LambdaToSQL
 {
     internal enum SqlType : byte
     {

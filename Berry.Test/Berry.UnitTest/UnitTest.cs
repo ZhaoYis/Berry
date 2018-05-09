@@ -30,11 +30,13 @@ namespace Berry.UnitTest
 
             //IocTest();
 
-            //InsertTest(5000);
+            InsertTest(5000);
 
-            InsertListTest();
+            //InsertListTest();
 
             //QueryTest();
+
+            //RsaTest();
         }
 
         private void LogTest()
@@ -158,6 +160,23 @@ namespace Berry.UnitTest
             });
 
             Console.WriteLine("执行结束，耗时：" + time);
+        }
+
+        private void RsaTest()
+        {
+            var key = RSAEncryptHelper.GetRSAKey();
+            Console.WriteLine("PublicKey：" + key.PublicKey + "\r\n");
+            Console.WriteLine("PrivateKey：" + key.PrivateKey + "\r\n");
+
+            string source = @"RSAEncryptHelper";
+            if (RSAEncryptHelper.CheckSourceValidate(source))
+            {
+                string e = RSAEncryptHelper.EncryptString(source, key.PublicKey);
+                Console.WriteLine("加密后：" + e + "\r\n");
+
+                string d = RSAEncryptHelper.DecryptString(e, key.PrivateKey);
+                Console.WriteLine("解密后：" + d);
+            }
         }
     }
 }

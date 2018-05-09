@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace LambdaToSQL
+namespace Berry.Util.LambdaToSQL
 {
     /// <summary>
     /// 成员反射操作

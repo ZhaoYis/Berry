@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace LambdaToSQL
+namespace Berry.Util.LambdaToSQL
 {
     internal enum LambdaExpUnion : byte
     {
