@@ -4,7 +4,6 @@ using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
-using System.Data.SQLite;
 using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
 
