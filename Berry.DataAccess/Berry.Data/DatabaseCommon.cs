@@ -393,11 +393,37 @@ namespace Berry.Data
         }
 
         /// <summary>
+        /// 拼接 查询 SQL语句，自定义条件
+        /// </summary>
+        /// <returns></returns>
+        public static StringBuilder SelectSql<T>(string where) where T : class ,new()
+        {
+            //表名
+            string table = EntityAttributeHelper.GetEntityTable<T>();
+
+            PropertyInfo[] props = EntityAttributeHelper.GetProperties(typeof(T));
+            StringBuilder sbColumns = new StringBuilder();
+
+            foreach (PropertyInfo prop in props)
+            {
+                //string propertytype = prop.PropertyType.ToString();
+                sbColumns.Append(prop.Name + ",");
+            }
+            if (sbColumns.Length > 0) sbColumns.Remove(sbColumns.ToString().Length - 1, 1);
+
+            if (string.IsNullOrWhiteSpace(where)) where = " WHERE 1 = 1";
+
+            string strSql = "SELECT {0} FROM {1} {2}";
+            strSql = string.Format(strSql, sbColumns.ToString(), table + " ", where);
+            return new StringBuilder(strSql);
+        }
+
+        /// <summary>
         /// 拼接 查询 SQL语句
         /// </summary>
-        /// <param name="Top">显示条数</param>
+        /// <param name="top">显示条数</param>
         /// <returns></returns>
-        public static StringBuilder SelectSql<T>(int Top) where T : new()
+        public static StringBuilder SelectSql<T>(int top) where T : new()
         {
             //表名
             string table = EntityAttributeHelper.GetEntityTable<T>();
@@ -410,7 +436,7 @@ namespace Berry.Data
             }
             if (sbColumns.Length > 0) sbColumns.Remove(sbColumns.ToString().Length - 1, 1);
             string strSql = "SELECT top {0} {1} FROM {2} WHERE 1=1 ";
-            strSql = string.Format(strSql, Top, sbColumns.ToString(), table + " ");
+            strSql = string.Format(strSql, top, sbColumns.ToString(), table + " ");
             return new StringBuilder(strSql);
         }
 

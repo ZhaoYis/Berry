@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27428.2002
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01 Framework 基础设施层", "01 Framework 基础设施层", "{473D1AB0-2590-4D50-961F-E92115EE8507}"
 EndProject
@@ -61,6 +61,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.Data.Dapper", "Berry.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00 系统资源文件", "00 系统资源文件", "{2DB2EA6D-4E8E-4F87-9610-0529FD964D0A}"
 	ProjectSection(SolutionItems) = preProject
+		Berry.sql = Berry.sql
 		系统资源文件\ioc.config = 系统资源文件\ioc.config
 		系统资源文件\redis.xml = 系统资源文件\redis.xml
 		系统资源文件\system.config = 系统资源文件\system.config

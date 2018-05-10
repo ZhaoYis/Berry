@@ -9,6 +9,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using Berry.Extension;
 using Berry.Util.LambdaToSQL;
 
 namespace Berry.Data.ADO
@@ -522,17 +523,41 @@ namespace Berry.Data.ADO
                 //res = this.Commit();
             }
             return res;
-        } 
+        }
         #endregion
-        
+
         /// <summary>
         /// 根据主键获取一条数据
         /// </summary>
         /// <param name="keyValue">主键值</param>
         /// <returns></returns>
-        public T FindEntity<T>(object keyValue) where T : class
+        public T FindEntity<T>(object keyValue) where T : class, new()
         {
-            throw new NotImplementedException();
+            T res = default(T);
+
+            string keyField = EntityAttributeHelper.GetEntityKey<T>();
+            string where = $"Where [{keyField}] = ";
+            if (keyValue is int)
+            {
+                where += $"{keyValue}";
+            }
+            else if (keyValue is string)
+            {
+                where += $"'{keyValue}'";
+            }
+            string sql = DatabaseCommon.SelectSql<T>(where).ToString();
+
+            using (var conn = Connection)
+            {
+                DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, sql);
+                if (data.Tables.Count > 0)
+                {
+                    DataTable table = data.Tables[0];
+                    res = table.DataTableToObject<T>();
+                }
+            }
+
+            return res;
         }
 
         /// <summary>
@@ -542,7 +567,35 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public T FindEntity<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
-            throw new NotImplementedException();
+            T res = default(T);
+
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
+            string sql = DatabaseCommon.SelectSql<T>(where).ToString();
+
+            if (SqlTransaction == null)
+            {
+                using (var conn = Connection)
+                {
+                    DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, sql);
+                    if (data.Tables.Count > 0)
+                    {
+                        DataTable table = data.Tables[0];
+                        res = table.DataTableToObject<T>();
+                    }
+                }
+            }
+            else
+            {
+                DataSet data = SqlHelper.ExecuteDataset(SqlTransaction, CommandType.Text, sql);
+                if (data.Tables.Count > 0)
+                {
+                    DataTable table = data.Tables[0];
+                    res = table.DataTableToObject<T>();
+                }
+            }
+            return res;
         }
 
         /// <summary>

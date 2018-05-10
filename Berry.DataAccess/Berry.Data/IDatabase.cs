@@ -169,7 +169,7 @@ namespace Berry.Data
         /// </summary>
         /// <param name="keyValue">主键值</param>
         /// <returns></returns>
-        T FindEntity<T>(object keyValue) where T : class;
+        T FindEntity<T>(object keyValue) where T : class, new();
 
         /// <summary>
         /// 根据条件获取一条数据

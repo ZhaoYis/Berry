@@ -49,6 +49,10 @@
       <Project>{3efa4e6a-73e4-40c6-ade4-9100a98860c1}</Project>
       <Name>Berry.Code</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Berry.Framework\Berry.Extension\Berry.Extension.csproj">
+      <Project>{7a95fd4d-8c13-401b-a1d5-cbc4e391b4dc}</Project>
+      <Name>Berry.Extension</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Berry.Framework\Berry.Log\Berry.Log.csproj">
       <Project>{C84E6C4A-81F9-4DA6-AAAF-CED2EFAC706E}</Project>
       <Name>Berry.Log</Name>
