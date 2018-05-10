@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace SCC.Common
+namespace Berry.Extension
 {
     public static class HideSensitiveInfoExtension
     {

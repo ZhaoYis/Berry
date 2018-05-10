@@ -15,7 +15,7 @@ namespace Berry.Data.Repository
     {
         #region 构造
 
-        public IDatabase db;
+        private readonly IDatabase _db;
 
         /// <summary>
         /// 仓储模型
@@ -23,7 +23,7 @@ namespace Berry.Data.Repository
         /// <param name="idatabase"></param>
         public Repository(IDatabase idatabase)
         {
-            this.db = idatabase;
+            this._db = idatabase;
         }
 
         #endregion 构造
@@ -36,7 +36,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IRepository BeginTrans()
         {
-            db.BeginTrans();
+            _db.BeginTrans();
             return this;
         }
 
@@ -45,7 +45,7 @@ namespace Berry.Data.Repository
         /// </summary>
         public void Commit()
         {
-            db.Commit();
+            _db.Commit();
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Berry.Data.Repository
         /// </summary>
         public void Rollback()
         {
-            db.Rollback();
+            _db.Rollback();
         }
 
         #endregion 事务提交
@@ -67,7 +67,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int ExecuteBySql(string strSql)
         {
-            return db.ExecuteBySql(strSql);
+            return _db.ExecuteBySql(strSql);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int ExecuteBySql(string strSql, params DbParameter[] dbParameter)
         {
-            return db.ExecuteBySql(strSql, dbParameter);
+            return _db.ExecuteBySql(strSql, dbParameter);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int ExecuteByProc(string procName)
         {
-            return db.ExecuteByProc(procName);
+            return _db.ExecuteByProc(procName);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int ExecuteByProc(string procName, params DbParameter[] dbParameter)
         {
-            return db.ExecuteByProc(procName, dbParameter);
+            return _db.ExecuteByProc(procName, dbParameter);
         }
 
         #endregion 执行 SQL 语句
@@ -113,7 +113,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Insert<T>(T entity) where T : class
         {
-            return db.Insert<T>(entity);
+            return _db.Insert<T>(entity);
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Insert<T>(List<T> entity) where T : class
         {
-            return db.Insert<T>(entity);
+            return _db.Insert<T>(entity);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Delete<T>() where T : class
         {
-            return db.Delete<T>();
+            return _db.Delete<T>();
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Delete<T>(T entity) where T : class
         {
-            return db.Delete<T>(entity);
+            return _db.Delete<T>(entity);
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Delete<T>(List<T> entity) where T : class
         {
-            return db.Delete<T>(entity);
+            return _db.Delete<T>(entity);
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Delete<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
-            return db.Delete<T>(condition);
+            return _db.Delete<T>(condition);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Delete<T>(object keyValue) where T : class
         {
-            return db.Delete<T>(keyValue);
+            return _db.Delete<T>(keyValue);
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Delete<T>(object[] keyValue) where T : class
         {
-            return db.Delete<T>(keyValue);
+            return _db.Delete<T>(keyValue);
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Delete<T>(object propertyValue, string propertyName) where T : class
         {
-            return db.Delete<T>(propertyValue, propertyName);
+            return _db.Delete<T>(propertyValue, propertyName);
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Update<T>(T entity) where T : class
         {
-            return db.Update<T>(entity);
+            return _db.Update<T>(entity);
         }
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public int Update<T>(List<T> entity) where T : class
         {
-            return db.Update<T>(entity);
+            return _db.Update<T>(entity);
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public T FindEntity<T>(object keyValue) where T : class
         {
-            return db.FindEntity<T>(keyValue);
+            return _db.FindEntity<T>(keyValue);
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public T FindEntity<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
-            return db.FindEntity<T>(condition);
+            return _db.FindEntity<T>(condition);
         }
 
         /// <summary>
@@ -257,7 +257,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IQueryable<T> IQueryable<T>() where T : class, new()
         {
-            return db.IQueryable<T>();
+            return _db.IQueryable<T>();
         }
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IQueryable<T> IQueryable<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
-            return db.IQueryable<T>(condition);
+            return _db.IQueryable<T>(condition);
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IEnumerable<T> FindList<T>() where T : class, new()
         {
-            return db.FindList<T>();
+            return _db.FindList<T>();
         }
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
-            return db.FindList<T>(condition);
+            return _db.FindList<T>(condition);
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(string strSql) where T : class
         {
-            return db.FindList<T>(strSql);
+            return _db.FindList<T>(strSql);
         }
 
         /// <summary>
@@ -308,7 +308,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class
         {
-            return db.FindList<T>(strSql, dbParameter);
+            return _db.FindList<T>(strSql, dbParameter);
         }
 
         /// <summary>
@@ -319,7 +319,7 @@ namespace Berry.Data.Repository
         public IEnumerable<T> FindList<T>(PaginationEntity pagination) where T : class, new()
         {
             int total = pagination.TotalRecords;
-            var data = db.FindList<T>(pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
+            var data = _db.FindList<T>(pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
             pagination.TotalRecords = total;
             return data;
         }
@@ -333,7 +333,7 @@ namespace Berry.Data.Repository
         public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition, PaginationEntity pagination) where T : class, new()
         {
             int total = pagination.TotalRecords;
-            var data = db.FindList<T>(condition, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
+            var data = _db.FindList<T>(condition, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
             pagination.TotalRecords = total;
             return data;
         }
@@ -347,7 +347,7 @@ namespace Berry.Data.Repository
         public IEnumerable<T> FindList<T>(string strSql, PaginationEntity pagination) where T : class
         {
             int total = pagination.TotalRecords;
-            var data = db.FindList<T>(strSql, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
+            var data = _db.FindList<T>(strSql, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
             pagination.TotalRecords = total;
             return data;
         }
@@ -362,7 +362,7 @@ namespace Berry.Data.Repository
         public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, PaginationEntity pagination) where T : class
         {
             int total = pagination.TotalRecords;
-            var data = db.FindList<T>(strSql, dbParameter, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
+            var data = _db.FindList<T>(strSql, dbParameter, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
             pagination.TotalRecords = total;
             return data;
         }
@@ -378,7 +378,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public DataTable FindTable(string strSql)
         {
-            return db.FindTable(strSql);
+            return _db.FindTable(strSql);
         }
 
         /// <summary>
@@ -389,7 +389,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public DataTable FindTable(string strSql, DbParameter[] dbParameter)
         {
-            return db.FindTable(strSql, dbParameter);
+            return _db.FindTable(strSql, dbParameter);
         }
 
         /// <summary>
@@ -401,7 +401,7 @@ namespace Berry.Data.Repository
         public DataTable FindTable(string strSql, PaginationEntity pagination)
         {
             int total = pagination.TotalRecords;
-            var data = db.FindTable(strSql, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
+            var data = _db.FindTable(strSql, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
             pagination.TotalRecords = total;
             return data;
         }
@@ -416,7 +416,7 @@ namespace Berry.Data.Repository
         public DataTable FindTable(string strSql, DbParameter[] dbParameter, PaginationEntity pagination)
         {
             int total = pagination.TotalRecords;
-            var data = db.FindTable(strSql, dbParameter, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
+            var data = _db.FindTable(strSql, dbParameter, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
             pagination.TotalRecords = total;
             return data;
         }
@@ -428,7 +428,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public object FindObject(string strSql)
         {
-            return db.FindObject(strSql);
+            return _db.FindObject(strSql);
         }
 
         /// <summary>
@@ -439,7 +439,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public object FindObject(string strSql, DbParameter[] dbParameter)
         {
-            return db.FindObject(strSql, dbParameter);
+            return _db.FindObject(strSql, dbParameter);
         }
 
         #endregion 数据源 查询
