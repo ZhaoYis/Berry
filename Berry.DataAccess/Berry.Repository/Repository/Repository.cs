@@ -236,7 +236,7 @@ namespace Berry.Data.Repository
         /// </summary>
         /// <param name="keyValue">主键值</param>
         /// <returns></returns>
-        public T FindEntity<T>(object keyValue) where T : class
+        public T FindEntity<T>(object keyValue) where T : class, new()
         {
             return _db.FindEntity<T>(keyValue);
         }

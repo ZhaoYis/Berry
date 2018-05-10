@@ -30,11 +30,11 @@ namespace Berry.UnitTest
 
             //IocTest();
 
-            InsertTest(5000);
+            //InsertTest(5000);
 
-            //InsertListTest();
+            InsertListTest(5000 * 10);
 
-            //QueryTest();
+            QueryTest();
 
             //RsaTest();
         }
@@ -113,12 +113,12 @@ namespace Berry.UnitTest
             Console.WriteLine("执行结束，耗时：" + time);
         }
 
-        private void InsertListTest()
+        private void InsertListTest(int toatl = 10)
         {
             Console.WriteLine("\r\n开始测试批量插入数据...\r\n");
 
             List<UserEntity> list = new List<UserEntity>();
-            for (int i = 1; i < 5000; i++)
+            for (int i = 1; i < toatl; i++)
             {
                 string key = Guid.NewGuid().ToString().Replace("-", "");
 
@@ -139,6 +139,8 @@ namespace Berry.UnitTest
 
                 list.Add(user);
             }
+
+            Console.WriteLine("\r\n初始化数据完成...\r\n");
 
             string time = Stopwatch(() =>
             {

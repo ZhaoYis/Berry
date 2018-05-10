@@ -643,7 +643,35 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
-            throw new NotImplementedException();
+            List<T> res = new List<T>();
+
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
+            string sql = DatabaseCommon.SelectSql<T>(where).ToString();
+
+            if (SqlTransaction == null)
+            {
+                using (var conn = Connection)
+                {
+                    DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, sql);
+                    if (data.Tables.Count > 0)
+                    {
+                        DataTable table = data.Tables[0];
+                        res = table.DataTableToList<T>();
+                    }
+                }
+            }
+            else
+            {
+                DataSet data = SqlHelper.ExecuteDataset(SqlTransaction, CommandType.Text, sql);
+                if (data.Tables.Count > 0)
+                {
+                    DataTable table = data.Tables[0];
+                    res = table.DataTableToList<T>();
+                }
+            }
+            return res;
         }
 
         /// <summary>

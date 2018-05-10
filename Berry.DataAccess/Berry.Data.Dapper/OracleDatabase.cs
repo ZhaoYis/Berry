@@ -438,7 +438,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="keyValue"></param>
         /// <returns></returns>
-        public T FindEntity<T>(object keyValue) where T : class
+        public T FindEntity<T>(object keyValue) where T : class,new ()
         {
             using (var dbConnection = Connection)
             {

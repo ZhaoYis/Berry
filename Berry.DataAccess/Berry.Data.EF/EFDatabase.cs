@@ -482,7 +482,7 @@ namespace Berry.Data.EF
         /// <typeparam name="T"></typeparam>
         /// <param name="keyValue"></param>
         /// <returns></returns>
-        public T FindEntity<T>(object keyValue) where T : class
+        public T FindEntity<T>(object keyValue) where T : class, new()
         {
             return Dbcontext.Set<T>().Find(keyValue);
         }
