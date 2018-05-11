@@ -18,8 +18,7 @@
         /// A new instance of the target type
         /// 深拷贝了源对象属性的目标对象实例
         /// </returns>
-        public static TTarget Copy<TSource, TTarget>(TSource source)
-            => Copier<TSource, TTarget>.Copy(source);
+        public static TTarget Copy<TSource, TTarget>(TSource source) => Copier<TSource, TTarget>.Copy(source);
 
         /// <summary>
         /// Deep copy the source object
@@ -41,7 +40,6 @@
         /// <typeparam name="TTarget">The type of target object 目标对象类型</typeparam>
         /// <param name="source">The source object 源对象实例</param>
         /// <param name="target">The target object 目标对象实例</param>
-        public static void Copy<TSource, TTarget>(TSource source, TTarget target)
-            => Copier<TSource, TTarget>.Copy(source, target);
+        public static void Copy<TSource, TTarget>(TSource source, TTarget target) => Copier<TSource, TTarget>.Copy(source, target);
     }
 }

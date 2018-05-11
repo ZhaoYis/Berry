@@ -39,7 +39,6 @@ namespace Berry.DeepCopier
                 if (TypeICollection.MakeGenericType(elementType).IsAssignableFrom(type))
                 {
                     return CopyICollectionMethodInfo.MakeGenericMethod(type, elementType);
-
                 }
             }
             throw new UnsupportedTypeException(type);

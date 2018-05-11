@@ -60,9 +60,7 @@ namespace Berry.DeepCopier
                     // 1.源属性类型和目标属性类型一致
                     // 2.源属性可读
                     // 3.目标属性可写
-                    if (sourcePropType == targetPropType
-                        && sourcePropInfo.CanRead
-                        && targetPropInfo.CanWrite)
+                    if (sourcePropType == targetPropType && sourcePropInfo.CanRead && targetPropInfo.CanWrite)
                     {
                         // 获取属性值的表达式
                         Expression expression = Expression.Property(paramExpr, sourcePropInfo);
@@ -75,8 +73,7 @@ namespace Berry.DeepCopier
                             // 进行递归
                             if (Utils.IsRefTypeExceptString(targetPropType))
                             {
-                                expression = Expression.Call(null,
-                                    GetCopyMethodInfo(sourcePropType, targetPropType), expression);
+                                expression = Expression.Call(null, GetCopyMethodInfo(sourcePropType, targetPropType), expression);
                             }
                         }
                         memberBindings.Add(Expression.Bind(targetPropInfo, expression));
@@ -86,8 +83,7 @@ namespace Berry.DeepCopier
                 bodyExpr = Expression.MemberInit(Expression.New(targetType), memberBindings);
             }
 
-            var lambdaExpr
-                = Expression.Lambda<Func<TSource, TTarget>>(bodyExpr, paramExpr);
+            var lambdaExpr = Expression.Lambda<Func<TSource, TTarget>>(bodyExpr, paramExpr);
 
             _copyFunc = lambdaExpr.Compile();
             return _copyFunc(source);
@@ -139,9 +135,7 @@ namespace Berry.DeepCopier
                     // 1.源属性类型和目标属性类型一致
                     // 2.源属性可读
                     // 3.目标属性可写
-                    if (sourcePropType == targetPropType
-                        && sourcePropInfo.CanRead
-                        && targetPropInfo.CanWrite)
+                    if (sourcePropType == targetPropType && sourcePropInfo.CanRead && targetPropInfo.CanWrite)
                     {
                         // 获取属性值的表达式
                         Expression expression = Expression.Property(paramSourceExpr, sourcePropInfo);
@@ -151,26 +145,21 @@ namespace Berry.DeepCopier
                         // 暂不考虑目标值类型有非字符串的引用类型这种特殊情况
                         if (Utils.IsRefTypeExceptString(targetPropType))
                         {
-                            expression = Expression.Call(null,
-                                GetCopyMethodInfo(sourcePropType, targetPropType), expression);
+                            expression = Expression.Call(null, GetCopyMethodInfo(sourcePropType, targetPropType), expression);
                         }
                         binaryExpressions.Add(Expression.Assign(targetPropExpr, expression));
                     }
                 }
 
                 bodyExpr = Expression.Block(binaryExpressions);
-
-
-                var lambdaExpr
-                    = Expression.Lambda<Action<TSource, TTarget>>(bodyExpr, paramSourceExpr, paramTargetExpr);
+                
+                var lambdaExpr = Expression.Lambda<Action<TSource, TTarget>>(bodyExpr, paramSourceExpr, paramTargetExpr);
 
                 _copyAction = lambdaExpr.Compile();
                 _copyAction(source, target);
             }
-
         }
 
-        private static MethodInfo GetCopyMethodInfo(Type source, Type target)
-            => typeof(Copier<,>).MakeGenericType(source, target).GetMethod(nameof(Copy), new[] { source });
+        private static MethodInfo GetCopyMethodInfo(Type source, Type target) => typeof(Copier<,>).MakeGenericType(source, target).GetMethod(nameof(Copy), new[] { source });
     }
 }
