@@ -58,8 +58,10 @@ namespace Berry.Util
         /// <param name="cookiesName">Cookie对象名称</param>
         public static void DelCookie(string cookiesName)
         {
-            HttpCookie objCookie = new HttpCookie(cookiesName.Trim());
-            objCookie.Expires = System.DateTime.Now.AddYears(-5);
+            HttpCookie objCookie = new HttpCookie(cookiesName.Trim())
+            {
+                Expires = System.DateTime.Now.AddYears(-5)
+            };
             HttpContext.Current.Response.Cookies.Add(objCookie);
         }
     }
