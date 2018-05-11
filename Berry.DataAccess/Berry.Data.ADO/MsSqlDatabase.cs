@@ -9,6 +9,9 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
+using System.Text.RegularExpressions;
+using Berry.Data.Extension;
 using Berry.Extension;
 using Berry.Util.LambdaToSQL;
 
@@ -26,7 +29,7 @@ namespace Berry.Data.ADO
         /// </summary>
         public MsSqlDatabase(string connString)
         {
-            DbHelper.DbType = DatabaseType.SqlServer;
+            SqlHelper.DbType = DatabaseType.SqlServer;
             ConnectionString = ConfigHelper.GetConnectionString(connString);
         }
 
@@ -59,30 +62,6 @@ namespace Berry.Data.ADO
         /// 事务对象
         /// </summary>
         private SqlTransaction SqlTransaction { get; set; }
-
-        #region DbParameter转SqlParameter
-
-        /// <summary>
-        /// DbParameter转SqlParameter
-        /// </summary>
-        /// <param name="commandParameters"></param>
-        /// <returns></returns>
-
-        private static SqlParameter[] DbParameterToSqlParameter(DbParameter[] commandParameters)
-        {
-            if (commandParameters == null)
-            {
-                return null;
-            }
-            SqlParameter[] sqlParameters = new SqlParameter[commandParameters.Length];
-            for (int i = 0; i < commandParameters.Length; i++)
-            {
-                sqlParameters[i] = commandParameters[i] as SqlParameter;
-            }
-            return sqlParameters;
-        }
-
-        #endregion DbParameter转SqlParameter
 
         #endregion 属性
 
@@ -181,7 +160,7 @@ namespace Berry.Data.ADO
         {
             using (var connection = Connection)
             {
-                return SqlHelper.ExecuteNonQuery(connection, CommandType.Text, strSql, DbParameterToSqlParameter(dbParameter));
+                return SqlHelper.ExecuteNonQuery(connection, CommandType.Text, strSql, DatabaseCommon.DbParameterToSqlParameter(dbParameter));
             }
         }
 
@@ -208,7 +187,7 @@ namespace Berry.Data.ADO
         {
             using (var connection = Connection)
             {
-                return SqlHelper.ExecuteNonQuery(connection, CommandType.StoredProcedure, procName, DbParameterToSqlParameter(dbParameter));
+                return SqlHelper.ExecuteNonQuery(connection, CommandType.StoredProcedure, procName, DatabaseCommon.DbParameterToSqlParameter(dbParameter));
             }
         }
 
@@ -230,7 +209,7 @@ namespace Berry.Data.ADO
                 DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
                 using (var connection = Connection)
                 {
-                    res = SqlHelper.ExecuteNonQuery(connection, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+                    res = SqlHelper.ExecuteNonQuery(connection, CommandType.Text, sql, DatabaseCommon.DbParameterToSqlParameter(parameter));
                 }
             }
             else
@@ -238,7 +217,7 @@ namespace Berry.Data.ADO
                 string sql = DatabaseCommon.InsertSql<T>(entity).ToString();
                 DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
 
-                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DatabaseCommon.DbParameterToSqlParameter(parameter));
 
                 //res = this.Commit();
             }
@@ -295,7 +274,7 @@ namespace Berry.Data.ADO
                 DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
                 using (var connection = Connection)
                 {
-                    res = SqlHelper.ExecuteNonQuery(connection, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+                    res = SqlHelper.ExecuteNonQuery(connection, CommandType.Text, sql, DatabaseCommon.DbParameterToSqlParameter(parameter));
                 }
             }
             else
@@ -303,7 +282,7 @@ namespace Berry.Data.ADO
                 string sql = DatabaseCommon.DeleteSql<T>(entity).ToString();
                 DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
 
-                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DatabaseCommon.DbParameterToSqlParameter(parameter));
 
                 //return this.Commit();
             }
@@ -455,7 +434,7 @@ namespace Berry.Data.ADO
 
                 using (var conn = Connection)
                 {
-                    res = SqlHelper.ExecuteNonQuery(conn, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+                    res = SqlHelper.ExecuteNonQuery(conn, CommandType.Text, sql, DatabaseCommon.DbParameterToSqlParameter(parameter));
                 }
             }
             else
@@ -463,7 +442,7 @@ namespace Berry.Data.ADO
                 string sql = DatabaseCommon.UpdateSql<T>(entity).ToString();
                 DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
 
-                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DbParameterToSqlParameter(parameter));
+                res = SqlHelper.ExecuteNonQuery(SqlTransaction, CommandType.Text, sql, DatabaseCommon.DbParameterToSqlParameter(parameter));
             }
             return res;
         }
@@ -627,16 +606,6 @@ namespace Berry.Data.ADO
         }
 
         /// <summary>
-        /// 获取一条数据，返回对象集合
-        /// </summary>
-        /// <param name="orderby">排序条件</param>
-        /// <returns></returns>
-        public IEnumerable<T> FindList<T>(Func<T, object> orderby) where T : class, new()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// 根据条件获取一条数据，返回对象集合
         /// </summary>
         /// <param name="condition">条件</param>
@@ -679,9 +648,9 @@ namespace Berry.Data.ADO
         /// </summary>
         /// <param name="strSql">T-SQL语句</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql) where T : class
+        public IEnumerable<T> FindList<T>(string strSql) where T : class, new()
         {
-            throw new NotImplementedException();
+            return this.FindList<T>(strSql, null);
         }
 
         /// <summary>
@@ -690,16 +659,27 @@ namespace Berry.Data.ADO
         /// <param name="strSql">T-SQL语句</param>
         /// <param name="dbParameter">DbCommand参数</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class, new()
         {
-            throw new NotImplementedException();
+            List<T> res = new List<T>();
+
+            using (var conn = Connection)
+            {
+                DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, strSql);
+                if (data.Tables.Count > 0)
+                {
+                    DataTable table = data.Tables[0];
+                    res = table.DataTableToList<T>();
+                }
+            }
+            return res;
         }
 
         /// <summary>
         /// 获取分页数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="orderField">排序字段</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
@@ -707,7 +687,45 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
-            throw new NotImplementedException();
+            IQueryable<T> tempData = this.FindList<T>().AsQueryable();
+            string[] order = !string.IsNullOrEmpty(orderField) ? orderField.Split(',') : new[] { "" };
+            MethodCallExpression resultExp = null;
+            try
+            {
+                if (!string.IsNullOrEmpty(order[0]))
+                {
+                    foreach (string item in order)
+                    {
+                        string orderPart = item;
+                        orderPart = Regex.Replace(orderPart, @"\s+", " ");
+                        string[] orderArry = orderPart.Split(' ');
+
+                        bool sort = isAsc;
+                        if (orderArry.Length == 2)
+                        {
+                            sort = orderArry[1].ToUpper() == "ASC" ? true : false;
+                        }
+                        var parameter = Expression.Parameter(typeof(T), "t");
+                        var property = typeof(T).GetProperty(orderArry[0]);
+                        if (property != null)
+                        {
+                            var propertyAccess = Expression.MakeMemberAccess(parameter, property);
+                            var orderByExp = Expression.Lambda(propertyAccess, parameter);
+                            resultExp = Expression.Call(typeof(Queryable), sort ? "OrderBy" : "OrderByDescending", new Type[] { typeof(T), property.PropertyType }, tempData.Expression, Expression.Quote(orderByExp));
+                        }
+                    }
+                }
+                if (resultExp != null)
+                    tempData = tempData.Provider.CreateQuery<T>(resultExp);
+                tempData = tempData.Skip<T>(pageSize * (pageIndex - 1)).Take<T>(pageSize).AsQueryable();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            total = tempData.Count();
+            return tempData.ToList();
         }
 
         /// <summary>
@@ -715,7 +733,7 @@ namespace Berry.Data.ADO
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="condition">条件</param>
-        /// <param name="orderField">排序字段</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
@@ -723,7 +741,37 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
-            throw new NotImplementedException();
+            MethodCallExpression resultExp = null;
+
+            var tempData = this.FindList<T>(condition).AsQueryable();
+
+            string[] order = orderField.Split(',');
+            foreach (string item in order)
+            {
+                string orderPart = item;
+                orderPart = Regex.Replace(orderPart, @"\s+", " ");
+                string[] orderArry = orderPart.Split(' ');
+
+                bool sort = isAsc;
+                if (orderArry.Length == 2)
+                {
+                    sort = orderArry[1].ToUpper() == "ASC" ? true : false;
+                }
+                var parameter = Expression.Parameter(typeof(T), "t");
+                var property = typeof(T).GetProperty(orderArry[0]);
+                if (property != null)
+                {
+                    var propertyAccess = Expression.MakeMemberAccess(parameter, property);
+                    var orderByExp = Expression.Lambda(propertyAccess, parameter);
+                    resultExp = Expression.Call(typeof(Queryable), sort ? "OrderBy" : "OrderByDescending", new Type[] { typeof(T), property.PropertyType }, tempData.Expression, Expression.Quote(orderByExp));
+                }
+            }
+            if (resultExp != null)
+                tempData = tempData.Provider.CreateQuery<T>(resultExp);
+            total = tempData.Count();
+            tempData = tempData.Skip<T>(pageSize * (pageIndex - 1)).Take<T>(pageSize).AsQueryable();
+
+            return tempData.ToList();
         }
 
         /// <summary>
@@ -731,15 +779,15 @@ namespace Berry.Data.ADO
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="strSql">T-SQL语句</param>
-        /// <param name="orderField">排序字段</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
         /// <param name="total">总记录</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
-            throw new NotImplementedException();
+            return FindList<T>(strSql, null, orderField, isAsc, pageSize, pageIndex, out total);
         }
 
         /// <summary>
@@ -748,15 +796,49 @@ namespace Berry.Data.ADO
         /// <typeparam name="T"></typeparam>
         /// <param name="strSql">T-SQL语句</param>
         /// <param name="dbParameter">DbCommand参数</param>
-        /// <param name="orderField">排序字段</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
         /// <param name="total">总记录</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
-            throw new NotImplementedException();
+
+            using (var dbConnection = Connection)
+            {
+                StringBuilder sb = new StringBuilder();
+                if (pageIndex == 0)
+                {
+                    pageIndex = 1;
+                }
+                int num = (pageIndex - 1) * pageSize;
+                int num1 = (pageIndex) * pageSize;
+                string orderBy = "";
+
+                if (!string.IsNullOrEmpty(orderField))
+                {
+                    if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
+                    {
+                        orderBy = "Order By " + orderField;
+                    }
+                    else
+                    {
+                        orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
+                    }
+                }
+                else
+                {
+                    orderBy = "Order By (Select 0)";
+                }
+                sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
+                sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
+
+                total = Convert.ToInt32(SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
+                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, sb.ToString(), dbParameter);
+
+                return ConvertExtension.IDataReaderToList<T>(dataReader);
+            }
         }
 
         /// <summary>

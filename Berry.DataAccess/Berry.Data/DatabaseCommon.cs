@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -73,6 +74,30 @@ namespace Berry.Data
         }
 
         #endregion 对象参数转换DbParameter
+
+        #region DbParameter转SqlParameter
+
+        /// <summary>
+        /// DbParameter转SqlParameter
+        /// </summary>
+        /// <param name="commandParameters"></param>
+        /// <returns></returns>
+
+        public static SqlParameter[] DbParameterToSqlParameter(DbParameter[] commandParameters)
+        {
+            if (commandParameters == null)
+            {
+                return null;
+            }
+            SqlParameter[] sqlParameters = new SqlParameter[commandParameters.Length];
+            for (int i = 0; i < commandParameters.Length; i++)
+            {
+                sqlParameters[i] = commandParameters[i] as SqlParameter;
+            }
+            return sqlParameters;
+        }
+
+        #endregion DbParameter转SqlParameter
 
         #region 拼接 Insert SQL语句
 

@@ -1,21 +1,89 @@
 ﻿using System;
 using System.Collections;
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Xml;
+using Berry.Code;
+using Berry.Data.Extension;
 
-namespace Berry.Data.ADO
+namespace Berry.Data
 {
     /// <summary>
     /// SqlServer数据访问帮助类
     /// </summary>
     public class SqlHelper
     {
-        #region 私有构造函数和方法
+        #region 属性
 
-        private SqlHelper()
+        /// <summary>
+        /// 数据库类型
+        /// </summary>
+        public static DatabaseType DbType { get; set; }
+
+        /// <summary>
+        /// 数据库连接对象
+        /// </summary>
+        private SqlConnection SqlConnection { get; set; }
+
+        /// <summary>
+        /// 数据库连接对象
+        /// </summary>
+        //private DbConnection DbConnection { get; set; }
+
+        /// <summary>
+        /// 执行命令对象
+        /// </summary>
+        private IDbCommand DbCommand { get; set; }
+
+        /// <summary>
+        /// 关闭数据库连接
+        /// </summary>
+        public void CloseSqlConnection()
         {
+            if (SqlConnection != null && SqlConnection.State != ConnectionState.Closed)
+            {
+                SqlConnection.Close();
+                SqlConnection.Dispose();
+            }
+            if (DbCommand != null)
+            {
+                DbCommand.Dispose();
+            }
         }
+
+        #endregion 属性
+
+        #region 私有构造函数
+
+        /// <summary>
+        /// 私有构造
+        /// </summary>
+        private SqlHelper() { }
+
+        ///// <summary>
+        ///// 构造
+        ///// </summary>
+        ///// <param name="sqlConnection"></param>
+        //private SqlHelper(SqlConnection sqlConnection)
+        //{
+        //    this.SqlConnection = sqlConnection;
+        //    DbCommand = this.SqlConnection.CreateCommand();
+        //}
+
+        ///// <summary>
+        ///// 构造
+        ///// </summary>
+        ///// <param name="dbConnection"></param>
+        //public SqlHelper(DbConnection dbConnection)
+        //{
+        //    this.DbConnection = dbConnection;
+        //    DbCommand = this.DbConnection.CreateCommand();
+        //}
+
+        #endregion 构造函数
+
+        #region 私有方法
 
         /// <summary>
         /// 将SqlParameter参数数组(参数值)分配给SqlCommand命令.
@@ -34,8 +102,7 @@ namespace Berry.Data.ADO
                     if (p != null)
                     {
                         // 检查未分配值的输出参数,将其分配以DBNull.Value.
-                        if ((p.Direction == ParameterDirection.InputOutput || p.Direction == ParameterDirection.Input) &&
-                            (p.Value == null))
+                        if ((p.Direction == ParameterDirection.InputOutput || p.Direction == ParameterDirection.Input) && (p.Value == null))
                         {
                             p.Value = DBNull.Value;
                         }
@@ -170,6 +237,117 @@ namespace Berry.Data.ADO
 
         #endregion 私有构造函数和方法
 
+        #region 公共操作
+
+        /// <summary>
+        /// 执行SQL返回 DataReader
+        /// </summary>
+        /// <param name="dbConnection"></param>
+        /// <param name="cmdType">命令的类型</param>
+        /// <param name="strSql">Sql语句</param>
+        /// <returns></returns>
+        public static IDataReader ExecuteReader(DbConnection dbConnection, CommandType cmdType, string strSql)
+        {
+            return ExecuteReader(dbConnection, cmdType, strSql, null);
+        }
+
+        /// <summary>
+        /// 执行SQL返回 DataReader
+        /// </summary>
+        /// <param name="dbConnection"></param>
+        /// <param name="cmdType">命令的类型</param>
+        /// <param name="strSql">Sql语句</param>
+        /// <param name="dbParameter">Sql参数</param>
+        /// <returns></returns>
+        public static IDataReader ExecuteReader(DbConnection dbConnection, CommandType cmdType, string strSql, params DbParameter[] dbParameter)
+        {
+            var dbCommand = dbConnection.CreateCommand();
+
+            PrepareDbCommand(dbConnection, dbCommand, null, cmdType, strSql, dbParameter);
+            IDataReader rdr = dbCommand.ExecuteReader(CommandBehavior.CloseConnection);
+            return rdr;
+        }
+
+        /// <summary>
+        /// 执行查询，并返回查询所返回的结果集
+        /// </summary>
+        /// <param name="dbConnection"></param>
+        /// <param name="cmdType">命令的类型</param>
+        /// <param name="strSql">Sql语句</param>
+        /// <returns></returns>
+        public static object ExecuteScalar(DbConnection dbConnection, CommandType cmdType, string strSql)
+        {
+            return ExecuteScalar(dbConnection, cmdType, strSql, null);
+        }
+
+        /// <summary>
+        /// 执行查询，并返回查询所返回的结果集
+        /// </summary>
+        /// <param name="dbConnection"></param>
+        /// <param name="cmdType">命令的类型</param>
+        /// <param name="cmdText">Sql语句或者存储过程名称</param>
+        /// <param name="parameters">Sql参数</param>
+        /// <returns></returns>
+        public static object ExecuteScalar(DbConnection dbConnection, CommandType cmdType, string cmdText, params DbParameter[] parameters)
+        {
+            var dbCommand = dbConnection.CreateCommand();
+
+            PrepareDbCommand(dbConnection, dbCommand, null, cmdType, cmdText, parameters);
+            object val = dbCommand.ExecuteScalar();
+            dbCommand.Parameters.Clear();
+            return val;
+        }
+
+        /// <summary>
+        /// 执行查询，并返回查询所返回的结果集
+        /// </summary>
+        /// <param name="dbConnection"></param>
+        /// <param name="cmdType">命令的类型</param>
+        /// <param name="cmdText">Sql语句</param>
+        /// <param name="parameters">Sql参数</param>
+        /// <returns></returns>
+        public static IDataReader ExecuteDataReader(DbConnection dbConnection, CommandType cmdType, string cmdText, params DbParameter[] parameters)
+        {
+            var dbCommand = dbConnection.CreateCommand();
+
+            PrepareDbCommand(dbConnection, dbCommand, null, cmdType, cmdText, parameters);
+            IDataReader val = dbCommand.ExecuteReader(CommandBehavior.CloseConnection);
+            dbCommand.Parameters.Clear();
+            return val;
+        }
+
+        /// <summary>
+        /// 为即将执行准备一个命令
+        /// </summary>
+        /// <param name="conn">SqlConnection对象</param>
+        /// <param name="cmd">SqlCommand对象</param>
+        /// <param name="isOpenTrans">DbTransaction对象</param>
+        /// <param name="cmdType">执行命令的类型（存储过程或T-SQL，等等）</param>
+        /// <param name="cmdText">存储过程名称或者T-SQL命令行, e.g. Select * from Products</param>
+        /// <param name="dbParameter">执行命令所需的sql语句对应参数</param>
+        private static void PrepareDbCommand(DbConnection conn, IDbCommand cmd, DbTransaction isOpenTrans, CommandType cmdType, string cmdText, params DbParameter[] dbParameter)
+        {
+            if (conn.State != ConnectionState.Open)
+                conn.Open();
+
+            cmd.Connection = conn;
+            cmd.CommandText = cmdText;
+
+            if (isOpenTrans != null)
+                cmd.Transaction = isOpenTrans;
+            cmd.CommandType = cmdType;
+
+            if (dbParameter != null)
+            {
+                dbParameter = DbParameters.ToDbParameter(dbParameter);
+                foreach (var parameter in dbParameter)
+                {
+                    cmd.Parameters.Add(parameter);
+                }
+            }
+        }
+        #endregion
+
         #region ExecuteNonQuery命令
 
         /// <summary>
@@ -185,7 +363,7 @@ namespace Berry.Data.ADO
         /// <returns>返回命令影响的行数</returns>
         public static int ExecuteNonQuery(string connectionString, CommandType commandType = CommandType.Text, string commandText = "")
         {
-            return ExecuteNonQuery(connectionString, commandType, commandText, (SqlParameter[])null);
+            return ExecuteNonQuery(connectionString, commandType, commandText, null);
         }
 
         /// <summary>
@@ -261,7 +439,7 @@ namespace Berry.Data.ADO
         /// <returns>返回影响的行数</returns>
         public static int ExecuteNonQuery(SqlConnection connection, CommandType commandType, string commandText)
         {
-            return ExecuteNonQuery(connection, commandType, commandText, (SqlParameter[])null);
+            return ExecuteNonQuery(connection, commandType, commandText, null);
         }
 
         /// <summary>
@@ -282,8 +460,9 @@ namespace Berry.Data.ADO
 
             // 创建SqlCommand命令,并进行预处理
             SqlCommand cmd = new SqlCommand();
+
             bool mustCloseConnection = false;
-            PrepareCommand(cmd, connection, (SqlTransaction)null, commandType, commandText, commandParameters, out mustCloseConnection);
+            PrepareCommand(cmd, connection, null, commandType, commandText, commandParameters, out mustCloseConnection);
 
             // Finally, execute the command
             int retval = cmd.ExecuteNonQuery();
@@ -342,7 +521,7 @@ namespace Berry.Data.ADO
         /// <returns>返回影响的行数/returns>
         public static int ExecuteNonQuery(SqlTransaction transaction, CommandType commandType, string commandText)
         {
-            return ExecuteNonQuery(transaction, commandType, commandText, (SqlParameter[])null);
+            return ExecuteNonQuery(transaction, commandType, commandText, null);
         }
 
         /// <summary>
@@ -429,7 +608,7 @@ namespace Berry.Data.ADO
         /// <returns>返回一个包含结果集的DataSet</returns>
         public static DataSet ExecuteDataset(string connectionString, CommandType commandType, string commandText)
         {
-            return ExecuteDataset(connectionString, commandType, commandText, (SqlParameter[])null);
+            return ExecuteDataset(connectionString, commandType, commandText, null);
         }
 
         /// <summary>
@@ -504,7 +683,7 @@ namespace Berry.Data.ADO
         /// <returns>返回一个包含结果集的DataSet</returns>
         public static DataSet ExecuteDataset(SqlConnection connection, CommandType commandType, string commandText)
         {
-            return ExecuteDataset(connection, commandType, commandText, (SqlParameter[])null);
+            return ExecuteDataset(connection, commandType, commandText, null);
         }
 
         /// <summary>
@@ -526,10 +705,10 @@ namespace Berry.Data.ADO
             // 预处理
             SqlCommand cmd = new SqlCommand();
             bool mustCloseConnection = false;
-            PrepareCommand(cmd, connection, (SqlTransaction)null, commandType, commandText, commandParameters, out mustCloseConnection);
+            PrepareCommand(cmd, connection, null, commandType, commandText, commandParameters, out mustCloseConnection);
 
             // 创建SqlDataAdapter和DataSet.
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (DbDataAdapter da = new SqlDataAdapter(cmd))
             {
                 DataSet ds = new DataSet();
 
@@ -591,7 +770,7 @@ namespace Berry.Data.ADO
         /// <returns>返回一个包含结果集的DataSet</returns>
         public static DataSet ExecuteDataset(SqlTransaction transaction, CommandType commandType, string commandText)
         {
-            return ExecuteDataset(transaction, commandType, commandText, (SqlParameter[])null);
+            return ExecuteDataset(transaction, commandType, commandText, null);
         }
 
         /// <summary>
@@ -753,7 +932,7 @@ namespace Berry.Data.ADO
         /// <returns>返回包含结果集的SqlDataReader</returns>
         public static SqlDataReader ExecuteReader(string connectionString, CommandType commandType, string commandText)
         {
-            return ExecuteReader(connectionString, commandType, commandText, (SqlParameter[])null);
+            return ExecuteReader(connectionString, commandType, commandText, null);
         }
 
         /// <summary>
@@ -831,7 +1010,7 @@ namespace Berry.Data.ADO
         /// <returns>返回包含结果集的SqlDataReader</returns>
         public static SqlDataReader ExecuteReader(SqlConnection connection, CommandType commandType, string commandText)
         {
-            return ExecuteReader(connection, commandType, commandText, (SqlParameter[])null);
+            return ExecuteReader(connection, commandType, commandText, null);
         }
 
         /// <summary>
@@ -848,7 +1027,7 @@ namespace Berry.Data.ADO
         /// <returns>返回包含结果集的SqlDataReader</returns>
         public static SqlDataReader ExecuteReader(SqlConnection connection, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            return ExecuteReader(connection, (SqlTransaction)null, commandType, commandText, commandParameters, SqlConnectionOwnership.External);
+            return ExecuteReader(connection, null, commandType, commandText, commandParameters, SqlConnectionOwnership.External);
         }
 
         /// <summary>
@@ -895,7 +1074,7 @@ namespace Berry.Data.ADO
         /// <returns>返回包含结果集的SqlDataReader</returns>
         public static SqlDataReader ExecuteReader(SqlTransaction transaction, CommandType commandType, string commandText)
         {
-            return ExecuteReader(transaction, commandType, commandText, (SqlParameter[])null);
+            return ExecuteReader(transaction, commandType, commandText, null);
         }
 
         /// <summary>
@@ -971,7 +1150,7 @@ namespace Berry.Data.ADO
         public static object ExecuteScalar(string connectionString, CommandType commandType, string commandText)
         {
             // 执行参数为空的方法
-            return ExecuteScalar(connectionString, commandType, commandText, (SqlParameter[])null);
+            return ExecuteScalar(connectionString, commandType, commandText, null);
         }
 
         /// <summary>
@@ -1050,7 +1229,7 @@ namespace Berry.Data.ADO
         public static object ExecuteScalar(SqlConnection connection, CommandType commandType, string commandText)
         {
             // 执行参数为空的方法
-            return ExecuteScalar(connection, commandType, commandText, (SqlParameter[])null);
+            return ExecuteScalar(connection, commandType, commandText, null);
         }
 
         /// <summary>
@@ -1073,7 +1252,7 @@ namespace Berry.Data.ADO
             SqlCommand cmd = new SqlCommand();
 
             bool mustCloseConnection = false;
-            PrepareCommand(cmd, connection, (SqlTransaction)null, commandType, commandText, commandParameters, out mustCloseConnection);
+            PrepareCommand(cmd, connection, null, commandType, commandText, commandParameters, out mustCloseConnection);
 
             // 执行SqlCommand命令,并返回结果.
             object retval = cmd.ExecuteScalar();
@@ -1138,7 +1317,7 @@ namespace Berry.Data.ADO
         public static object ExecuteScalar(SqlTransaction transaction, CommandType commandType, string commandText)
         {
             // 执行参数为空的方法
-            return ExecuteScalar(transaction, commandType, commandText, (SqlParameter[])null);
+            return ExecuteScalar(transaction, commandType, commandText, null);
         }
 
         /// <summary>
@@ -1227,7 +1406,7 @@ namespace Berry.Data.ADO
         public static XmlReader ExecuteXmlReader(SqlConnection connection, CommandType commandType, string commandText)
         {
             // 执行参数为空的方法
-            return ExecuteXmlReader(connection, commandType, commandText, (SqlParameter[])null);
+            return ExecuteXmlReader(connection, commandType, commandText, null);
         }
 
         /// <summary>
@@ -1251,7 +1430,7 @@ namespace Berry.Data.ADO
             SqlCommand cmd = new SqlCommand();
             try
             {
-                PrepareCommand(cmd, connection, (SqlTransaction)null, commandType, commandText, commandParameters, out mustCloseConnection);
+                PrepareCommand(cmd, connection, null, commandType, commandText, commandParameters, out mustCloseConnection);
 
                 // 执行命令
                 XmlReader retval = cmd.ExecuteXmlReader();
@@ -1320,7 +1499,7 @@ namespace Berry.Data.ADO
         public static XmlReader ExecuteXmlReader(SqlTransaction transaction, CommandType commandType, string commandText)
         {
             // 执行参数为空的方法
-            return ExecuteXmlReader(transaction, commandType, commandText, (SqlParameter[])null);
+            return ExecuteXmlReader(transaction, commandType, commandText, null);
         }
 
         /// <summary>

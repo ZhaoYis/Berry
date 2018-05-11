@@ -295,7 +295,7 @@ namespace Berry.Data.Repository
         /// </summary>
         /// <param name="strSql">T-SQL语句</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql) where T : class
+        public IEnumerable<T> FindList<T>(string strSql) where T : class, new()
         {
             return _db.FindList<T>(strSql);
         }
@@ -306,7 +306,7 @@ namespace Berry.Data.Repository
         /// <param name="strSql">T-SQL语句</param>
         /// <param name="dbParameter">DbCommand参数</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class, new()
         {
             return _db.FindList<T>(strSql, dbParameter);
         }
@@ -344,7 +344,7 @@ namespace Berry.Data.Repository
         /// <param name="strSql">T-SQL语句</param>
         /// <param name="pagination">分页参数</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, PaginationEntity pagination) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, PaginationEntity pagination) where T : class, new()
         {
             int total = pagination.TotalRecords;
             var data = _db.FindList<T>(strSql, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
@@ -359,7 +359,7 @@ namespace Berry.Data.Repository
         /// <param name="dbParameter">DbCommand参数</param>
         /// <param name="pagination">分页参数</param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, PaginationEntity pagination) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, PaginationEntity pagination) where T : class, new()
         {
             int total = pagination.TotalRecords;
             var data = _db.FindList<T>(strSql, dbParameter, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);

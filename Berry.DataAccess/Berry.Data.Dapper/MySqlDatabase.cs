@@ -27,7 +27,7 @@ namespace Berry.Data.Dapper
         /// </summary>
         public MySqlDatabase(string connString)
         {
-            DbHelper.DbType = DatabaseType.MySql;
+            SqlHelper.DbType = DatabaseType.MySql;
             ConnectionString = connString;
         }
 
@@ -532,17 +532,6 @@ namespace Berry.Data.Dapper
         }
 
         /// <summary>
-        /// 根据选择器查询出一个集合
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="keySelector"></param>
-        /// <returns></returns>
-        public IEnumerable<T> FindList<T>(Func<T, object> keySelector) where T : class, new()
-        {
-            return null;
-        }
-
-        /// <summary>
         /// 根据条件查询出一个集合
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -559,7 +548,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="strSql"></param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql) where T : class
+        public IEnumerable<T> FindList<T>(string strSql) where T : class, new()
         {
             return FindList<T>(strSql, null);
         }
@@ -571,7 +560,7 @@ namespace Berry.Data.Dapper
         /// <param name="strSql"></param>
         /// <param name="dbParameter"></param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class, new()
         {
             using (var dbConnection = Connection)
             {
@@ -623,7 +612,7 @@ namespace Berry.Data.Dapper
         /// <param name="pageIndex"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
             return FindList<T>(strSql, null, orderField, isAsc, pageSize, pageIndex, out total);
         }
@@ -640,7 +629,7 @@ namespace Berry.Data.Dapper
         /// <param name="pageIndex"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
             using (var dbConnection = Connection)
             {
@@ -651,28 +640,30 @@ namespace Berry.Data.Dapper
                 }
                 int num = (pageIndex - 1) * pageSize;
                 int num1 = (pageIndex) * pageSize;
-                string OrderBy = "";
+                string orderBy = "";
 
                 if (!string.IsNullOrEmpty(orderField))
                 {
                     if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
                     {
-                        OrderBy = "Order By " + orderField;
+                        orderBy = "Order By " + orderField;
                     }
                     else
                     {
-                        OrderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
+                        orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
                     }
                 }
                 else
                 {
-                    OrderBy = "order by (select 0 )";
+                    orderBy = "Order By (Select 0 )";
                 }
-                sb.Append(strSql + OrderBy);
+                sb.Append(strSql + orderBy);
                 sb.Append(" limit " + num + "," + pageSize + "");
-                total = Convert.ToInt32(new DbHelper(dbConnection).ExecuteScalar(CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
-                var IDataReader = new DbHelper(dbConnection).ExecuteReader(CommandType.Text, sb.ToString(), dbParameter);
-                return ConvertExtension.IDataReaderToList<T>(IDataReader);
+
+                total = Convert.ToInt32(SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
+                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, sb.ToString(), dbParameter);
+
+                return ConvertExtension.IDataReaderToList<T>(dataReader);
             }
         }
 
@@ -700,7 +691,7 @@ namespace Berry.Data.Dapper
         {
             using (var dbConnection = Connection)
             {
-                var dataReader = new DbHelper(dbConnection).ExecuteReader(CommandType.Text, strSql, dbParameter);
+                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, strSql, dbParameter);
                 return ConvertExtension.IDataReaderToDataTable(dataReader);
             }
         }
@@ -757,12 +748,14 @@ namespace Berry.Data.Dapper
                 }
                 else
                 {
-                    orderBy = "order by (select 0 )";
+                    orderBy = "Order By (select 0 )";
                 }
                 sb.Append(strSql + orderBy);
                 sb.Append(" limit " + num + "," + pageSize + "");
-                total = Convert.ToInt32(new DbHelper(dbConnection).ExecuteScalar(CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
-                var dataReader = new DbHelper(dbConnection).ExecuteReader(CommandType.Text, sb.ToString(), dbParameter);
+
+                total = Convert.ToInt32(SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
+                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, sb.ToString(), dbParameter);
+
                 DataTable resultTable = ConvertExtension.IDataReaderToDataTable(dataReader);
                 return resultTable;
             }
@@ -788,7 +781,7 @@ namespace Berry.Data.Dapper
         {
             using (var dbConnection = Connection)
             {
-                return new DbHelper(dbConnection).ExecuteScalar(CommandType.Text, strSql, dbParameter);
+                return SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, strSql, dbParameter);
             }
         }
 

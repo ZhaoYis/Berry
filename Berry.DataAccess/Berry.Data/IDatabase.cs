@@ -196,14 +196,7 @@ namespace Berry.Data
         /// </summary>
         /// <returns></returns>
         IEnumerable<T> FindList<T>() where T : class, new();
-
-        /// <summary>
-        /// 获取一条数据，返回对象集合
-        /// </summary>
-        /// <param name="orderby">排序条件</param>
-        /// <returns></returns>
-        IEnumerable<T> FindList<T>(Func<T, object> orderby) where T : class, new();
-
+        
         /// <summary>
         /// 根据条件获取一条数据，返回对象集合
         /// </summary>
@@ -216,7 +209,7 @@ namespace Berry.Data
         /// </summary>
         /// <param name="strSql">T-SQL语句</param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql) where T : class;
+        IEnumerable<T> FindList<T>(string strSql) where T : class, new();
 
         /// <summary>
         /// 根据T-SQL语句获取一条数据，返回对象集合
@@ -224,17 +217,17 @@ namespace Berry.Data
         /// <param name="strSql">T-SQL语句</param>
         /// <param name="dbParameter">DbCommand参数</param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class;
+        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class, new();
 
         /// <summary>
         /// 获取分页数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="orderField">排序字段</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
         /// <param name="isAsc">是否升序</param>
-        /// <param name="pageSize">每页条数</param>
+        /// <param name="pageSize">分页大小</param>
         /// <param name="pageIndex">索引</param>
-        /// <param name="total">总记录</param>
+        /// <param name="total">总记录数</param>
         /// <returns></returns>
         IEnumerable<T> FindList<T>(string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new();
 
@@ -243,7 +236,7 @@ namespace Berry.Data
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="condition">条件</param>
-        /// <param name="orderField">排序字段</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
@@ -256,13 +249,13 @@ namespace Berry.Data
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="strSql">T-SQL语句</param>
-        /// <param name="orderField">排序字段</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
         /// <param name="total">总记录</param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class;
+        IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new();
 
         /// <summary>
         /// 根据T-SQL获取分页数据
@@ -270,13 +263,13 @@ namespace Berry.Data
         /// <typeparam name="T"></typeparam>
         /// <param name="strSql">T-SQL语句</param>
         /// <param name="dbParameter">DbCommand参数</param>
-        /// <param name="orderField">排序字段</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
         /// <param name="total">总记录</param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class;
+        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new();
 
         /// <summary>
         /// 返回DataTable

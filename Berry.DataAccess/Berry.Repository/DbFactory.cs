@@ -18,7 +18,7 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public static IDatabase Base(string connString, DatabaseType dbType)
         {
-            DbHelper.DbType = dbType;
+            SqlHelper.DbType = dbType;
 
             ResolverOverride parConnStr = new ParameterOverride("connString", connString);
             ResolverOverride parDbType = new ParameterOverride("dbType", dbType.ToString());
@@ -36,7 +36,7 @@ namespace Berry.Data.Repository
         {
             string mapToName = UnityIocHelper.GetmapToByName("DbContainer", "IDbContext");
             DatabaseType dbType = (DatabaseType)Enum.Parse(typeof(DatabaseType), mapToName, true);
-            DbHelper.DbType = dbType;
+            SqlHelper.DbType = dbType;
 
             ResolverOverride parConnStr = new ParameterOverride("connString", "MsSqlBaseDbConnectionString");
             ResolverOverride parDbType = new ParameterOverride("dbType", dbType.ToString());

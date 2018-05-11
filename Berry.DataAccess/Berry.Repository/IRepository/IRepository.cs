@@ -176,7 +176,7 @@ namespace Berry.Data.Repository
         /// </summary>
         /// <param name="strSql">T-SQL语句</param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql) where T : class;
+        IEnumerable<T> FindList<T>(string strSql) where T : class, new();
 
         /// <summary>
         /// 根据T-SQL语句获取一条数据，返回对象集合
@@ -184,7 +184,7 @@ namespace Berry.Data.Repository
         /// <param name="strSql">T-SQL语句</param>
         /// <param name="dbParameter">DbCommand参数</param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class;
+        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class, new();
 
         /// <summary>
         /// 根据分页参数获取一条数据，返回对象集合
@@ -214,7 +214,7 @@ namespace Berry.Data.Repository
         /// <param name="strSql">T-SQL语句</param>
         /// <param name="pagination">分页参数</param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql, PaginationEntity pagination) where T : class;
+        IEnumerable<T> FindList<T>(string strSql, PaginationEntity pagination) where T : class, new();
 
         /// <summary>
         /// 根据分页参数获取一条数据，返回对象集合
@@ -223,7 +223,7 @@ namespace Berry.Data.Repository
         /// <param name="dbParameter">DbCommand参数</param>
         /// <param name="pagination">分页参数</param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, PaginationEntity pagination) where T : class;
+        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, PaginationEntity pagination) where T : class, new();
 
         /// <summary>
         /// 返回DataTable

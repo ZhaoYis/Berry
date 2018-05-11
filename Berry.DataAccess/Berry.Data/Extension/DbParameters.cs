@@ -16,13 +16,13 @@ namespace Berry.Data.Extension
     {
         /// <summary>
         /// 根据配置文件中所配置的数据库类型
-        /// 来获取命令参数中的参数符号oracle为":",sqlserver为"@"
+        /// 来获取命令参数中的参数符号Oracle为":",SqlServer为"@"
         /// </summary>
         /// <returns></returns>
         public static string CreateDbParmCharacter()
         {
             string character;
-            switch (DbHelper.DbType)
+            switch (SqlHelper.DbType)
             {
                 case DatabaseType.SqlServer:
                     character = "@";
@@ -53,7 +53,26 @@ namespace Berry.Data.Extension
         /// <returns></returns>
         public static DbParameter CreateDbParameter()
         {
-            return new SqlParameter();
+            DbParameter parameter;
+            switch (SqlHelper.DbType)
+            {
+                case DatabaseType.SqlServer:
+                    parameter = new SqlParameter();
+                    break;
+
+                case DatabaseType.Oracle:
+                    parameter = new OracleParameter();
+                    break;
+
+                case DatabaseType.MySql:
+                    parameter = new MySqlParameter();
+                    break;
+
+                default:
+                    parameter = new SqlParameter();
+                    break;
+            }
+            return parameter;
         }
 
         /// <summary>
@@ -93,7 +112,7 @@ namespace Berry.Data.Extension
             int i = 0;
             int size = parameter.Length;
             DbParameter[] dbParameter = null;
-            switch (DbHelper.DbType)
+            switch (SqlHelper.DbType)
             {
                 case DatabaseType.SqlServer:
                     dbParameter = new DbParameter[size];

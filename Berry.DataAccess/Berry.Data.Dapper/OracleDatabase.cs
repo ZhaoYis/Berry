@@ -28,7 +28,7 @@ namespace Berry.Data.Dapper
         /// </summary>
         public OracleDatabase(string connString)
         {
-            DbHelper.DbType = DatabaseType.Oracle;
+            SqlHelper.DbType = DatabaseType.Oracle;
             ConnectionString = connString;
         }
 
@@ -438,7 +438,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="keyValue"></param>
         /// <returns></returns>
-        public T FindEntity<T>(object keyValue) where T : class,new ()
+        public T FindEntity<T>(object keyValue) where T : class, new()
         {
             using (var dbConnection = Connection)
             {
@@ -493,17 +493,6 @@ namespace Berry.Data.Dapper
         }
 
         /// <summary>
-        /// 根据选择器查询出一个集合
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="keySelector"></param>
-        /// <returns></returns>
-        public IEnumerable<T> FindList<T>(Func<T, object> keySelector) where T : class, new()
-        {
-            return null;
-        }
-
-        /// <summary>
         /// 根据条件查询出一个集合
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -520,7 +509,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="strSql"></param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql) where T : class
+        public IEnumerable<T> FindList<T>(string strSql) where T : class, new()
         {
             return FindList<T>(strSql, null);
         }
@@ -532,7 +521,7 @@ namespace Berry.Data.Dapper
         /// <param name="strSql"></param>
         /// <param name="dbParameter"></param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class, new()
         {
             using (var dbConnection = Connection)
             {
@@ -584,7 +573,7 @@ namespace Berry.Data.Dapper
         /// <param name="pageIndex"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
             return FindList<T>(strSql, null, orderField, isAsc, pageSize, pageIndex, out total);
         }
@@ -601,7 +590,7 @@ namespace Berry.Data.Dapper
         /// <param name="pageIndex"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class
+        public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
             using (var dbConnection = Connection)
             {
@@ -631,9 +620,11 @@ namespace Berry.Data.Dapper
                 }
                 sb.Append("Select * From (Select ROW_NUMBER() Over (" + OrderBy + ")");
                 sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum < " + (num1 + 1).ToString() + "");
-                total = Convert.ToInt32(new DbHelper(dbConnection).ExecuteScalar(CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
-                var IDataReader = new DbHelper(dbConnection).ExecuteReader(CommandType.Text, sb.ToString(), dbParameter);
-                return ConvertExtension.IDataReaderToList<T>(IDataReader);
+
+                total = Convert.ToInt32(SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
+                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, sb.ToString(), dbParameter);
+
+                return ConvertExtension.IDataReaderToList<T>(dataReader);
             }
         }
 
@@ -661,8 +652,8 @@ namespace Berry.Data.Dapper
         {
             using (var dbConnection = Connection)
             {
-                var IDataReader = new DbHelper(dbConnection).ExecuteReader(CommandType.Text, strSql, dbParameter);
-                return ConvertExtension.IDataReaderToDataTable(IDataReader);
+                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, strSql, dbParameter);
+                return ConvertExtension.IDataReaderToDataTable(dataReader);
             }
         }
 
@@ -703,28 +694,30 @@ namespace Berry.Data.Dapper
                 }
                 int num = (pageIndex - 1) * pageSize;
                 int num1 = (pageIndex) * pageSize;
-                string OrderBy = "";
+                string orderBy = "";
 
                 if (!string.IsNullOrEmpty(orderField))
                 {
                     if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
                     {
-                        OrderBy = "Order By " + orderField;
+                        orderBy = "Order By " + orderField;
                     }
                     else
                     {
-                        OrderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
+                        orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
                     }
                 }
                 else
                 {
-                    OrderBy = "order by (select 0 from dual)";
+                    orderBy = "order by (select 0 from dual)";
                 }
-                sb.Append("Select * From (Select ROW_NUMBER() Over (" + OrderBy + ")");
+                sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
                 sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum < " + (num1 + 1).ToString() + "");
-                total = Convert.ToInt32(new DbHelper(dbConnection).ExecuteScalar(CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
-                var IDataReader = new DbHelper(dbConnection).ExecuteReader(CommandType.Text, sb.ToString(), dbParameter);
-                DataTable resultTable = ConvertExtension.IDataReaderToDataTable(IDataReader);
+
+                total = Convert.ToInt32(SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
+                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, sb.ToString(), dbParameter);
+
+                DataTable resultTable = ConvertExtension.IDataReaderToDataTable(dataReader);
                 resultTable.Columns.Remove("rowNum");
                 return resultTable;
             }
@@ -750,7 +743,7 @@ namespace Berry.Data.Dapper
         {
             using (var dbConnection = Connection)
             {
-                return new DbHelper(dbConnection).ExecuteScalar(CommandType.Text, strSql, dbParameter);
+                return SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, strSql, dbParameter);
             }
         }
 
