@@ -6,7 +6,7 @@ namespace Berry.Util
     /// <summary>
     /// 根据字段过滤重复的数据
     /// </summary>
-    public class ComparintTools<T> : IEqualityComparer<T> where T : class, new()
+    public sealed class ComparintTools<T> : IEqualityComparer<T> where T : class, new()
     {
         private readonly string[] _comparintFiledName;
 

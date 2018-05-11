@@ -9,7 +9,7 @@ namespace Berry.Util
     /// <summary>
     /// 字符串操作帮助类
     /// </summary>
-    public static class StringHelper
+    public sealed class StringHelper
     {
         #region 防止SQL注入，过滤字符串
 
@@ -18,7 +18,7 @@ namespace Berry.Util
         ///</summary>
         ///<param name="source">传入的字符串</param>
         ///<returns>过滤后的字符串</returns>
-        public static string SqlFilters(this string source)
+        public static string SqlFilters(string source)
         {
             //半角括号替换为全角括号
             source = source.Replace("'", "'''").Replace(";", "；").Replace("(", "（").Replace(")", "）");
@@ -227,7 +227,7 @@ namespace Berry.Util
         /// <param name="text"></param>
         /// <param name="pattern"></param>
         /// <returns></returns>
-        public static List<string> GetValueByRegex(this string text, string pattern)
+        public static List<string> GetValueByRegex(string text, string pattern)
         {
             if (string.IsNullOrEmpty(text)) return new List<string>();
 
@@ -258,7 +258,7 @@ namespace Berry.Util
         /// <param name="html"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static string ReplaceHtmlTag(this string html, int length = 0)
+        public static string ReplaceHtmlTag(string html, int length = 0)
         {
             string strText = System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", "");
             strText = System.Text.RegularExpressions.Regex.Replace(strText, "&[^;]+;", "");

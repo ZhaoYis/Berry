@@ -19,7 +19,7 @@ namespace Berry.Data.EF.Extension
         /// <returns></returns>
         public static string FormatSql(string strsql)
         {
-            return strsql.SqlFilters();
+            return StringHelper.SqlFilters(strsql);
         }
 
         /// <summary>

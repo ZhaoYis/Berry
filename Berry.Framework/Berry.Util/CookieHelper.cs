@@ -5,7 +5,7 @@ namespace Berry.Util
     /// <summary>
     /// Cookie帮助类
     /// </summary>
-    public static class CookieHelper
+    public sealed class CookieHelper
     {
         /// <summary>
         /// 写cookie值

@@ -7,7 +7,7 @@ using System.Web;
 
 namespace Berry.Util
 {
-    public class NetHelper
+    public sealed class NetHelper
     {
         #region Ip(获取Ip)
 

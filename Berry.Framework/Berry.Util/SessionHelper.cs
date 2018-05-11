@@ -10,7 +10,7 @@ namespace Berry.Util
     /// <para>　GetSession：读取某个Session对象值</para>
     /// <para>　DelSession：删除某个Session对象</para>
     /// </summary>
-    public static class SessionHelper
+    public sealed class SessionHelper
     {
         #region 添加Session,有效期为默认
 

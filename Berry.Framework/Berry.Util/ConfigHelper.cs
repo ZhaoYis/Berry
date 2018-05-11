@@ -5,7 +5,7 @@ namespace Berry.Util
     /// <summary>
     /// 配置文件操作帮助类
     /// </summary>
-    public class ConfigHelper
+    public sealed class ConfigHelper
     {
         /// <summary>
         /// 获取链接字符串

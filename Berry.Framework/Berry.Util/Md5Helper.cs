@@ -6,7 +6,7 @@ namespace Berry.Util
     /// <summary>
     /// MD5加密帮助类
     /// </summary>
-    public class Md5Helper
+    public sealed class Md5Helper
     {
         #region MD5加密
 

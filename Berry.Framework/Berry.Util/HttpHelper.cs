@@ -12,7 +12,7 @@ namespace Berry.Util
     /// <summary>
     /// Http连接操作帮助类
     /// </summary>
-    public class HttpHelper
+    public sealed class HttpHelper
     {
         #region 预定义方变量
 

@@ -6,7 +6,7 @@ namespace Berry.Util
     /// <summary>
     /// 异常信息封装类
     /// </summary>
-    public class ExceptionMessageHelper
+    public sealed class ExceptionMessageHelper
     {
         #region 构造函数
 

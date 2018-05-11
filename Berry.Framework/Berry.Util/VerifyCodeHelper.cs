@@ -8,7 +8,7 @@ namespace Berry.Util
     /// <summary>
     /// 验证码帮助类
     /// </summary>
-    public class VerifyCodeHelper
+    public sealed class VerifyCodeHelper
     {
         /// <summary>
         /// 生成验证码

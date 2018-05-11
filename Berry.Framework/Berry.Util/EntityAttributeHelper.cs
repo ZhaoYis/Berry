@@ -11,7 +11,7 @@ namespace Berry.Util
     /// <summary>
     /// 获取实体类Attribute自定义属性
     /// </summary>
-    public static class EntityAttributeHelper
+    public sealed class EntityAttributeHelper
     {
         /// <summary>
         ///  获取实体对象Key

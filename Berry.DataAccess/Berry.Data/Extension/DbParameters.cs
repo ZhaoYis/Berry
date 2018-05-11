@@ -60,13 +60,13 @@ namespace Berry.Data.Extension
                     parameter = new SqlParameter();
                     break;
 
-                case DatabaseType.Oracle:
-                    parameter = new OracleParameter();
-                    break;
+                //case DatabaseType.Oracle:
+                //    parameter = new OracleParameter();
+                //    break;
 
-                case DatabaseType.MySql:
-                    parameter = new MySqlParameter();
-                    break;
+                //case DatabaseType.MySql:
+                //    parameter = new MySqlParameter();
+                //    break;
 
                 default:
                     parameter = new SqlParameter();

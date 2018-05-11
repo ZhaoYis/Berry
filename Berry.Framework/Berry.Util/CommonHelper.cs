@@ -8,7 +8,7 @@ namespace Berry.Util
     /// <summary>
     /// 公共帮助类
     /// </summary>
-    public class CommonHelper
+    public sealed class CommonHelper
     {
         #region 将XML内容转换成目标对象实体集合
 

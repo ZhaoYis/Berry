@@ -453,11 +453,12 @@ namespace Berry.Extension
             // 获得此模型的类型
             Type type = typeof(T);
 
+            // 获得此模型的公共属性
+            PropertyInfo[] propertys = type.GetProperties();
+
             foreach (DataRow dr in dt.Rows)
             {
                 T t = new T();
-                // 获得此模型的公共属性
-                PropertyInfo[] propertys = t.GetType().GetProperties();
                 foreach (PropertyInfo pi in propertys)
                 {
                     string tempName = pi.Name;
@@ -490,10 +491,13 @@ namespace Berry.Extension
         public static T DataTableToObject<T>(this DataTable dt) where T : new()
         {
             T t = new T();
+            // 获得此模型的类型
+            Type type = typeof(T);
+            // 获得此模型的公共属性
+            PropertyInfo[] propertys = type.GetProperties();
+
             foreach (DataRow dr in dt.Rows)
             {
-                // 获得此模型的公共属性
-                PropertyInfo[] propertys = t.GetType().GetProperties();
                 foreach (PropertyInfo pi in propertys)
                 {
                     string tempName = pi.Name;
