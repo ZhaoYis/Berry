@@ -49,7 +49,7 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
         [HttpGet]
         public ActionResult GetListJson(string moduleId)
         {
-            var data = moduleButtonBLL.GetModuleButtonList(moduleId);
+            var data = moduleButtonBLL.GetListByModuleId(moduleId);
             return Content(data.TryToJson());
         }
         /// <summary>
@@ -59,7 +59,7 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
         [HttpGet]
         public ActionResult GetTreeListJson(string moduleId)
         {
-            var data = moduleButtonBLL.GetModuleButtonList(moduleId);
+            var data = moduleButtonBLL.GetListByModuleId(moduleId);
             if (data != null)
             {
                 var treeList = new List<TreeGridEntity>();

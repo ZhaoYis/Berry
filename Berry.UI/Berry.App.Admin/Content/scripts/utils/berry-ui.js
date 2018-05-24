@@ -376,30 +376,35 @@ $.fn.GetWebControls = function (keyValue) {
         var type = $(this).attr('type');
         switch (type) {
             case "checkbox":
+                //if ($("#" + id).is(":checked")) {
+                //    reVal += '"' + id + '"' + ':' + '"1",'
+                //} else {
+                //    reVal += '"' + id + '"' + ':' + '"0",'
+                //}
                 if ($("#" + id).is(":checked")) {
-                    reVal += '"' + id + '"' + ':' + '"1",'
+                    reVal += '"' + id + '"' + ':' + 'true,'
                 } else {
-                    reVal += '"' + id + '"' + ':' + '"0",'
+                    reVal += '"' + id + '"' + ':' + 'false,'
                 }
                 break;
             case "select":
                 var value = $("#" + id).attr('data-value');
                 if (value == "") {
-                    value = "&nbsp;";
+                    value = "";
                 }
                 reVal += '"' + id + '"' + ':' + '"' + $.trim(value) + '",'
                 break;
             case "selectTree":
                 var value = $("#" + id).attr('data-value');
                 if (value == "") {
-                    value = "&nbsp;";
+                    value = "";
                 }
                 reVal += '"' + id + '"' + ':' + '"' + $.trim(value) + '",'
                 break;
             default:
                 var value = $("#" + id).val();
                 if (value == "") {
-                    value = "&nbsp;";
+                    value = "";
                 }
                 reVal += '"' + id + '"' + ':' + '"' + $.trim(value) + '",'
                 break;

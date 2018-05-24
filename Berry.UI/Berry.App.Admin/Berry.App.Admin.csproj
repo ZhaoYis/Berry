@@ -125,6 +125,7 @@
     <Content Include="Content\images\on-line.png" />
     <Content Include="Content\images\splitLine_bg.gif" />
     <Content Include="Content\images\tab_close.png" />
+    <Content Include="Content\images\UserCard01.png" />
     <Content Include="Content\images\UserCard02.png" />
     <Content Include="Content\images\UserCard03.png" />
     <Content Include="Content\images\validatebox_warning.png" />

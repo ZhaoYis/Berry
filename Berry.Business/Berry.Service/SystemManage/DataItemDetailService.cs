@@ -86,14 +86,14 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public bool ExistItemValue(string itemValue, string keyValue, string itemId)
         {
-            var expression = LambdaExtension.True<DataItemDetailEntity>();
-            expression = expression.And(t => t.ItemValue == itemValue).And(t => t.ItemId == itemId);
+            List<DataItemDetailEntity> data = this.BaseRepository()
+                .FindList<DataItemDetailEntity>(t => t.ItemValue == itemValue && t.ItemId == itemId).ToList();
             if (!string.IsNullOrEmpty(keyValue))
             {
-                expression = expression.And(t => t.Id != keyValue);
+                data = data.Where(t => t.Id != keyValue).ToList();
             }
 
-            bool hasExit = this.BaseRepository().IQueryable(expression).Any();
+            bool hasExit = data.Count > 0;
 
             return hasExit;
         }
@@ -107,14 +107,14 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public bool ExistItemName(string itemName, string keyValue, string itemId)
         {
-            var expression = LambdaExtension.True<DataItemDetailEntity>();
-            expression = expression.And(t => t.ItemName == itemName).And(t => t.ItemId == itemId);
+            List<DataItemDetailEntity> data = this.BaseRepository()
+                .FindList<DataItemDetailEntity>(t => t.ItemName == itemName && t.ItemId == itemId).ToList();
             if (!string.IsNullOrEmpty(keyValue))
             {
-                expression = expression.And(t => t.Id != keyValue);
+                data = data.Where(t => t.Id != keyValue).ToList();
             }
 
-            bool hasExit = this.BaseRepository().IQueryable(expression).Any();
+            bool hasExit = data.Count > 0;
 
             return hasExit;
         }
@@ -125,7 +125,7 @@ namespace Berry.Service.SystemManage
         /// <param name="keyValue">主键</param>
         public void RemoveDataItemDetailByKey(string keyValue)
         {
-            int res = this.BaseRepository().Delete(keyValue);
+            int res = this.BaseRepository().Delete<DataItemDetailEntity>(keyValue);
         }
 
         /// <summary>
@@ -139,12 +139,12 @@ namespace Berry.Service.SystemManage
             if (!string.IsNullOrEmpty(keyValue))
             {
                 dataItemDetailEntity.Modify(keyValue);
-                int res = this.BaseRepository().Update(dataItemDetailEntity);
+                int res = this.BaseRepository().Update<DataItemDetailEntity>(dataItemDetailEntity);
             }
             else
             {
                 dataItemDetailEntity.Create();
-                int res = this.BaseRepository().Insert(dataItemDetailEntity);
+                int res = this.BaseRepository().Insert<DataItemDetailEntity>(dataItemDetailEntity);
             }
         }
     }

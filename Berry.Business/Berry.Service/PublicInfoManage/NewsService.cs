@@ -29,17 +29,17 @@ namespace Berry.Service.PublicInfoManage
             JObject queryParam = queryJson.TryToJObject();
             if (queryParam != null)
             {
-                if (!string.IsNullOrEmpty(queryParam["FullHead"].ToString()))
+                if (!queryParam["FullHead"].IsEmpty())
                 {
                     string FullHead = queryParam["FullHead"].ToString();
                     expression = expression.And(t => t.FullHead.Contains(FullHead));
                 }
-                if (!string.IsNullOrEmpty(queryParam["Category"].ToString()))
+                if (!queryParam["Category"].IsEmpty())
                 {
                     string Category = queryParam["Category"].ToString();
                     expression = expression.And(t => t.Category == Category);
                 }
-                if (!string.IsNullOrEmpty(queryParam["CategoryId"].ToString()))
+                if (!queryParam["CategoryId"].IsEmpty())
                 {
                     string CategoryId = queryParam["CategoryId"].ToString();
                     expression = expression.And(t => t.CategoryId == CategoryId);

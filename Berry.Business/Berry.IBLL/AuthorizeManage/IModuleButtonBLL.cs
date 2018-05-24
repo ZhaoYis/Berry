@@ -9,17 +9,23 @@ namespace Berry.IBLL.AuthorizeManage
     public partial interface IModuleButtonBLL
     {
         /// <summary>
+        /// 获取所有授权功能按钮
+        /// </summary>
+        /// <returns></returns>
+        List<ModuleButtonEntity> GetList();
+
+        /// <summary>
         /// 获取授权功能按钮
         /// </summary>
         /// <param name="userId">用户Id</param>
         /// <returns></returns>
-        IEnumerable<ModuleButtonEntity> GetModuleButtonList(string userId);
+        IEnumerable<ModuleButtonEntity> GetListByUserId(string userId);
         /// <summary>
         /// 按钮列表
         /// </summary>
         /// <param name="moduleId">功能Id</param>
         /// <returns></returns>
-        IEnumerable<ModuleButtonEntity> GetList(string moduleId);
+        IEnumerable<ModuleButtonEntity> GetListByModuleId(string moduleId);
         /// <summary>
         /// 按钮实体
         /// </summary>

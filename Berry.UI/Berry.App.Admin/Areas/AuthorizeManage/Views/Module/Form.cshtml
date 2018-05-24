@@ -87,8 +87,11 @@
         if (postData["ParentId"] == "") {
             postData["ParentId"] = 0;
         }
-        postData["moduleButtonListJson"] = JSON.stringify(buttonJson);
-        postData["moduleColumnListJson"] = JSON.stringify(columnJson);
+        postData["moduleButtonListJson"] = buttonJson;//JSON.stringify(buttonJson);
+        postData["moduleColumnListJson"] = columnJson;//JSON.stringify(columnJson);
+
+        console.log(postData)
+
         $.SaveForm({
             url: "../../AuthorizeManage/Module/SaveForm?keyValue=" + keyValue,
             param: postData,
@@ -128,7 +131,7 @@
         $.ajax({
             url: "../../AuthorizeManage/ModuleButton/GetListJson?moduleId=" + escape(moduleId),
             type: "get",
-            dataType: "json",
+            dataType: "text",
             success: function (data) {
                 buttonJson = data;
             },
@@ -141,7 +144,7 @@
             height: $(window).height() - 165,
             width: $(window).width() - 11,
             colModel: [
-                { label: "主键", name: "ModuleButtonId", hidden: true },
+                { label: "主键", name: "Id", hidden: true },
                 { label: "名称", name: "FullName", width: 140, align: "left", sortable: false },
                 { label: "编号", name: "EnCode", width: 140, align: "left", sortable: false },
                 { label: "地址", name: "ActionAddress", width: 500, align: "left", sortable: false },
@@ -156,9 +159,9 @@
         function buttonListToListTreeJson(buttonJson) {
             $.ajax({
                 url: "../../AuthorizeManage/ModuleButton/ListToListTreeJson",
-                data: { moduleButtonJson: JSON.stringify(buttonJson) },
+                data: { moduleButtonJson: buttonJson }, //JSON.stringify(buttonJson)
                 type: "post",
-                dataType: "json",
+                dataType: "text",
                 success: function (data) {
                     $grid.clearGridData();
                     $grid[0].addJSONData(data);
@@ -167,7 +170,7 @@
         }
         //新增
         $("#lr-add-button").click(function () {
-            var parentId = $("#gridTable-button").jqGridRowValue("ModuleButtonId");
+            var parentId = $("#gridTable-button").jqGridRowValue("Id");
             dialogOpen({
                 id: "buttonForm",
                 title: '添加按钮',
@@ -184,7 +187,7 @@
         })
         //编辑
         $("#lr-edit-button").click(function () {
-            var moduleButtonId = $("#gridTable-button").jqGridRowValue("ModuleButtonId");
+            var moduleButtonId = $("#gridTable-button").jqGridRowValue("Id");
             if (checkedRow(moduleButtonId)) {
                 dialogOpen({
                     id: "buttonForm",
@@ -195,7 +198,7 @@
                     callBack: function (iframeId) {
                         top.frames[iframeId].AcceptClick(function (data) {
                             $.each(buttonJson, function (i) {
-                                if (buttonJson[i].ModuleButtonId == moduleButtonId) {
+                                if (buttonJson[i].Id == moduleButtonId) {
                                     buttonJson[i] = data;
                                 }
                             });
@@ -207,10 +210,10 @@
         })
         //删除
         $("#lr-delete-button").click(function () {
-            var moduleButtonId = $("#gridTable-button").jqGridRowValue("ModuleButtonId");
+            var moduleButtonId = $("#gridTable-button").jqGridRowValue("Id");
             if (checkedRow(moduleButtonId)) {
                 $.each(buttonJson, function (i) {
-                    if (buttonJson[i].ModuleButtonId == moduleButtonId) {
+                    if (buttonJson[i].Id == moduleButtonId) {
                         buttonJson.splice(i, 1);
                         buttonListToListTreeJson(buttonJson);
                         return false;
@@ -220,7 +223,7 @@
         });
         //复制
         $("#lr-copy-button").click(function () {
-            var moduleButtonId = $("#gridTable-button").jqGridRowValue("ModuleButtonId");
+            var moduleButtonId = $("#gridTable-button").jqGridRowValue("Id");
             if (checkedRow(moduleButtonId)) {
                 dialogOpen({
                     id: "OptionModule",
@@ -257,7 +260,7 @@
             height: $(window).height() - 165,
             width: $(window).width() - 11,
             colModel: [
-                { label: "主键", name: "ModuleColumnId", index: "ModuleColumnId", hidden: true },
+                { label: "主键", name: "Id", index: "Id", hidden: true },
                 { label: "名称", name: "FullName", index: "FullName", width: 140, align: "left", sortable: false, },
                 { label: "编号", name: "EnCode", index: "EnCode", width: 140, align: "left", sortable: false },
                 { label: "描述", name: "Description", index: "Description", width: 500, align: "left", sortable: false }
@@ -296,7 +299,7 @@
         })
         //编辑
         $("#lr-edit-view").click(function () {
-            var moduleColumnId = $("#gridTable-view").jqGridRowValue("ModuleColumnId");
+            var moduleColumnId = $("#gridTable-view").jqGridRowValue("Id");
             if (checkedRow(moduleColumnId)) {
                 dialogOpen({
                     id: "viewForm",
@@ -307,7 +310,7 @@
                     callBack: function (iframeId) {
                         top.frames[iframeId].AcceptClick(function (data) {
                             $.each(columnJson, function (i) {
-                                if (columnJson[i].ModuleColumnId == moduleColumnId) {
+                                if (columnJson[i].Id == moduleColumnId) {
                                     columnJson[i] = data;
                                 }
                             });
@@ -319,10 +322,10 @@
         })
         //删除
         $("#lr-delete-view").click(function () {
-            var moduleColumnId = $("#gridTable-view").jqGridRowValue("ModuleColumnId");
+            var moduleColumnId = $("#gridTable-view").jqGridRowValue("Id");
             if (checkedRow(moduleColumnId)) {
                 $.each(columnJson, function (i) {
-                    if (columnJson[i].ModuleColumnId == moduleColumnId) {
+                    if (columnJson[i].Id == moduleColumnId) {
                         columnJson.splice(i, 1);
                         ViewListToListTreeJson(columnJson);
                         return false;

@@ -108,11 +108,11 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
         {
             var existMember = permissionBLL.GetMemberList(roleId).ToList();
             var userdata = userBLL.GetTable();
-            userdata.Columns.Add("ischeck", Type.GetType("System.Int32"));
-            userdata.Columns.Add("isdefault", Type.GetType("System.Int32"));
+            userdata.Columns.Add("ischeck", typeof(int));
+            userdata.Columns.Add("isdefault", typeof(int));
             foreach (DataRow item in userdata.Rows)
             {
-                string userId = item["userid"].ToString();
+                string userId = item["id"].ToString();
                 int ischeck = existMember.Count(t => t.UserId == userId);
                 item["ischeck"] = ischeck;
                 if (ischeck > 0)
@@ -172,7 +172,7 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
             var existModuleButton = permissionBLL.GetModuleButtonList(roleId).ToList();
             string userId = OperatorProvider.Provider.Current().UserId;
             var moduleData = moduleBll.GetModuleList(userId).ToList();
-            var moduleButtonData = moduleButtonBll.GetModuleButtonList(userId).ToList();
+            var moduleButtonData = moduleButtonBll.GetListByUserId(userId).ToList();
             var treeList = new List<TreeEntity>();
 
             foreach (ModuleEntity item in moduleData)

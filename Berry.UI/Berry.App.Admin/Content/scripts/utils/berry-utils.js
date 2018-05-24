@@ -25,11 +25,11 @@ $.SaveForm = function (options) {
             type: options.type,
             dataType: options.dataType,
             success: function (data) {
-                if (data.type == "3") {
-                    dialogAlert(data.message, -1);
+                if (data.Status == 2002) {
+                    dialogAlert(data.Message, -1);
                 } else {
                     Loading(false);
-                    dialogMsg(data.message, 1);
+                    dialogMsg(data.Message, 1);
                     options.success(data);
                     if (options.close == true) {
                         dialogClose();
@@ -72,8 +72,8 @@ $.SetForm = function (options) {
         dataType: options.dataType,
         async: options.async,
         success: function (data) {
-            if (data != null && data.type == "3") {
-                dialogAlert(data.message, -1);
+            if (data != null && data.Status == 2002) {
+                dialogAlert(data.Message, -1);
             } else {
                 options.success(data);
             }
@@ -119,10 +119,10 @@ $.RemoveForm = function (options) {
                     type: options.type,
                     dataType: options.dataType,
                     success: function (data) {
-                        if (data.type == "3") {
-                            dialogAlert(data.message, -1);
+                        if (data.Status == 2002) {
+                            dialogAlert(data.Message, -1);
                         } else {
-                            dialogMsg(data.message, 1);
+                            dialogMsg(data.Message, 1);
                             options.success(data);
                         }
                     },
@@ -173,10 +173,11 @@ $.ConfirmAjax = function (options) {
                     dataType: options.dataType,
                     success: function (data) {
                         Loading(false);
-                        if (data.type == "3") {
-                            dialogAlert(data.message, -1);
+                        if (data.Status == 2002) {
+                            dialogAlert(data.Message, -1);
                         } else {
-                            dialogMsg(data.message, 1);
+                            dialogMsg(data.Message, 1);
+
                             options.success(data);
                         }
                     },

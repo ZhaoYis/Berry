@@ -102,7 +102,10 @@ namespace Berry.Extension
         /// <returns></returns>
         public static List<T> JsonToList<T>(this string json)
         {
-            return JsonConvert.DeserializeObject<List<T>>(json);
+            if (json.IsJson())
+                return JsonConvert.DeserializeObject<List<T>>(json);
+
+            return default(List<T>);
         }
 
         /// <summary>
@@ -113,7 +116,9 @@ namespace Berry.Extension
         /// <returns></returns>
         public static T JsonToEntity<T>(this string json)
         {
-            return JsonConvert.DeserializeObject<T>(json);
+            if (json.IsJson())
+                return JsonConvert.DeserializeObject<T>(json);
+            return default(T);
         }
 
         /// <summary>

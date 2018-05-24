@@ -233,7 +233,7 @@ namespace Berry.App.Admin.Controllers
         private Dictionary<string, object> GetModuleButtonData()
         {
             string userId = OperatorProvider.Provider.Current().UserId;
-            var data = moduleButtonBll.GetModuleButtonList(userId).ToList();
+            var data = moduleButtonBll.GetListByUserId(userId).ToList();
 
             var dataModule = data.Distinct(new ComparintTools<ModuleButtonEntity>("ModuleId")).ToList();
             Dictionary<string, object> dictionary = new Dictionary<string, object>();

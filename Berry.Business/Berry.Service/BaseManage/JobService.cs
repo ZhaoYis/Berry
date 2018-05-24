@@ -57,15 +57,12 @@ namespace Berry.Service.BaseManage
                         case "FullName":          //职位名称
                             expression = expression.And(t => t.FullName.Contains(keyword));
                             break;
-
-                        default:
-                            break;
                     }
                 }
             }
 
             expression = expression.And(t => t.Category == 3);
-            return this.BaseRepository().FindList(expression, pagination);
+            return this.BaseRepository().FindList<RoleEntity>(expression, pagination);
         }
 
         /// <summary>
@@ -126,7 +123,7 @@ namespace Berry.Service.BaseManage
         /// <param name="keyValue">主键</param>
         public void RemoveForm(string keyValue)
         {
-            this.BaseRepository().Delete(keyValue);
+            this.BaseRepository().Delete<RoleEntity>(keyValue);
         }
 
         /// <summary>
@@ -140,13 +137,13 @@ namespace Berry.Service.BaseManage
             if (!string.IsNullOrEmpty(keyValue))
             {
                 jobEntity.Modify(keyValue);
-                this.BaseRepository().Update(jobEntity);
+                this.BaseRepository().Update<RoleEntity>(jobEntity);
             }
             else
             {
                 jobEntity.Create();
                 jobEntity.Category = 3;
-                this.BaseRepository().Insert(jobEntity);
+                this.BaseRepository().Insert<RoleEntity>(jobEntity);
             }
         }
 

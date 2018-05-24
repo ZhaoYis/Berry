@@ -16,7 +16,7 @@
         //上级
         $("#ParentId").ComboBoxTree({
             url: "../../AuthorizeManage/ModuleButton/ListToTreeJson",
-            param: { moduleButtonJson: JSON.stringify(dataJson) },
+            param: { moduleButtonJson: dataJson },//JSON.stringify(dataJson)
             method: "post",
             description: "==请选择==",
             height: "150px"
@@ -24,7 +24,7 @@
         if (!!moduleButtonId) {
             $.each(dataJson, function (i) {
                 var row = dataJson[i];
-                if (row.ModuleButtonId == moduleButtonId) {
+                if (row.Id == moduleButtonId) {
                     $("#form1").SetWebControls(row);
                 }
             });

@@ -29,6 +29,7 @@
     }
     //加载树
     var _Category;
+    var _CategoryId;
     function GetTree() {
         var item = {
             height: $(window).height() - 52,
@@ -36,6 +37,7 @@
             url: "../../SystemManage/DataItemDetail/GetDataItemTreeJson",
             onnodeclick: function (item) {
                 _Category = item.value;
+                _CategoryId = item.id;
                 $('#btn_Search').trigger("click");
             }
         };
@@ -125,7 +127,8 @@
         $("#btn_Search").click(function () {
             var queryJson = {
                 Category: _Category,
-                FullHead: $("#txt_Keyword").val()
+                FullHead: $("#txt_Keyword").val(),
+                CategoryId: _CategoryId
             }
             $grid.jqGrid('setGridParam', {
                 postData: { queryJson: JSON.stringify(queryJson) },

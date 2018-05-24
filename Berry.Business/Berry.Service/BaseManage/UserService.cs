@@ -132,7 +132,7 @@ namespace Berry.Service.BaseManage
             {
                 //更新操作
                 userEntity.Modify(keyValue);
-                int res = this.BaseRepository().Update(userEntity);
+                int res = this.BaseRepository().Update<UserEntity>(userEntity);
                 isSucc = res > 0;
             }
             else
@@ -140,7 +140,7 @@ namespace Berry.Service.BaseManage
                 //新增操作
                 userEntity.Create();
 
-                int res = this.BaseRepository().Insert(userEntity);
+                int res = this.BaseRepository().Insert<UserEntity>(userEntity);
                 isSucc = res > 0;
             }
 
@@ -329,7 +329,7 @@ namespace Berry.Service.BaseManage
             strSql.Append(@"SELECT  u.*,
                                     d.FullName AS DepartmentName
                             FROM    Base_User u
-                                    LEFT JOIN Base_Department d ON d.DepartmentId = u.DepartmentId
+                                    LEFT JOIN Base_Department d ON d.Id = u.DepartmentId
                             WHERE   1 = 1");
             strSql.Append(" AND u.Id <> 'System' AND u.EnabledMark = 1 AND u.DeleteMark = 0");
 
@@ -364,8 +364,8 @@ namespace Berry.Service.BaseManage
                                     u.CreateDate,
                                     u.Description
                             FROM    Base_User u
-                                    LEFT JOIN Base_Organize o ON o.OrganizeId = u.OrganizeId
-                                    LEFT JOIN Base_Department d ON d.DepartmentId = u.DepartmentId
+                                    LEFT JOIN Base_Organize o ON o.Id = u.OrganizeId
+                                    LEFT JOIN Base_Department d ON d.Id = u.DepartmentId
                             WHERE   1 = 1");
             strSql.Append(" AND u.Id <> 'System' AND u.EnabledMark = 1 AND u.DeleteMark = 0 order by o.FullName,d.FullName,u.RealName");
 
@@ -397,8 +397,8 @@ namespace Berry.Service.BaseManage
                                   ,u.[CreateDate]
                                   ,u.[CreateUserName]
                               FROM Base_User u
-                              INNER JOIN Base_Department d ON u.DepartmentId = d.DepartmentId
-                              INNER JOIN Base_Organize o ON u.OrganizeId = o.OrganizeId");
+                              INNER JOIN Base_Department d ON u.DepartmentId = d.Id
+                              INNER JOIN Base_Organize o ON u.OrganizeId = o.Id");
 
             DataTable data = this.BaseRepository().FindTable(strSql.ToString());
 

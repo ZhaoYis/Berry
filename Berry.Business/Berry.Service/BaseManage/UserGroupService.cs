@@ -88,15 +88,15 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistEnCode(string enCode, string keyValue)
         {
-            var expression = LambdaExtension.True<RoleEntity>();
-            expression = expression.And(t => t.EnCode == enCode).And(t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true);
+            List<RoleEntity> data = this.BaseRepository().FindList<RoleEntity>(t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true && t.EnCode == enCode).ToList();
             if (!string.IsNullOrEmpty(keyValue))
             {
-                expression = expression.And(t => t.Id != keyValue);
+                data = data.Where(t => t.Id != keyValue).ToList();
             }
-            bool hasExist = this.BaseRepository().IQueryable<RoleEntity>(expression).Any();
 
-            return hasExist;
+            bool hasExit = data.Count > 0;
+
+            return hasExit;
         }
 
         /// <summary>
@@ -107,15 +107,15 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistFullName(string fullName, string keyValue)
         {
-            var expression = LambdaExtension.True<RoleEntity>();
-            expression = expression.And(t => t.FullName == fullName).And(t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true);
+            List<RoleEntity> data = this.BaseRepository().FindList<RoleEntity>(t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true && t.FullName == fullName).ToList();
             if (!string.IsNullOrEmpty(keyValue))
             {
-                expression = expression.And(t => t.Id != keyValue);
+                data = data.Where(t => t.Id != keyValue).ToList();
             }
-            bool hasExist = this.BaseRepository().IQueryable<RoleEntity>(expression).Any();
 
-            return hasExist;
+            bool hasExit = data.Count > 0;
+
+            return hasExit;
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Berry.Service.BaseManage
         /// <summary>
         /// 用户组列表
         /// </summary>
-        private const string GetAllUserGroupSQL = @"SELECT  r.RoleId ,
+        private const string GetAllUserGroupSQL = @"SELECT  r.Id ,
 				                                            o.FullName AS OrganizeId ,
 				                                            r.Category ,
 				                                            r.EnCode ,
@@ -166,8 +166,8 @@ namespace Berry.Service.BaseManage
 				                                            r.CreateDate,
                                                             r.DeleteMark
                                             FROM    Base_Role r
-				                                            LEFT JOIN Base_Organize o ON o.OrganizeId = r.OrganizeId
-                                            WHERE   and r.Category = 4 and r.EnabledMark = 1 and r.DeleteMark = 0
+				                                            LEFT JOIN Base_Organize o ON o.Id = r.OrganizeId
+                                            WHERE o.FullName is not null and r.Category = 4 and r.EnabledMark = 1 and r.DeleteMark = 0
                                             ORDER BY o.FullName, r.SortCode";
 
         #endregion SQL语句

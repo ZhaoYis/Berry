@@ -90,16 +90,16 @@ namespace Berry.App.Admin.Areas.BaseManage.Controllers
                 switch (condition)
                 {
                     case "FullName":    //机构名称
-                        data = data.TreeWhere(t => t.FullName.Contains(keyword), "OrganizeId");
+                        data = data.TreeWhere(t => t.FullName.Contains(keyword), "Id");
                         break;
                     case "EnCode":      //外文名称
-                        data = data.TreeWhere(t => t.EnCode.Contains(keyword), "OrganizeId");
+                        data = data.TreeWhere(t => t.EnCode.Contains(keyword), "Id");
                         break;
                     case "ShortName":   //中文名称
-                        data = data.TreeWhere(t => t.ShortName.Contains(keyword), "OrganizeId");
+                        data = data.TreeWhere(t => t.ShortName.Contains(keyword), "Id");
                         break;
                     case "Manager":     //负责人
-                        data = data.TreeWhere(t => t.Manager.Contains(keyword), "OrganizeId");
+                        data = data.TreeWhere(t => t.Manager.Contains(keyword), "Id");
                         break;
                     default:
                         break;
@@ -128,7 +128,7 @@ namespace Berry.App.Admin.Areas.BaseManage.Controllers
         [HttpGet]
         public ActionResult GetFormJson(string keyValue)
         {
-            var data = organizeBLL.GetOrganizeList();
+            var data = organizeBLL.GetOrganizeEntity(keyValue);
             return Content(data.TryToJson());
         }
         #endregion

@@ -29,7 +29,7 @@ namespace Berry.BLL.AuthorizeManage
         /// </summary>
         /// <param name="userId">用户Id</param>
         /// <returns></returns>
-        public IEnumerable<ModuleButtonEntity> GetModuleButtonList(string userId)
+        public IEnumerable<ModuleButtonEntity> GetListByUserId(string userId)
         {
             bool isSystem = OperatorProvider.Provider.Current().IsSystem;
             if (isSystem)
@@ -47,7 +47,7 @@ namespace Berry.BLL.AuthorizeManage
         /// </summary>
         /// <param name="moduleId">功能Id</param>
         /// <returns></returns>
-        public IEnumerable<ModuleButtonEntity> GetList(string moduleId)
+        public IEnumerable<ModuleButtonEntity> GetListByModuleId(string moduleId)
         {
             return moduleButtonService.GetList(moduleId);
         }

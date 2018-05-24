@@ -42,15 +42,15 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistFullName(string departmentName, string keyValue)
         {
-            var expression = LambdaExtension.True<DepartmentEntity>();
-            expression = expression.And(t => t.FullName == departmentName);
+            List<OrganizeEntity> data = this.BaseRepository().FindList<OrganizeEntity>(t => t.FullName == departmentName).ToList();
             if (!string.IsNullOrEmpty(keyValue))
             {
-                expression = expression.And(t => t.Id != keyValue);
+                data = data.Where(t => t.Id != keyValue).ToList();
             }
-            bool hasExist = this.BaseRepository().IQueryable(expression).Any();
 
-            return hasExist;
+            bool hasExit = data.Count > 0;
+
+            return hasExit;
         }
 
         /// <summary>
@@ -61,15 +61,15 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistEnCode(string enCode, string keyValue)
         {
-            var expression = LambdaExtension.True<DepartmentEntity>();
-            expression = expression.And(t => t.EnCode == enCode);
+            List<OrganizeEntity> data = this.BaseRepository().FindList<OrganizeEntity>(t => t.EnCode == enCode).ToList();
             if (!string.IsNullOrEmpty(keyValue))
             {
-                expression = expression.And(t => t.Id != keyValue);
+                data = data.Where(t => t.Id != keyValue).ToList();
             }
-            bool hasExist = this.BaseRepository().IQueryable(expression).Any();
 
-            return hasExist;
+            bool hasExit = data.Count > 0;
+
+            return hasExit;
         }
 
         /// <summary>
@@ -80,15 +80,15 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistShortName(string shortName, string keyValue)
         {
-            var expression = LambdaExtension.True<DepartmentEntity>();
-            expression = expression.And(t => t.ShortName == shortName);
+            List<OrganizeEntity> data = this.BaseRepository().FindList<OrganizeEntity>(t => t.ShortName == shortName).ToList();
             if (!string.IsNullOrEmpty(keyValue))
             {
-                expression = expression.And(t => t.Id != keyValue);
+                data = data.Where(t => t.Id != keyValue).ToList();
             }
-            bool hasExist = this.BaseRepository().IQueryable(expression).Any();
 
-            return hasExist;
+            bool hasExit = data.Count > 0;
+
+            return hasExit;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Berry.Service.BaseManage
         /// <param name="keyValue">主键</param>
         public void RemoveDepartmentByKey(string keyValue)
         {
-            int count = this.BaseRepository().IQueryable<DepartmentEntity>(t => t.ParentId == keyValue).Count();
+            int count = this.BaseRepository().FindList<DepartmentEntity>(t => t.ParentId == keyValue).Count();
             if (count > 0)
             {
                 throw new Exception("当前所选数据有子节点数据！");
