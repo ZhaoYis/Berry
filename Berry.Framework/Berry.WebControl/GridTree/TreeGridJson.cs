@@ -20,19 +20,19 @@ namespace Berry.WebControl.GridTree
         public static string TreeJson(List<TreeGridEntity> listData, int index, string parentId)
         {
             StringBuilder sb = new StringBuilder();
-            var childNodeList = listData.FindAll(t => t.ParentId == parentId);
+            var childNodeList = listData.FindAll(t => t.parentId == parentId);
             if (childNodeList.Count > 0) { index++; }
 
             foreach (TreeGridEntity entity in childNodeList)
             {
-                string strJson = entity.EntityJson;
+                string strJson = entity.entityJson;
                 strJson = strJson.Insert(1, "\"level\":" + index + ",");
-                strJson = strJson.Insert(1, "\"isLeaf\":" + (entity.HasChildren != true).ToString().ToLower() + ",");
-                strJson = strJson.Insert(1, "\"expanded\":" + (entity.Expanded).ToString().ToLower() + ",");
+                strJson = strJson.Insert(1, "\"isLeaf\":" + (entity.hasChildren != true).ToString().ToLower() + ",");
+                strJson = strJson.Insert(1, "\"expanded\":" + (entity.expanded).ToString().ToLower() + ",");
                 strJson = strJson.Insert(1, "\"lft\":" + lft++ + ",");
                 strJson = strJson.Insert(1, "\"rgt\":" + rgt-- + ",");
                 sb.Append(strJson);
-                sb.Append(TreeJson(listData, index, entity.Id));
+                sb.Append(TreeJson(listData, index, entity.id));
             }
             return sb.ToString().Replace("}{", "},{");
         }

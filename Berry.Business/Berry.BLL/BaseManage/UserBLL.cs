@@ -58,10 +58,11 @@ namespace Berry.BLL.BaseManage
         /// </summary>
         /// <param name="keyValue">主键值</param>
         /// <param name="userEntity">用户实体</param>
+        /// <param name="objectId">用户ID</param>
         /// <returns></returns>
-        public bool AddUser(string keyValue, UserEntity userEntity)
+        public bool AddUser(string keyValue, UserEntity userEntity,out string objectId)
         {
-            return _userService.AddUser(keyValue, userEntity);
+            return _userService.AddUser(keyValue, userEntity,out objectId);
         }
 
         /// <summary>

@@ -40,8 +40,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AreaCache.cs" />
     <Compile Include="DataItemCache.cs" />
     <Compile Include="DepartmentCache.cs" />
+    <Compile Include="JobCache.cs" />
     <Compile Include="OrganizeCache.cs" />
     <Compile Include="PostCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,0 +1,42 @@
+﻿@using System.Web.Optimization
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render("~/bundles/bootstrap/css", "~/bundles/jqgrid/css", "~/bundles/tree/css")
+    @*<link href="~/Content/scripts/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />*@
+    <link href="~/Content/styles/berry-ui.css" rel="stylesheet" />
+    <link href="~/Content/styles/berry-index.css" rel="stylesheet" />
+
+    @Scripts.Render("~/bundles/jquery", "~/bundles/bootstrap/js", "~/bundles/jqgrid/js", "~/bundles/utils", "~/bundles/tree/js")
+    <script src="~/Content/scripts/plugins/layout/jquery.layout.js"></script>
+    @*<script src="~/Content/scripts/plugins/jquery-ui/jquery-ui.min.js"></script>*@
+    <script src="~/Content/scripts/plugins/datepicker/WdatePicker.js"></script>
+
+    <!--表单验证-->
+    <script src="~/Content/scripts/plugins/validator/validator.js"></script>
+
+    <!--日期控件-->
+    <link href="~/Content/scripts/plugins/datetime/pikaday.css" rel="stylesheet" />
+    <script src="~/Content/scripts/plugins/datetime/pikaday.js"></script>
+
+    <!--导向组件-->
+    <link href="~/Content/scripts/plugins/wizard/wizard.css" rel="stylesheet" />
+    <script src="~/Content/scripts/plugins/wizard/wizard.js"></script>
+
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    @RenderBody()
+    @Html.AntiForgeryToken()
+</body>
+</html>

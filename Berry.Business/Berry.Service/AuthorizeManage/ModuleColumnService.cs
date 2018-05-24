@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Text;
+using Berry.Data.Extension;
+using Berry.Extension;
 
 namespace Berry.Service.AuthorizeManage
 {
@@ -25,23 +28,44 @@ namespace Berry.Service.AuthorizeManage
             strSql.Append(@"SELECT  *
                             FROM    Base_ModuleColumn
                             WHERE   ModuleColumnId IN (
-                                    SELECT  ItemId
+                                    SELECT  Id
                                     FROM    Base_Authorize
                                     WHERE   ItemType = 3
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     UserId = @UserId ) )
+                                                  WHERE     Id = @UserId ) )
                                             OR ObjectId = @UserId )  Order By SortCode");
 
             DbParameter[] parameter =
             {
-                new SqlParameter("@UserId",SqlDbType.NVarChar,36)
+                //new SqlParameter("@UserId",SqlDbType.NVarChar,36)
+                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "UserId", userId, DbType.String)
             };
 
             IEnumerable<ModuleColumnEntity> res = this.BaseRepository().FindList<ModuleColumnEntity>(strSql.ToString(), parameter);
 
             return res;
+        }
+
+        /// <summary>
+        /// 视图列表
+        /// </summary>
+        /// <param name="moduleId">功能Id</param>
+        /// <returns></returns>
+        public IEnumerable<ModuleColumnEntity> GetList(string moduleId)
+        {
+            return this.BaseRepository().FindList<ModuleColumnEntity>(t => t.ModuleId == moduleId).OrderBy(t => t.SortCode);
+        }
+
+        /// <summary>
+        /// 视图实体
+        /// </summary>
+        /// <param name="keyValue">主键值</param>
+        /// <returns></returns>
+        public ModuleColumnEntity GetEntity(string keyValue)
+        {
+            return this.BaseRepository().FindEntity<ModuleColumnEntity>(keyValue);
         }
 
         /// <summary>
@@ -56,6 +80,16 @@ namespace Berry.Service.AuthorizeManage
             IEnumerable<ModuleColumnEntity> res = this.BaseRepository().FindList<ModuleColumnEntity>(strSql.ToString());
 
             return res;
+        }
+
+        /// <summary>
+        /// 添加视图
+        /// </summary>
+        /// <param name="moduleColumnEntity">视图实体</param>
+        public void AddEntity(ModuleColumnEntity moduleColumnEntity)
+        {
+            moduleColumnEntity.Create();
+            this.BaseRepository().Insert<ModuleColumnEntity>(moduleColumnEntity);
         }
     }
 }

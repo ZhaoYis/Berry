@@ -1,12 +1,14 @@
 ﻿using Berry.Code.Operator;
 using Berry.Util;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Berry.Entity.AuthorizeManage
 {
     /// <summary>
     /// 系统表单
     /// </summary>
+    [Table("Base_ModuleForm")]
     public class ModuleFormEntity : BaseEntity
     {
         #region 扩展操作

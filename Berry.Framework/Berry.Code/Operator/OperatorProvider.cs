@@ -127,9 +127,13 @@ namespace Berry.Code.Operator
 
                 #endregion 解决cookie时，设置数据权限较多时无法登陆的bug
             }
-            else
+            else if (_loginProvider == "Session")
             {
                 SessionHelper.RemoveSession(LoginUserKey.Trim());
+            }
+            else if (_loginProvider == "Cache")
+            {
+                CacheFactory.GetCacheInstance().RemoveCache(LoginUserKey);
             }
         }
 
@@ -157,9 +161,13 @@ namespace Berry.Code.Operator
 
                     #endregion 解决cookie时，设置数据权限较多时无法登陆的bug
                 }
-                else
+                else if (_loginProvider == "Session")
                 {
                     str = SessionHelper.GetSession<string>(LoginUserKey);
+                }
+                else if (_loginProvider == "Cache")
+                {
+                    str = CacheFactory.GetCacheInstance().GetCache<string>(LoginUserKey);
                 }
 
                 return string.IsNullOrEmpty(str);
@@ -188,10 +196,19 @@ namespace Berry.Code.Operator
 
                 #endregion 解决cookie时，设置数据权限较多时无法登陆的bug
             }
-            else
+            else if (_loginProvider == "Session")
             {
                 user = DESEncryptHelper.Decrypt(SessionHelper.GetSession<string>(LoginUserKey).ToString()).JsonToEntity<OperatorEntity>();
             }
+            else if (_loginProvider == "Cache")
+            {
+                string json = CacheFactory.GetCacheInstance().GetCache<string>(LoginUserKey);
+                if (!string.IsNullOrEmpty(json))
+                {
+                    user = DESEncryptHelper.Decrypt(json).JsonToEntity<OperatorEntity>();
+                }
+            }
+
             object token = CacheFactory.GetCacheInstance().GetCache<string>(user.UserId);
             if (token == null)
             {
@@ -204,6 +221,17 @@ namespace Berry.Code.Operator
             else
             {
                 return 0;//已登录
+            }
+        }
+
+        /// <summary>
+        /// 当前Tab页面模块Id
+        /// </summary>
+        public static string CurrentModuleId
+        {
+            get
+            {
+                return CookieHelper.GetCookie("currentmoduleId");
             }
         }
     }

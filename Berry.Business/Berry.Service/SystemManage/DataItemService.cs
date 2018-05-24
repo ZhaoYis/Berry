@@ -19,7 +19,8 @@ namespace Berry.Service.SystemManage
         public IEnumerable<DataItemEntity> GetDataItemList()
         {
             IEnumerable<DataItemEntity> res = this.BaseRepository()
-                .FindList<DataItemEntity>(d => d.DeleteMark == false && d.EnabledMark == true).OrderByDescending(d => d.CreateDate).ToList();
+                .FindList<DataItemEntity>(d => d.DeleteMark == false && d.EnabledMark == true)
+                .OrderByDescending(d => d.CreateDate).ToList();
 
             return res;
         }
@@ -71,7 +72,7 @@ namespace Berry.Service.SystemManage
                 expression = expression.And(t => t.Id != keyValue);
             }
 
-            bool isExit = this.BaseRepository().IQueryable<DataItemEntity>(expression).Any();
+            bool isExit = this.BaseRepository().FindList<DataItemEntity>(expression).Any();
 
             return isExit;
         }
@@ -91,7 +92,7 @@ namespace Berry.Service.SystemManage
                 expression = expression.And(t => t.Id != keyValue);
             }
 
-            bool isExit = this.BaseRepository().IQueryable<DataItemEntity>(expression).Any();
+            bool isExit = this.BaseRepository().FindList<DataItemEntity>(expression).Any();
 
             return isExit;
         }

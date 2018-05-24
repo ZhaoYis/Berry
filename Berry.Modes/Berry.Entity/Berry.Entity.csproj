@@ -58,6 +58,8 @@
     <Compile Include="BaseManage\UserRelationEntity.cs" />
     <Compile Include="CommonEntity\PaginationEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PublicInfoManage\NewsEntity.cs" />
+    <Compile Include="SystemManage\AreaEntity.cs" />
     <Compile Include="SystemManage\DataItemDetailEntity.cs" />
     <Compile Include="SystemManage\DataItemEntity.cs" />
     <Compile Include="SystemManage\LogEntity.cs" />

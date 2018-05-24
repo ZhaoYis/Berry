@@ -27,6 +27,19 @@ namespace Berry.Util.LambdaToSQL
         public string Where(bool addCinditionKey = true)
         {
             if (string.IsNullOrWhiteSpace(_aiWhereStr)) return string.Empty;
+            //(1 And (( (Category = 1) And (DeleteMark = 0)) And (EnabledMark = 1)))
+            //((1 And (CategoryId = 1)) And ((OperateTime >= '2018/5/6 0:00:00') And (OperateTime <= '2018/5/14 0:00:00')))
+
+            //处理语句开头有bool值情况
+            string temp = _aiWhereStr;
+            temp = temp.Replace("(", "").Replace(")", "").Trim();
+            if (temp.StartsWith("1 And"))
+            {
+                _aiWhereStr = _aiWhereStr.Replace("1 And", "");
+            }else if (temp.StartsWith("0 And"))
+            {
+                _aiWhereStr = _aiWhereStr.Replace("0 And", "");
+            }
 
             if (addCinditionKey)
             {

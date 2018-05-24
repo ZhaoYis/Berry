@@ -30,7 +30,7 @@ namespace Berry.UnitTest
 
             //IocTest();
 
-            //InsertTest(5000);
+            InsertTest(1);
 
             //InsertListTest(5000 * 10);
 
@@ -89,7 +89,7 @@ namespace Berry.UnitTest
 
                         UserEntity user = new UserEntity
                         {
-                            Account = "dashixiong" + i,
+                            Account = "System",
                             NickName = "大师兄" + i,
                             Birthday = DateTime.Now.AddDays(-1000),
                             Secretkey = key,

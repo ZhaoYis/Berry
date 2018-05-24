@@ -78,7 +78,7 @@ namespace Berry.Util
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 strbaser64 = "";
             }

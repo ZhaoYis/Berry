@@ -23,7 +23,7 @@ namespace Berry.Service.SystemManage
         public IEnumerable<DataItemDetailEntity> GetDataItemDetailList(string itemId)
         {
             IEnumerable<DataItemDetailEntity> res = this.BaseRepository()
-                .FindList<DataItemDetailEntity>(d => d.ItemId.Equals(itemId) && d.DeleteMark == false && d.EnabledMark == true).OrderBy(d => d.SortCode);
+                .FindList<DataItemDetailEntity>(d => d.ItemId == itemId && d.DeleteMark == false && d.EnabledMark == true).OrderBy(d => d.SortCode);
 
             return res;
         }
@@ -47,9 +47,9 @@ namespace Berry.Service.SystemManage
         public IEnumerable<DataItemViewModel> GetDataItemList()
         {
             StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT  i.ItemId ,
+            strSql.Append(@"SELECT  i.Id AS ItemId,
                                     i.ItemCode AS EnCode ,
-                                    d.ItemDetailId ,
+                                    d.Id AS ItemDetailId,
                                     d.ParentId ,
                                     d.ItemCode ,
                                     d.ItemName ,
@@ -60,7 +60,7 @@ namespace Berry.Service.SystemManage
                                     d.SortCode ,
                                     d.EnabledMark
                             FROM    Base_DataItemDetail d
-                                    LEFT JOIN Base_DataItem i ON i.ItemId = d.ItemId
+                                    LEFT JOIN Base_DataItem i ON i.Id = d.ItemId
                             WHERE   1 = 1
                                     AND d.EnabledMark = 1
                                     AND d.DeleteMark = 0

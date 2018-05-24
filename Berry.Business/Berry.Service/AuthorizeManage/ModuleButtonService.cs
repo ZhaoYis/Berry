@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Text;
+using Berry.Data.Extension;
+using Berry.Extension;
 
 namespace Berry.Service.AuthorizeManage
 {
@@ -25,18 +28,19 @@ namespace Berry.Service.AuthorizeManage
             strSql.Append(@"SELECT  *
                             FROM    Base_ModuleButton
                             WHERE   ModuleButtonId IN (
-                                    SELECT  ItemId
+                                    SELECT  Id
                                     FROM    Base_Authorize
                                     WHERE   ItemType = 2
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     UserId = @UserId ) )
+                                                  WHERE     Id = @UserId ) )
                                             OR ObjectId = @UserId ) Order By SortCode");
 
             DbParameter[] parameter =
             {
-                new SqlParameter("@UserId",SqlDbType.NVarChar,36)
+                //new SqlParameter("@UserId",SqlDbType.NVarChar,36)
+                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "UserId", userId, DbType.String)
             };
 
             IEnumerable<ModuleButtonEntity> res = this.BaseRepository().FindList<ModuleButtonEntity>(strSql.ToString(), parameter);
@@ -56,6 +60,38 @@ namespace Berry.Service.AuthorizeManage
             IEnumerable<ModuleButtonEntity> res = this.BaseRepository().FindList<ModuleButtonEntity>(strSql.ToString());
 
             return res;
+        }
+
+        /// <summary>
+        /// 按钮列表
+        /// </summary>
+        /// <param name="moduleId">功能Id</param>
+        /// <returns></returns>
+        public IEnumerable<ModuleButtonEntity> GetList(string moduleId)
+        {
+            var expression = LambdaExtension.True<ModuleButtonEntity>();
+            expression = expression.And(t => t.ModuleId == moduleId);
+            return this.BaseRepository().FindList(expression).OrderBy(t => t.SortCode).ToList();
+        }
+
+        /// <summary>
+        /// 按钮实体
+        /// </summary>
+        /// <param name="keyValue">主键值</param>
+        /// <returns></returns>
+        public ModuleButtonEntity GetEntity(string keyValue)
+        {
+            return this.BaseRepository().FindEntity<ModuleButtonEntity>(keyValue);
+        }
+
+        /// <summary>
+        /// 添加按钮
+        /// </summary>
+        /// <param name="moduleButtonEntity">按钮实体</param>
+        public void AddEntity(ModuleButtonEntity moduleButtonEntity)
+        {
+            moduleButtonEntity.Create();
+            this.BaseRepository().Insert<ModuleButtonEntity>(moduleButtonEntity);
         }
     }
 }

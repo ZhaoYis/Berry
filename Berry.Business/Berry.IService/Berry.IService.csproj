@@ -43,16 +43,22 @@
     <Compile Include="AuthorizeManage\IAuthorizeService.cs" />
     <Compile Include="AuthorizeManage\IModuleButtonService.cs" />
     <Compile Include="AuthorizeManage\IModuleColumnService.cs" />
+    <Compile Include="AuthorizeManage\IModuleFormInstanceService.cs" />
+    <Compile Include="AuthorizeManage\IModuleFormService.cs" />
     <Compile Include="AuthorizeManage\IModuleService.cs" />
     <Compile Include="AuthorizeManage\IPermissionService.cs" />
     <Compile Include="BaseManage\ICommonService.cs" />
     <Compile Include="BaseManage\IDepartmentService.cs" />
+    <Compile Include="BaseManage\IJobService.cs" />
     <Compile Include="BaseManage\IOrganizeService.cs" />
     <Compile Include="BaseManage\IPostService.cs" />
     <Compile Include="BaseManage\IRoleService.cs" />
     <Compile Include="BaseManage\IUserGroupService.cs" />
     <Compile Include="BaseManage\IUserService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PublicInfoManage\INewsService.cs" />
+    <Compile Include="PublicInfoManage\INoticeService.cs" />
+    <Compile Include="SystemManage\IAreaService.cs" />
     <Compile Include="SystemManage\IDataItemDetailService.cs" />
     <Compile Include="SystemManage\IDataItemService.cs" />
     <Compile Include="SystemManage\ILogService.cs" />
@@ -67,5 +73,6 @@
       <Name>Berry.Entity</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

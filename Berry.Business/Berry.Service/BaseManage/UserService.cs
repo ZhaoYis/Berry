@@ -26,13 +26,13 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistAccount(string account, string keyValue)
         {
-            var expression = LambdaExtension.True<UserEntity>();
-            expression = expression.And(t => t.Account == account).And(t => t.DeleteMark == false && t.EnabledMark == true);
+            List<UserEntity> data = this.BaseRepository().FindList<UserEntity>(t => t.Account == account && t.DeleteMark == false && t.EnabledMark == true).ToList();
             if (!string.IsNullOrEmpty(keyValue))
             {
-                expression = expression.And(t => t.Id != keyValue);
+                data = data.Where(d => d.Id != keyValue).ToList();
             }
-            bool hasExist = this.BaseRepository().IQueryable<UserEntity>(expression).Any();
+
+            bool hasExist = data.Any();
 
             return hasExist;
         }
@@ -123,8 +123,9 @@ namespace Berry.Service.BaseManage
         /// </summary>
         /// <param name="keyValue">主键值</param>
         /// <param name="userEntity">用户实体</param>
+        /// <param name="objectId">用户ID</param>
         /// <returns></returns>
-        public bool AddUser(string keyValue, UserEntity userEntity)
+        public bool AddUser(string keyValue, UserEntity userEntity, out string objectId)
         {
             bool isSucc = false;
             if (!string.IsNullOrEmpty(keyValue))
@@ -138,6 +139,7 @@ namespace Berry.Service.BaseManage
             {
                 //新增操作
                 userEntity.Create();
+
                 int res = this.BaseRepository().Insert(userEntity);
                 isSucc = res > 0;
             }
@@ -145,7 +147,7 @@ namespace Berry.Service.BaseManage
             #region 添加角色、岗位、职位信息
 
             //删除历史用户角色关系
-            this.BaseRepository().Delete<UserRelationEntity>(u => u.IsDefault == true && u.Id.Equals(userEntity.Id));
+            this.BaseRepository().Delete<UserRelationEntity>(u => u.IsDefault == true && u.Id == userEntity.Id);
             //用户关系
             List<UserRelationEntity> userRelation = new List<UserRelationEntity>();
             //角色
@@ -198,6 +200,7 @@ namespace Berry.Service.BaseManage
 
             #endregion 添加角色、岗位、职位信息
 
+            objectId = userEntity.Id;
             return isSucc;
         }
 
@@ -277,19 +280,19 @@ namespace Berry.Service.BaseManage
             if (queryParam != null)
             {
                 //公司主键
-                if (!string.IsNullOrEmpty(queryParam["organizeId"].ToString()))
+                if (!queryParam["organizeId"].IsEmpty())
                 {
                     string organizeId = queryParam["organizeId"].ToString();
-                    expression = expression.And(t => t.OrganizeId.Equals(organizeId));
+                    expression = expression.And(t => t.OrganizeId == organizeId);
                 }
                 //部门主键
-                if (!string.IsNullOrEmpty(queryParam["departmentId"].ToString()))
+                if (!queryParam["departmentId"].IsEmpty())
                 {
                     string departmentId = queryParam["departmentId"].ToString();
-                    expression = expression.And(t => t.DepartmentId.Equals(departmentId));
+                    expression = expression.And(t => t.DepartmentId == departmentId);
                 }
                 //查询条件
-                if (!string.IsNullOrEmpty(queryParam["condition"].ToString()) && !string.IsNullOrEmpty(queryParam["keyword"].ToString()))
+                if (!queryParam["condition"].IsEmpty() && !queryParam["keyword"].IsEmpty())
                 {
                     string condition = queryParam["condition"].ToString();
                     string keyord = queryParam["keyword"].ToString();
@@ -309,6 +312,8 @@ namespace Berry.Service.BaseManage
                     }
                 }
             }
+
+            expression = expression.And(u => u.DeleteMark == false);
             IEnumerable<UserEntity> res = this.BaseRepository().FindList<UserEntity>(expression, pagination);
 
             return res;
@@ -412,7 +417,8 @@ namespace Berry.Service.BaseManage
             if (!string.IsNullOrEmpty(userAccount) && !string.IsNullOrEmpty(password))
             {
                 //根据用户账号得到用户信息
-                UserEntity user = this.BaseRepository().FindEntity<UserEntity>(u => u.Account.Equals(userAccount));
+                //UserEntity user = this.BaseRepository().FindEntity<UserEntity>(u => u.Account.Equals(userAccount));
+                UserEntity user = this.BaseRepository().FindEntity<UserEntity>(u => u.Account == userAccount);
                 if (user != null)
                 {
                     if (user.EnabledMark)
@@ -466,10 +472,9 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public IEnumerable<UserEntity> GetUserList()
         {
-            var expression = LambdaExtension.True<UserEntity>();
-            expression = expression.And(t => t.Id != "System").And(t => t.EnabledMark == true).And(t => t.DeleteMark == false);
-
-            IEnumerable<UserEntity> res = this.BaseRepository().IQueryable<UserEntity>(expression).OrderByDescending(u => u.CreateDate).ToList();
+            IEnumerable<UserEntity> res = this.BaseRepository()
+                .FindList<UserEntity>(t => t.Id != "System" && t.EnabledMark == true && t.DeleteMark == false)
+                .OrderByDescending(u => u.CreateDate).ToList();
 
             return res;
         }
@@ -481,7 +486,7 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public UserEntity QueryUserByUserId(string userId)
         {
-            UserEntity res = this.BaseRepository().FindEntity<UserEntity>(u => u.Id.Equals(userId));
+            UserEntity res = this.BaseRepository().FindEntity<UserEntity>(u => u.Id == userId);
             return res;
         }
 

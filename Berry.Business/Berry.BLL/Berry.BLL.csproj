@@ -45,9 +45,12 @@
     <Compile Include="AuthorizeManage\ModuleBLL.cs" />
     <Compile Include="AuthorizeManage\ModuleButtonBLL.cs" />
     <Compile Include="AuthorizeManage\ModuleColumnBLL.cs" />
+    <Compile Include="AuthorizeManage\ModuleFormBLL.cs" />
+    <Compile Include="AuthorizeManage\ModuleFormInstanceBLL.cs" />
     <Compile Include="AuthorizeManage\PermissionBLL.cs" />
     <Compile Include="BaseManage\CommonBLL.cs" />
     <Compile Include="BaseManage\DepartmentBLL.cs" />
+    <Compile Include="BaseManage\JobBLL.cs" />
     <Compile Include="BaseManage\OrganizeBLL.cs" />
     <Compile Include="BaseManage\PostBLL.cs" />
     <Compile Include="BaseManage\RoleBLL.cs" />
@@ -55,6 +58,9 @@
     <Compile Include="BaseManage\UserGroupBLL.cs" />
     <Compile Include="BaseManage\UserRelationBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PublicInfoManage\NewsBLL.cs" />
+    <Compile Include="PublicInfoManage\NoticeBLL.cs" />
+    <Compile Include="SystemManage\AreaBLL.cs" />
     <Compile Include="SystemManage\DataItemBLL.cs" />
     <Compile Include="SystemManage\DataItemDetailBLL.cs" />
     <Compile Include="SystemManage\LogBLL.cs" />
@@ -67,6 +73,14 @@
     <ProjectReference Include="..\..\Berry.Framework\Berry.Code\Berry.Code.csproj">
       <Project>{3efa4e6a-73e4-40c6-ade4-9100a98860c1}</Project>
       <Name>Berry.Code</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Berry.Framework\Berry.Extension\Berry.Extension.csproj">
+      <Project>{7a95fd4d-8c13-401b-a1d5-cbc4e391b4dc}</Project>
+      <Name>Berry.Extension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Berry.Framework\Berry.Util\Berry.Util.csproj">
+      <Project>{8f155456-2d24-4fec-bbb4-2a232f3f4aae}</Project>
+      <Name>Berry.Util</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Berry.Modes\Berry.Entity\Berry.Entity.csproj">
       <Project>{9c58b7e0-83d3-4fcb-9ca8-21ba624d8ae3}</Project>
@@ -85,5 +99,6 @@
       <Name>Berry.Service</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

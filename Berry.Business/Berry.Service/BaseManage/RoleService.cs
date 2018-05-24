@@ -20,10 +20,7 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public IEnumerable<RoleEntity> GetRoleList()
         {
-            var expression = LambdaExtension.True<RoleEntity>();
-            expression = expression.And(t => t.Category == 1).And(t => t.EnabledMark == true).And(t => t.DeleteMark == false);
-
-            IEnumerable<RoleEntity> res = this.BaseRepository().FindList<RoleEntity>(expression);
+            IEnumerable<RoleEntity> res = this.BaseRepository().FindList<RoleEntity>(t => t.Category == 1 && t.EnabledMark == true && t.DeleteMark == false);
             res = res.OrderByDescending(r => r.CreateDate);
 
             return res;

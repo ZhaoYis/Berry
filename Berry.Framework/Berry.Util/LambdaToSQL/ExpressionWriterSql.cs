@@ -248,7 +248,7 @@ namespace Berry.Util.LambdaToSQL
             {
                 //if (b.Left is MemberExpression)
                 //{
-                //    if (((MemberExpression)b.Left).Type == typeof(bool) && (bizRead == BizExpSqlType.bizWhere))
+                //    if (((MemberExpression)b.Left).Type == typeof(bool) && (_bizRead == SqlType.Where))
                 //    {
                 //        this.Write("(" + ((MemberExpression)b.Left).Member.Name + " = 1)");
                 //    }
@@ -389,6 +389,7 @@ namespace Berry.Util.LambdaToSQL
                 switch (Type.GetTypeCode(c.Value.GetType()))
                 {
                     case TypeCode.Boolean:
+                        //if (c.NodeType != ExpressionType.Constant)
                         this.Write(((bool)c.Value) ? "1" : "0");
                         break;
 

@@ -45,9 +45,12 @@
     <Compile Include="AuthorizeManage\IModuleBLL.cs" />
     <Compile Include="AuthorizeManage\IModuleButtonBLL.cs" />
     <Compile Include="AuthorizeManage\IModuleColumnBLL.cs" />
+    <Compile Include="AuthorizeManage\IModuleFormInstanceBLL.cs" />
+    <Compile Include="AuthorizeManage\IModuleFormBLL.cs" />
     <Compile Include="AuthorizeManage\IPermissionBLL.cs" />
     <Compile Include="BaseManage\ICommonBLL.cs" />
     <Compile Include="BaseManage\IDepartmentBLL.cs" />
+    <Compile Include="BaseManage\IJobBLL.cs" />
     <Compile Include="BaseManage\IOrganizeBLL.cs" />
     <Compile Include="BaseManage\IPostBLL.cs" />
     <Compile Include="BaseManage\IRoleBLL.cs" />
@@ -55,6 +58,9 @@
     <Compile Include="BaseManage\IUserGroupBLL.cs" />
     <Compile Include="BaseManage\IUserRelationBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PublicInfoManage\INewsBLL.cs" />
+    <Compile Include="PublicInfoManage\INoticeBLL.cs" />
+    <Compile Include="SystemManage\IAreaBLL.cs" />
     <Compile Include="SystemManage\IDataItemBLL.cs" />
     <Compile Include="SystemManage\IDataItemDetailBLL.cs" />
     <Compile Include="SystemManage\ILogBLL.cs" />
@@ -69,5 +75,6 @@
       <Name>Berry.Entity</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,0 +1,64 @@
+﻿@using System.Web.Optimization
+@{
+    /**/
+
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>登录</title>
+    @Scripts.Render("~/bundles/jquery", "~/bundles/bootstrap/js", "~/bundles/utils")
+    @Styles.Render("~/bundles/bootstrap/css")
+    <link href="~/Content/styles/berry-login.css" rel="stylesheet" />
+    <link href="~/Content/scripts/plugins/layer/skin/default/layer.css" rel="stylesheet" />
+
+</head>
+<body>
+    <div style="position: absolute; top: 20px; left: 20px; color: #4b4b4b; font-size: 13px; line-height: 22px;"></div>
+    <div class="wrap">
+        <div style="text-align: center">
+            <img src="~/Content/images/on-line.png" style="border-radius: 96px; margin-bottom: -48px" alt="" />
+        </div>
+        <div id="login-form" class="container">
+            <fieldset class="box">
+                <legend>系统登录</legend>
+                <dl class="form">
+                    <dd>
+                        <input type="text" id="username" class="px" placeholder="账户、邮箱或者手机号" />
+                    </dd>
+                    <dd>
+                        <input type="password" id="password" class="px" placeholder="密码" />
+                    </dd>
+                    <dd style="overflow: hidden">
+                        <div style="float: left; width: 65%">
+                            <input type="text" maxlength="4" class="px" id="code" placeholder="验证码" />
+                        </div>
+                        <div style="float: left;width: 35%">
+                            <img id="login_code" src="@Url.Action("VerifyCode","Login")" class="" width="100" height="30" alt="点击切换验证码" title="点击切换验证码" style="cursor: pointer; padding-top: 2px;padding-left: 5px" />
+                        </div>
+                    </dd>
+                    <dd>
+                        <input hidden="hidden" id="UItheme" value="1" />
+                        <span class="y"><a href="#" onclick="alert('请联系管理员')">忘记密码？</a></span>
+                        <label style="cursor: pointer;">
+                            <input id="autologin" type="checkbox" class="" style="margin-bottom: 4.5px; margin-right: 0px; vertical-align: middle;">
+                            <span>下次自动登录</span>
+                        </label>
+                    </dd>
+                    <dd class="btn_d">
+                        <button id="btnlogin" type="button" class="pn"><span>登录</span></button>
+                    </dd>
+                </dl>
+            </fieldset>
+        </div>
+    </div>
+    <div class="copyright"></div>
+    <div class="weixin"></div>
+    <script src="~/Content/scripts/berry-login.js"></script>
+    <script src="~/Content/scripts/plugins/layer/layer.js"></script>
+</body>
+</html>

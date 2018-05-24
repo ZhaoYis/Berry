@@ -20,5 +20,23 @@ namespace Berry.IService.AuthorizeManage
         /// </summary>
         /// <returns></returns>
         IEnumerable<ModuleButtonEntity> GetModuleButtonList();
+        /// <summary>
+        /// 按钮列表
+        /// </summary>
+        /// <param name="moduleId">功能Id</param>
+        /// <returns></returns>
+        IEnumerable<ModuleButtonEntity> GetList(string moduleId);
+        /// <summary>
+        /// 按钮实体
+        /// </summary>
+        /// <param name="keyValue">主键值</param>
+        /// <returns></returns>
+        ModuleButtonEntity GetEntity(string keyValue);
+
+        /// <summary>
+        /// 添加按钮
+        /// </summary>
+        /// <param name="moduleButtonEntity">按钮实体</param>
+        void AddEntity(ModuleButtonEntity moduleButtonEntity);
     }
 }

@@ -17,7 +17,7 @@ namespace Berry.WebControl.Tree
         public static string TreeToJson(this List<TreeEntity> list, string parentId = "0")
         {
             StringBuilder strJson = new StringBuilder();
-            List<TreeEntity> item = list.FindAll(t => t.ParentId == parentId);
+            List<TreeEntity> item = list.FindAll(t => t.parentId == parentId);
 
             strJson.Append("[");
             if (item.Count > 0)
@@ -26,14 +26,14 @@ namespace Berry.WebControl.Tree
                 {
                     strJson.Append("{");
 
-                    strJson.Append("\"id\":\"" + entity.Id + "\",");
+                    strJson.Append("\"id\":\"" + entity.id + "\",");
 
-                    if (!string.IsNullOrEmpty(entity.Text))
+                    if (!string.IsNullOrEmpty(entity.text))
                     {
-                        strJson.Append("\"text\":\"" + entity.Text.Replace("&nbsp;", "") + "\",");
+                        strJson.Append("\"text\":\"" + entity.text.Replace("&nbsp;", "") + "\",");
                     }
 
-                    strJson.Append("\"value\":\"" + entity.Value + "\",");
+                    strJson.Append("\"value\":\"" + entity.value + "\",");
 
                     if (!string.IsNullOrEmpty(entity.Attribute))
                     {
@@ -45,24 +45,24 @@ namespace Berry.WebControl.Tree
                         strJson.Append("\"" + entity.AttributeA + "\":\"" + entity.AttributeValueA + "\",");
                     }
 
-                    if (!string.IsNullOrEmpty(entity.Title.Replace("&nbsp;", "")))
+                    if (!string.IsNullOrEmpty(entity.title))
                     {
-                        strJson.Append("\"title\":\"" + entity.Title.Replace("&nbsp;", "") + "\",");
+                        strJson.Append("\"title\":\"" + entity.title.Replace("&nbsp;", "") + "\",");
                     }
 
-                    if (!string.IsNullOrEmpty(entity.ImageUrl.Replace("&nbsp;", "")))
+                    if (!string.IsNullOrEmpty(entity.img))
                     {
-                        strJson.Append("\"img\":\"" + entity.ImageUrl.Replace("&nbsp;", "") + "\",");
+                        strJson.Append("\"img\":\"" + entity.img.Replace("&nbsp;", "") + "\",");
                     }
 
-                    if (entity.Checkstate != null)
+                    if (entity.checkstate != null)
                     {
-                        strJson.Append("\"checkstate\":" + entity.Checkstate + ",");
+                        strJson.Append("\"checkstate\":" + entity.checkstate + ",");
                     }
 
-                    if (!string.IsNullOrEmpty(entity.ParentId))
+                    if (!string.IsNullOrEmpty(entity.parentId))
                     {
-                        strJson.Append("\"parentnodes\":\"" + entity.ParentId + "\",");
+                        strJson.Append("\"parentnodes\":\"" + entity.parentId + "\",");
                     }
 
                     if (entity.Level != null)
@@ -70,18 +70,19 @@ namespace Berry.WebControl.Tree
                         strJson.Append("\"Level\":" + entity.Level + ",");
                     }
 
-                    strJson.Append("\"showcheck\":" + entity.Showcheck.ToString().ToLower() + ",");
+                    strJson.Append("\"showcheck\":" + entity.showcheck.ToString().ToLower() + ",");
 
-                    strJson.Append("\"isexpand\":" + entity.Isexpand.ToString().ToLower() + ",");
+                    strJson.Append("\"isexpand\":" + entity.isexpand.ToString().ToLower() + ",");
 
-                    if (entity.Complete)
+                    if (entity.complete)
                     {
-                        strJson.Append("\"complete\":" + entity.Complete + ",");
+                        strJson.Append("\"complete\":" + entity.complete.ToString().ToLower() + ",");
                     }
 
-                    strJson.Append("\"hasChildren\":" + entity.HasChildren + ",");
+                    strJson.Append("\"hasChildren\":" + entity.hasChildren.ToString().ToLower() + ",");
 
-                    strJson.Append("\"ChildNodes\":" + TreeToJson(list, entity.Id) + "");
+                    string childNodes = TreeToJson(list, entity.id);
+                    strJson.Append("\"ChildNodes\":" + childNodes + "");
 
                     strJson.Append("},");
                 }

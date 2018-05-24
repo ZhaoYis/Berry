@@ -73,5 +73,30 @@ namespace Berry.Util
         }
 
         #endregion 获取全局唯一GUID
+
+        #region Stopwatch计时器
+        /// <summary>
+        /// 计时器开始
+        /// </summary>
+        /// <returns></returns>
+        public static System.Diagnostics.Stopwatch TimerStart()
+        {
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+            watch.Reset();
+            watch.Start();
+            return watch;
+        }
+        /// <summary>
+        /// 计时器结束
+        /// </summary>
+        /// <param name="watch"></param>
+        /// <returns></returns>
+        public static string TimerEnd(System.Diagnostics.Stopwatch watch)
+        {
+            watch.Stop();
+            double costtime = watch.ElapsedMilliseconds;
+            return costtime.ToString();
+        }
+        #endregion
     }
 }

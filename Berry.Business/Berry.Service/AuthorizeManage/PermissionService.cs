@@ -22,7 +22,7 @@ namespace Berry.Service.AuthorizeManage
         public IEnumerable<UserRelationEntity> GetMemberList(string objectId)
         {
             List<UserRelationEntity> res =
-                this.BaseRepository().FindList<UserRelationEntity>(u => u.ObjectId.Equals(objectId))
+                this.BaseRepository().FindList<UserRelationEntity>(u => u.ObjectId == objectId)
                     .OrderByDescending(u => u.CreateDate)
                     .ToList();
 
@@ -37,7 +37,7 @@ namespace Berry.Service.AuthorizeManage
         public IEnumerable<UserRelationEntity> GetObjectList(string userId)
         {
             List<UserRelationEntity> res =
-                this.BaseRepository().FindList<UserRelationEntity>(u => u.UserId.Equals(userId))
+                this.BaseRepository().FindList<UserRelationEntity>(u => u.UserId == userId)
                     .OrderByDescending(u => u.CreateDate)
                     .ToList();
 
@@ -77,7 +77,7 @@ namespace Berry.Service.AuthorizeManage
         public IEnumerable<AuthorizeEntity> GetModuleList(string objectId)
         {
             List<AuthorizeEntity> res =
-                this.BaseRepository().FindList<AuthorizeEntity>(u => u.ObjectId.Equals(objectId) && u.ItemType == 1)
+                this.BaseRepository().FindList<AuthorizeEntity>(u => u.ObjectId == objectId && u.ItemType == 1)
                     .ToList();
 
             return res;
@@ -91,7 +91,7 @@ namespace Berry.Service.AuthorizeManage
         public IEnumerable<AuthorizeEntity> GetModuleButtonList(string objectId)
         {
             List<AuthorizeEntity> res =
-                this.BaseRepository().FindList<AuthorizeEntity>(u => u.ObjectId.Equals(objectId) && u.ItemType == 2)
+                this.BaseRepository().FindList<AuthorizeEntity>(u => u.ObjectId == objectId && u.ItemType == 2)
                     .ToList();
 
             return res;
@@ -105,7 +105,7 @@ namespace Berry.Service.AuthorizeManage
         public IEnumerable<AuthorizeEntity> GetModuleColumnList(string objectId)
         {
             List<AuthorizeEntity> res =
-                this.BaseRepository().FindList<AuthorizeEntity>(u => u.ObjectId.Equals(objectId) && u.ItemType == 3)
+                this.BaseRepository().FindList<AuthorizeEntity>(u => u.ObjectId == objectId && u.ItemType == 3)
                     .ToList();
 
             return res;
@@ -119,7 +119,7 @@ namespace Berry.Service.AuthorizeManage
         public IEnumerable<AuthorizeDataEntity> GetAuthorizeDataList(string objectId)
         {
             List<AuthorizeDataEntity> res =
-                this.BaseRepository().FindList<AuthorizeDataEntity>(u => u.ObjectId.Equals(objectId))
+                this.BaseRepository().FindList<AuthorizeDataEntity>(u => u.ObjectId == objectId)
                     .OrderBy(u => u.SortCode)
                     .ToList();
 
@@ -135,7 +135,7 @@ namespace Berry.Service.AuthorizeManage
         public void SaveMember(AuthorizeTypeEnum authorizeType, string objectId, string[] userIds)
         {
             //先清除历史用户关系数据
-            int isSucc = this.BaseRepository().Delete<UserRelationEntity>(u => u.ObjectId.Equals(objectId) && u.IsDefault == false);
+            int isSucc = this.BaseRepository().Delete<UserRelationEntity>(u => u.ObjectId == objectId && u.IsDefault == false);
             if (isSucc > 0)
             {
                 //组装数据
@@ -172,7 +172,7 @@ namespace Berry.Service.AuthorizeManage
             string[] moduleColumnIds, IEnumerable<AuthorizeDataEntity> authorizeDataList)
         {
             //先清除历史授权数据
-            int isSucc = this.BaseRepository().Delete<AuthorizeDataEntity>(u => u.ObjectId.Equals(objectId));
+            int isSucc = this.BaseRepository().Delete<AuthorizeDataEntity>(u => u.ObjectId == objectId);
             if (isSucc > 0)
             {
                 #region 功能
@@ -245,7 +245,7 @@ namespace Berry.Service.AuthorizeManage
 
                 //清除数据权限
                 isSucc = this
-                    .BaseRepository().Delete<AuthorizeDataEntity>(u => u.ObjectId.Equals(objectId));
+                    .BaseRepository().Delete<AuthorizeDataEntity>(u => u.ObjectId == objectId);
                 int sortCode = 1;
                 List<AuthorizeDataEntity> authorizeDataTempList = new List<AuthorizeDataEntity>();
 

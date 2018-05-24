@@ -529,7 +529,7 @@ namespace Berry.Data.ADO
             using (var conn = Connection)
             {
                 DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, sql);
-                if (data.Tables.Count > 0)
+                if (data.Tables[0].IsExistRows())
                 {
                     DataTable table = data.Tables[0];
                     res = table.DataTableToObject<T>();
@@ -558,7 +558,7 @@ namespace Berry.Data.ADO
                 using (var conn = Connection)
                 {
                     DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, sql);
-                    if (data.Tables.Count > 0)
+                    if (data.Tables[0].IsExistRows())
                     {
                         DataTable table = data.Tables[0];
                         res = table.DataTableToObject<T>();
@@ -568,7 +568,7 @@ namespace Berry.Data.ADO
             else
             {
                 DataSet data = SqlHelper.ExecuteDataset(SqlTransaction, CommandType.Text, sql);
-                if (data.Tables.Count > 0)
+                if (data.Tables[0].IsExistRows())
                 {
                     DataTable table = data.Tables[0];
                     res = table.DataTableToObject<T>();
@@ -624,7 +624,7 @@ namespace Berry.Data.ADO
                 using (var conn = Connection)
                 {
                     DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, sql);
-                    if (data.Tables.Count > 0)
+                    if (data.Tables[0].IsExistRows())
                     {
                         DataTable table = data.Tables[0];
                         res = table.DataTableToList<T>();
@@ -634,7 +634,7 @@ namespace Berry.Data.ADO
             else
             {
                 DataSet data = SqlHelper.ExecuteDataset(SqlTransaction, CommandType.Text, sql);
-                if (data.Tables.Count > 0)
+                if (data.Tables[0].IsExistRows())
                 {
                     DataTable table = data.Tables[0];
                     res = table.DataTableToList<T>();
@@ -665,8 +665,8 @@ namespace Berry.Data.ADO
 
             using (var conn = Connection)
             {
-                DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, strSql);
-                if (data.Tables.Count > 0)
+                DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, strSql, DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+                if (data.Tables[0].IsExistRows())
                 {
                     DataTable table = data.Tables[0];
                     res = table.DataTableToList<T>();
@@ -804,7 +804,6 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
-
             using (var dbConnection = Connection)
             {
                 StringBuilder sb = new StringBuilder();
@@ -848,7 +847,7 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public DataTable FindTable(string strSql)
         {
-            throw new NotImplementedException();
+            return FindTable(strSql, null);
         }
 
         /// <summary>
@@ -859,7 +858,17 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public DataTable FindTable(string strSql, DbParameter[] dbParameter)
         {
-            throw new NotImplementedException();
+            DataTable res = new DataTable();
+
+            using (var conn = Connection)
+            {
+                DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, strSql, DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+                if (data.Tables[0].IsExistRows())
+                {
+                    res = data.Tables[0];
+                }
+            }
+            return res;
         }
 
         /// <summary>
@@ -874,7 +883,7 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public DataTable FindTable(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total)
         {
-            throw new NotImplementedException();
+            return FindTable(strSql, null, orderField, isAsc, pageSize, pageIndex, out total);
         }
 
         /// <summary>
@@ -890,7 +899,48 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public DataTable FindTable(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total)
         {
-            throw new NotImplementedException();
+            using (var dbConnection = Connection)
+            {
+                StringBuilder sb = new StringBuilder();
+                if (pageIndex == 0)
+                {
+                    pageIndex = 1;
+                }
+                int num = (pageIndex - 1) * pageSize;
+                int num1 = (pageIndex) * pageSize;
+                string orderBy = "";
+
+                if (!string.IsNullOrEmpty(orderField))
+                {
+                    if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
+                    {
+                        orderBy = "Order By " + orderField;
+                    }
+                    else
+                    {
+                        orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
+                    }
+                }
+                else
+                {
+                    orderBy = "Order By (Select 0)";
+                }
+                sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
+                sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
+
+                total = Convert.ToInt32(SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
+
+                DataSet dataSet = SqlHelper.ExecuteDataset(dbConnection, CommandType.Text, sb.ToString(), DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+                DataTable table = new DataTable();
+                if (dataSet.Tables.Count > 0)
+                {
+                    if (dataSet.Tables[0].IsExistRows())
+                    {
+                        table = dataSet.Tables[0];
+                    }
+                }
+                return table;
+            }
         }
 
         /// <summary>
@@ -900,7 +950,10 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public object FindObject(string strSql)
         {
-            throw new NotImplementedException();
+            using (var conn = Connection)
+            {
+                return SqlHelper.ExecuteScalar(conn, CommandType.Text, strSql);
+            }
         }
 
         /// <summary>
@@ -911,7 +964,10 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public object FindObject(string strSql, DbParameter[] dbParameter)
         {
-            throw new NotImplementedException();
+            using (var conn = Connection)
+            {
+                return SqlHelper.ExecuteScalar(conn, CommandType.Text, strSql, DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+            }
         }
 
         #region 日志

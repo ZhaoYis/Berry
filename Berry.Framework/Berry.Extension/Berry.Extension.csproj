@@ -50,6 +50,7 @@
     <Compile Include="LambdaExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SortExtention.cs" />
+    <Compile Include="ValidateExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

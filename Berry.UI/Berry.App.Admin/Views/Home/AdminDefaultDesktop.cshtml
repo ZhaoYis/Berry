@@ -1,0 +1,39 @@
+﻿@using System.Web.Optimization
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link href="~/Content/styles/font-awesome.min.css" rel="stylesheet" />
+    @Scripts.Render("~/bundles/jquery", "~/bundles/bootstrap/js", "~/bundles/utils")
+
+    <script>
+        $(function () {
+            InitialPage();
+        });
+        //初始化
+        function InitialPage() {
+            $('#desktop').height($(window).height() - 22);
+            $(window).resize(function (e) {
+                window.setTimeout(function () {
+                    $('#desktop').height($(window).height() - 22);
+                }, 200);
+                e.stopPropagation();
+            });
+        }
+        //跳转到指定模块菜单
+        function OpenNav(navid) {
+            top.$("#nav").find('a#' + navid).trigger("click");
+        }
+    </script>
+</head>
+<body>
+    <div class="border" id="desktop" style="margin: 10px 10px 0 10px; background: #fff; overflow: auto;">
+        <div class="portal-panel">
+            
+        </div>
+    </div>
+</body>
+</html>

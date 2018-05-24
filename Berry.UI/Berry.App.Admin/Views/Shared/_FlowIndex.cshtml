@@ -1,0 +1,49 @@
+﻿@using System.Web.Optimization
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link href="~/Content/styles/berry-ui.css" rel="stylesheet" />
+    <link href="~/Content/scripts/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+    @Styles.Render("~/bundles/bootstrap/css", "~/bundles/jqgrid/css", "~/bundles/tree/css")
+
+    @Scripts.Render("~/bundles/jquery", "~/bundles/bootstrap/js", "~/bundles/jqgrid/js", "~/bundles/utils", "~/bundles/tree/js")
+    <script src="~/Content/scripts/plugins/layout/jquery.layout.js"></script>
+    <script src="~/Content/scripts/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/Content/scripts/plugins/datepicker/WdatePicker.js"></script>
+
+    <!--表单验证-->
+    <script src="~/Content/scripts/plugins/validator/validator.js"></script>
+
+    <!--日期控件-->
+    <link href="~/Content/scripts/plugins/datetime/pikaday.css" rel="stylesheet" />
+    <script src="~/Content/scripts/plugins/datetime/pikaday.js"></script>
+
+    <!--导向组件-->
+    <link href="~/Content/scripts/plugins/wizard/wizard.css" rel="stylesheet" />
+    <script src="~/Content/scripts/plugins/wizard/wizard.js"></script>
+
+    <link href="~/Content/scripts/plugins/simditor/css/simditor.css" rel="stylesheet" />
+    <link href="~/Content/scripts/plugins/cxColor/css/jquery.cxcolor.css" rel="stylesheet" />
+    <link href="~/Content/scripts/plugins/uploadify/uploadify.css" rel="stylesheet" />
+    <link href="~/Content/scripts/plugins/uploadify/uploadify.extension.css" rel="stylesheet" />
+    <link href="~/Content/scripts/plugins/flow-ui/flow.css" rel="stylesheet" />
+
+    <script src="~/Content/scripts/plugins/simditor/js/module.min.js"></script>
+    <script src="~/Content/scripts/plugins/simditor/js/uploader.js"></script>
+    <script src="~/Content/scripts/plugins/simditor/js/hotkeys.min.js"></script>
+    <script src="~/Content/scripts/plugins/simditor/js/simditor.min.js"></script>
+    <script src="~/Content/scripts/plugins/cxColor/js/jquery.cxcolor.js"></script>
+    <script src="~/Content/scripts/plugins/uploadify/jquery.uploadify.min.js"></script>
+
+</head>
+<body>
+    <div>
+        @RenderBody()
+        @Html.AntiForgeryToken()
+    </div>
+</body>
+</html>

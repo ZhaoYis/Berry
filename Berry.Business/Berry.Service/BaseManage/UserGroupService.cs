@@ -20,10 +20,7 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public IEnumerable<RoleEntity> GetUserGroupList()
         {
-            var expression = LambdaExtension.True<RoleEntity>();
-            expression = expression.And(r => r.Category == 4 && r.DeleteMark == false && r.EnabledMark == true);
-
-            IEnumerable<RoleEntity> res = this.BaseRepository().FindList<RoleEntity>(expression);
+            IEnumerable<RoleEntity> res = this.BaseRepository().FindList<RoleEntity>(r => r.Category == 4 && r.DeleteMark == false && r.EnabledMark == true);
 
             return res;
         }

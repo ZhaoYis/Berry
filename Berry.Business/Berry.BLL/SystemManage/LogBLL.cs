@@ -1,4 +1,6 @@
-﻿using Berry.Entity.SystemManage;
+﻿using System.Collections.Generic;
+using Berry.Entity.CommonEntity;
+using Berry.Entity.SystemManage;
 using Berry.IBLL.SystemManage;
 using Berry.IService.SystemManage;
 using Berry.Service.SystemManage;
@@ -12,6 +14,17 @@ namespace Berry.BLL.SystemManage
     {
         private readonly ILogService _logService = new LogService();
 
+        /// <summary>
+        /// 日志列表
+        /// </summary>
+        /// <param name="pagination">分页</param>
+        /// <param name="queryJson">查询参数</param>
+        /// <returns></returns>
+        public IEnumerable<LogEntity> GetPageList(PaginationEntity pagination, string queryJson)
+        {
+            return _logService.GetPageList(pagination, queryJson);
+        }
+        
         /// <summary>
         /// 日志实体
         /// </summary>

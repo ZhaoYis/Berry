@@ -12,6 +12,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using Berry.Data.Extension;
 
 namespace Berry.Service.AuthorizeManage
 {
@@ -35,7 +36,7 @@ namespace Berry.Service.AuthorizeManage
             }
 
             string userId = operators.UserId;
-            StringBuilder whereSb = new StringBuilder(" SELECT UserId FROM Base_User WHERE 1=1 ");
+            StringBuilder whereSb = new StringBuilder(" SELECT Id FROM Base_User WHERE 1=1 ");
             string strAuthorData = "";
             if (isWrite)
             {
@@ -45,7 +46,7 @@ namespace Berry.Service.AuthorizeManage
                                         ObjectId IN (
                                                 SELECT  ObjectId
                                                 FROM    Base_UserRelation
-                                                WHERE   UserId = @UserId)";
+                                                WHERE   Id = @UserId)";
             }
             else
             {
@@ -55,14 +56,14 @@ namespace Berry.Service.AuthorizeManage
                                         ObjectId IN (
                                                 SELECT  ObjectId
                                                 FROM    Base_UserRelation
-                                                WHERE   UserId = @UserId)";
+                                                WHERE   Id = @UserId)";
             }
+
             DbParameter[] parameter =
             {
-                new SqlParameter("@UserId",SqlDbType.NVarChar,36)
+                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "UserId", userId, DbType.String)
             };
-
-            whereSb.Append(string.Format("  AND( UserId ='{0}'", userId));
+            whereSb.Append(string.Format("AND( Id ='{0}'", userId));
 
             IEnumerable<AuthorizeDataEntity> listAuthorizeData = this.BaseRepository().FindList<AuthorizeDataEntity>(strAuthorData, parameter);
             foreach (AuthorizeDataEntity item in listAuthorizeData)
@@ -77,22 +78,16 @@ namespace Berry.Service.AuthorizeManage
                         break;
 
                     case 3://所在部门
-                        whereSb.Append(@"  OR DepartmentId = (  SELECT  DepartmentId
-                                                                    FROM    Base_User
-                                                                    WHERE   UserId ='{0}'
-                                                                  )");
+                        whereSb.Append(@"  OR DepartmentId = (SELECT DepartmentId FROM Base_User WHERE Id ='{0}')");
                         break;
 
                     case 4://所在公司
-                        whereSb.Append(@"  OR OrganizeId = (    SELECT  OrganizeId
-                                                                    FROM    Base_User
-                                                                    WHERE   UserId ='{0}'
-                                                                  )");
+                        whereSb.Append(@"  OR OrganizeId = (SELECT OrganizeId  FROM Base_User WHERE Id ='{0}' )");
                         break;
 
-                    case 5:
-                        whereSb.Append(string.Format(@"  OR DepartmentId='{1}' OR OrganizeId='{1}'", userId, item.ResourceId));
-                        break;
+                    //case 5:
+                    //    whereSb.Append(string.Format(@"  OR DepartmentId = '{1}' OR OrganizeId = '{1}'", userId, item.ResourceId));
+                    //    break;
                 }
             }
             whereSb.Append(")");
@@ -138,7 +133,7 @@ namespace Berry.Service.AuthorizeManage
                 CacheFactory.GetCacheInstance().WriteCache(authorizeUrlList, "__ActionAuthorize_" + userId, DateTime.Now.AddMinutes(5));
             }
 
-            authorizeUrlList = authorizeUrlList.FindAll(a => a.ModuleId.Equals(moduleId));
+            authorizeUrlList = authorizeUrlList.FindAll(a => a.ModuleId == moduleId);
             foreach (AuthorizeUrlModel item in authorizeUrlList)
             {
                 if (!string.IsNullOrEmpty(item.UrlAddress))
@@ -173,7 +168,7 @@ namespace Berry.Service.AuthorizeManage
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     UserId = @UserId ) )
+                                                  WHERE     Id = @UserId ) )
                                             OR ObjectId = @UserId )
                                     AND EnabledMark = 1
                                     AND DeleteMark = 0
@@ -192,13 +187,17 @@ namespace Berry.Service.AuthorizeManage
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     UserId = @UserId ) )
+                                                  WHERE     Id = @UserId ) )
                                             OR ObjectId = @UserId )
                                     AND ActionAddress IS NOT NULL");
 
-            string sql = strSql.ToString().Replace("@UserId", $"'{userId}'");
+            DbParameter[] parameter =
+            {
+                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "UserId", userId, DbType.String)
+            };
+            //string sql = strSql.ToString().Replace("@UserId", $"'{userId}'");
 
-            DataTable data = this.BaseRepository().FindTable(sql);
+            DataTable data = this.BaseRepository().FindTable(strSql.ToString(), parameter);
             if (data.IsExistRows())
             {
                 IEnumerable<AuthorizeUrlModel> res = data.DataTableToList<AuthorizeUrlModel>();

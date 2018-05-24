@@ -313,9 +313,9 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IEnumerable<T> FindList(PaginationEntity pagination)
         {
-            int total = pagination.TotalRecords;
-            var data = _db.FindList<T>(pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
-            pagination.TotalRecords = total;
+            int total = pagination.records;
+            var data = _db.FindList<T>(pagination.sidx, pagination.sord.ToLower() == "asc" ? true : false, pagination.rows, pagination.page, out total);
+            pagination.records = total;
             return data;
         }
 
@@ -327,9 +327,9 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IEnumerable<T> FindList(Expression<Func<T, bool>> condition, PaginationEntity pagination)
         {
-            int total = pagination.TotalRecords;
-            var data = _db.FindList<T>(condition, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
-            pagination.TotalRecords = total;
+            int total = pagination.records;
+            var data = _db.FindList<T>(condition, pagination.sidx, pagination.sord.ToLower() == "asc" ? true : false, pagination.rows, pagination.page, out total);
+            pagination.records = total;
             return data;
         }
 
@@ -341,9 +341,9 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IEnumerable<T> FindList(string strSql, PaginationEntity pagination)
         {
-            int total = pagination.TotalRecords;
-            var data = _db.FindList<T>(strSql, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
-            pagination.TotalRecords = total;
+            int total = pagination.records;
+            var data = _db.FindList<T>(strSql, pagination.sidx, pagination.sord.ToLower() == "asc" ? true : false, pagination.rows, pagination.page, out total);
+            pagination.records = total;
             return data;
         }
 
@@ -356,9 +356,9 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public IEnumerable<T> FindList(string strSql, DbParameter[] dbParameter, PaginationEntity pagination)
         {
-            int total = pagination.TotalRecords;
-            var data = _db.FindList<T>(strSql, dbParameter, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
-            pagination.TotalRecords = total;
+            int total = pagination.records;
+            var data = _db.FindList<T>(strSql, dbParameter, pagination.sidx, pagination.sord.ToLower() == "asc" ? true : false, pagination.rows, pagination.page, out total);
+            pagination.records = total;
             return data;
         }
 
@@ -395,9 +395,9 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public DataTable FindTable(string strSql, PaginationEntity pagination)
         {
-            int total = pagination.TotalRecords;
-            var data = _db.FindTable(strSql, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
-            pagination.TotalRecords = total;
+            int total = pagination.records;
+            var data = _db.FindTable(strSql, pagination.sidx, pagination.sord.ToLower() == "asc" ? true : false, pagination.rows, pagination.page, out total);
+            pagination.records = total;
             return data;
         }
 
@@ -410,9 +410,9 @@ namespace Berry.Data.Repository
         /// <returns></returns>
         public DataTable FindTable(string strSql, DbParameter[] dbParameter, PaginationEntity pagination)
         {
-            int total = pagination.TotalRecords;
-            var data = _db.FindTable(strSql, dbParameter, pagination.Sidx, pagination.Sord.ToLower() == "asc" ? true : false, pagination.PageSize, pagination.PageIndex, out total);
-            pagination.TotalRecords = total;
+            int total = pagination.records;
+            var data = _db.FindTable(strSql, dbParameter, pagination.sidx, pagination.sord.ToLower() == "asc" ? true : false, pagination.rows, pagination.page, out total);
+            pagination.records = total;
             return data;
         }
 

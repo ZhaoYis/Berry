@@ -60,6 +60,8 @@
     <Compile Include="BaseManage\UserMap.cs" />
     <Compile Include="BaseManage\UserRelationMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PublicInfoManage\NewsMap.cs" />
+    <Compile Include="SystemManage\AreaMap.cs" />
     <Compile Include="SystemManage\DataItemDetailMap.cs" />
     <Compile Include="SystemManage\LogMap.cs" />
     <Compile Include="SystemManage\DataItemMap.cs" />

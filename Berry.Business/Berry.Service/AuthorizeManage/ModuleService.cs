@@ -1,4 +1,5 @@
-﻿using Berry.Entity.AuthorizeManage;
+﻿using System;
+using Berry.Entity.AuthorizeManage;
 using Berry.IService.AuthorizeManage;
 using Berry.Service.Base;
 using System.Collections.Generic;
@@ -7,6 +8,9 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using Berry.Data.Extension;
+using Berry.Extension;
+using Berry.Util;
 
 namespace Berry.Service.AuthorizeManage
 {
@@ -26,19 +30,20 @@ namespace Berry.Service.AuthorizeManage
             strSql.Append(@"SELECT  *
                             FROM    Base_Module
                             WHERE   ModuleId IN (
-                                    SELECT  ItemId
+                                    SELECT  Id
                                     FROM    Base_Authorize
                                     WHERE   ItemType = 1
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     UserId = @UserId ) )
+                                                  WHERE     Id = @UserId ) )
                                             OR ObjectId = @UserId )
                             AND EnabledMark = 1  AND DeleteMark = 0 Order By SortCode");
 
             DbParameter[] parameter =
             {
-                new SqlParameter("@UserId",SqlDbType.NVarChar,36)
+                //new SqlParameter("@UserId",SqlDbType.NVarChar,36)
+                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "UserId", userId, DbType.String)
             };
 
             IEnumerable<ModuleEntity> res = this.BaseRepository().FindList<ModuleEntity>(strSql.ToString(), parameter).ToList();
@@ -53,11 +58,141 @@ namespace Berry.Service.AuthorizeManage
         public IEnumerable<ModuleEntity> GetModuleList()
         {
             StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT * FROM Base_Module WHERE EnabledMark = 1 AND DeleteMark = 0 Order By SortCode");
+            strSql.Append(@"SELECT * FROM Base_Module AS m WHERE EnabledMark = 1 AND DeleteMark = 0 Order By SortCode");
 
             IEnumerable<ModuleEntity> res = this.BaseRepository().FindList<ModuleEntity>(strSql.ToString());
 
             return res;
+        }
+
+        /// <summary>
+        /// 获取最大编号
+        /// </summary>
+        /// <returns></returns>
+        public int GetSortCode()
+        {
+            int sortCode = this.BaseRepository().FindList<ModuleEntity>(m=>m.DeleteMark == false).Max(t => t.SortCode).ToInt();
+            if (!string.IsNullOrEmpty(sortCode.ToString()))
+            {
+                return sortCode + 1;
+            }
+            return 100001;
+        }
+
+        /// <summary>
+        /// 功能列表
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ModuleEntity> GetList(string parentId)
+        {
+            StringBuilder strSql = new StringBuilder();
+            if (!string.IsNullOrEmpty(parentId))
+            {
+                parentId = StringHelper.SqlFilters(parentId);
+                strSql.Append("SELECT * FROM Base_Module Where ParentId ='" + parentId + "' Order By SortCode");
+            }
+            else
+            {
+                strSql.Append("SELECT * FROM Base_Module Order By SortCode");
+            }
+            return this.BaseRepository().FindList<ModuleEntity>(strSql.ToString());
+        }
+
+        /// <summary>
+        /// 功能实体
+        /// </summary>
+        /// <param name="keyValue">主键值</param>
+        /// <returns></returns>
+        public ModuleEntity GetEntity(string keyValue)
+        {
+            return this.BaseRepository().FindEntity<ModuleEntity>(keyValue);
+        }
+
+        /// <summary>
+        /// 功能编号不能重复
+        /// </summary>
+        /// <param name="enCode">编号</param>
+        /// <param name="keyValue">主键</param>
+        /// <returns></returns>
+        public bool ExistEnCode(string enCode, string keyValue)
+        {
+            var expression = LambdaExtension.True<ModuleEntity>();
+            expression = expression.And(t => t.EnCode == enCode);
+            if (!string.IsNullOrEmpty(keyValue))
+            {
+                expression = expression.And(t => t.Id != keyValue);
+            }
+            return this.BaseRepository().FindList<ModuleEntity>(expression).ToList().Count == 0;
+        }
+
+        /// <summary>
+        /// 功能名称不能重复
+        /// </summary>
+        /// <param name="fullName">名称</param>
+        /// <param name="keyValue">主键</param>
+        /// <returns></returns>
+        public bool ExistFullName(string fullName, string keyValue)
+        {
+            var expression = LambdaExtension.True<ModuleEntity>();
+            expression = expression.And(t => t.FullName == fullName);
+            if (!string.IsNullOrEmpty(keyValue))
+            {
+                expression = expression.And(t => t.Id != keyValue);
+            }
+            return this.BaseRepository().FindList<ModuleEntity>(expression).ToList().Count == 0;
+        }
+
+        /// <summary>
+        /// 删除功能
+        /// </summary>
+        /// <param name="keyValue">主键</param>
+        public void RemoveForm(string keyValue)
+        {
+            int count = this.BaseRepository().FindList<ModuleEntity>(t => t.ParentId == keyValue).Count();
+            if (count > 0)
+            {
+                throw new Exception("当前所选数据有子节点数据！");
+            }
+            //删除模块
+            this.BaseRepository().Delete<ModuleEntity>(keyValue);
+            //删除按钮
+            this.BaseRepository().Delete<ModuleButtonEntity>(t => t.ModuleId == keyValue);
+            //删除视图
+            this.BaseRepository().Delete<ModuleColumnEntity>(t => t.ModuleId == keyValue);
+        }
+
+        /// <summary>
+        /// 保存表单（新增、修改）
+        /// </summary>
+        /// <param name="keyValue">主键值</param>
+        /// <param name="moduleEntity">功能实体</param>
+        /// <param name="moduleButtonList">按钮实体列表</param>
+        /// <param name="moduleColumnList">视图实体列表</param>
+        /// <returns></returns>
+        public void SaveForm(string keyValue, ModuleEntity moduleEntity, List<ModuleButtonEntity> moduleButtonList, List<ModuleColumnEntity> moduleColumnList)
+        {
+            if (!string.IsNullOrEmpty(keyValue))
+            {
+                moduleEntity.Modify(keyValue);
+                this.BaseRepository().Update<ModuleEntity>(moduleEntity);
+            }
+            else
+            {
+                moduleEntity.Create();
+                this.BaseRepository().Insert(moduleEntity);
+            }
+
+            this.BaseRepository().Delete<ModuleButtonEntity>(t => t.ModuleId == keyValue);
+            if (moduleButtonList != null)
+            {
+                this.BaseRepository().Insert<ModuleButtonEntity>(moduleButtonList);
+            }
+
+            this.BaseRepository().Delete<ModuleColumnEntity>(t => t.ModuleId == keyValue);
+            if (moduleColumnList != null)
+            {
+                this.BaseRepository().Insert<ModuleColumnEntity>(moduleColumnList);
+            }
         }
     }
 }

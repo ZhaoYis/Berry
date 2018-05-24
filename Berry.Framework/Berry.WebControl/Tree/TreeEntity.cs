@@ -8,57 +8,57 @@
         /// <summary>
         /// 父级ID
         /// </summary>
-        public string ParentId { get; set; }
+        public string parentId { get; set; }
 
         /// <summary>
         /// ID
         /// </summary>
-        public string Id { get; set; }
+        public string id { get; set; }
 
         /// <summary>
         /// 节点描述
         /// </summary>
-        public string Text { get; set; }
+        public string text { get; set; }
 
         /// <summary>
         /// 值
         /// </summary>
-        public string Value { get; set; }
+        public string value { get; set; }
 
         /// <summary>
         /// 选中状态
         /// </summary>
-        public int? Checkstate { get; set; }
+        public int? checkstate { get; set; }
 
         /// <summary>
         /// 是否显示选择框
         /// </summary>
-        public bool Showcheck { get; set; }
+        public bool showcheck { get; set; }
 
         /// <summary>
         ///
         /// </summary>
-        public bool Complete { get; set; }
+        public bool complete { get; set; }
 
         /// <summary>
         /// 是否展开
         /// </summary>
-        public bool Isexpand { get; set; }
+        public bool isexpand { get; set; }
 
         /// <summary>
         /// 是否有子节点
         /// </summary>
-        public bool HasChildren { get; set; }
+        public bool hasChildren { get; set; }
 
         /// <summary>
         /// 图片
         /// </summary>
-        public string ImageUrl { get; set; }
+        public string img { get; set; }
 
         /// <summary>
         /// title
         /// </summary>
-        public string Title { get; set; }
+        public string title { get; set; }
 
         /// <summary>
         /// 级别

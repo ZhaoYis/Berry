@@ -14,5 +14,17 @@ namespace Berry.IBLL.AuthorizeManage
         /// <param name="userId">用户Id</param>
         /// <returns></returns>
         IEnumerable<ModuleButtonEntity> GetModuleButtonList(string userId);
+        /// <summary>
+        /// 按钮列表
+        /// </summary>
+        /// <param name="moduleId">功能Id</param>
+        /// <returns></returns>
+        IEnumerable<ModuleButtonEntity> GetList(string moduleId);
+        /// <summary>
+        /// 按钮实体
+        /// </summary>
+        /// <param name="keyValue">主键值</param>
+        /// <returns></returns>
+        ModuleButtonEntity GetEntity(string keyValue);
     }
 }
