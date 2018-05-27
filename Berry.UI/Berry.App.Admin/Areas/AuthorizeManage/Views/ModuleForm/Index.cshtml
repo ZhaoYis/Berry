@@ -28,41 +28,41 @@
             autowidth: true,
             colModel: [
                 { label: '主键', name: 'Id', hidden: true },
-                { label: '模块主键', name: 'moduleid', hidden: true },
-                { label: '表单名称', name: 'fullname', index: "tousername", width: 120, align: "left" },
-                { label: '表单编码', name: 'encode', index: "tousername", width: 120, align: "left" },
-                { label: '所属模块', name: 'modulename', index: "tousername", width: 120, align: "left" },
+                { label: '模块主键', name: 'ModuleId', hidden: true },
+                { label: '表单名称', name: 'FullName', index: "FullName", width: 120, align: "left" },
+                { label: '表单编码', name: 'EnCode', index: "EnCode", width: 120, align: "left" },
+                { label: '所属模块', name: 'ModuleName', index: "ModuleName", width: 120, align: "left" },
                 {
-                    label: "状态", name: "enabledmark", index: "enabledmark", width: 60, align: "center",
+                    label: "状态", name: "EnabledMark", index: "EnabledMark", width: 60, align: "center",
                     formatter: function (cellvalue, options, rowObject) {
                         if (cellvalue == 1) {
                             return '<span  class=\"label label-success\">启用</span>';
-                        } else if (rowObject.enabledmark == 0) {
+                        } else if (rowObject.EnabledMark == 0) {
                             return '<span  class=\"label label-danger\">停用</span>';
                         } else {
                             return '<span  class=\"label label-info\">草稿</span>';
                         }
                     }
                 },
-                { label: "创建人", name: "createusername", index: "createusername", width: 150, align: "left" },
+                { label: "创建人", name: "CreateUserName", index: "CreateUserName", width: 150, align: "left" },
                 {
-                    label: "创建时间", name: "createdate", index: "createdate", width: 150, align: "left",
+                    label: "创建时间", name: "CreateDate", index: "CreateDate", width: 150, align: "left",
                     formatter: function (cellvalue, options, rowObject) {
                         return formatDate(cellvalue, 'yyyy-MM-dd hh:mm:ss');
                     }
                 },
-                { label: "编辑人", name: "modifyusername", index: "modifyusername", width: 150, align: "left" },
+                { label: "编辑人", name: "ModifyUserName", index: "ModifyUserName", width: 150, align: "left" },
                 {
-                    label: "编辑时间", name: "modifydate", index: "modifydate", width: 150, align: "left",
+                    label: "编辑时间", name: "ModifyDate", index: "ModifyDate", width: 150, align: "left",
                     formatter: function (cellvalue, options, rowObject) {
                         return formatDate(cellvalue, 'yyyy-MM-dd hh:mm:ss');
                     }
                 },
-                { label: "备注", name: "description", index: "description", width: 200, align: "left" }
+                { label: "备注", name: "Description", index: "Description", width: 200, align: "left" }
             ],
             viewrecords: true,
             rowNum: 30,
-            rowList: [30, 50, 100],
+            rowList: [10, 25, 50, 100],
             pager: "#gridPager",
             sortname: 'SortCode',
             rownumbers: true,
@@ -96,7 +96,7 @@
             url: '/AuthorizeManage/ModuleForm/Form',
             width: "1100px",
             height: "700px",
-            btn:null,
+            btn: null,
             callBack: function (iframeId) {
                 top.frames[iframeId].AcceptClick();
             }
@@ -122,9 +122,9 @@
     //表单预览
     function btn_formpreview() {
         var keyValue = $("#gridTable").jqGridRowValue("Id");
-        var frmname = $("#gridTable").jqGridRowValue("fullname");
+        var frmname = $("#gridTable").jqGridRowValue("FullName");
         if (keyValue) {
-            top.tablist.newTab({ id: keyValue, title: '系统表单预览【' + frmname + '】', closed: true, icon: "fa fa fa-eye", url: top.contentPath + '/AuthorizeManage/ModuleForm/FormPreview?keyValue=' + keyValue });
+            top.tablist.newTab({ id: keyValue, title: '系统表单预览【' + frmname + '】', closed: true, icon: "fa fa fa-eye", url: '/AuthorizeManage/ModuleForm/FormPreview?keyValue=' + keyValue });
         }
         else {
             dialogMsg('请选择要设计的表单模板！', 0);
@@ -152,7 +152,7 @@
             $.ConfirmAjax({
                 msg: "请确认是否要【停用】委托规则？",
                 url: "../../AuthorizeManage/ModuleForm/SaveForm?keyValue=" + keyValue,
-                param: { EnabledMark: 0 },
+                param: { EnabledMark: false },
                 success: function (data) {
                     $("#gridTable").trigger("reloadGrid");
                 }
@@ -168,7 +168,7 @@
             $.ConfirmAjax({
                 msg: "请确认是否要【启用】委托规则？",
                 url: "../../AuthorizeManage/ModuleForm/SaveForm?keyValue=" + keyValue,
-                param: { EnabledMark: 1 },
+                param: { EnabledMark: true },
                 success: function (data) {
                     $("#gridTable").trigger("reloadGrid");
                 }

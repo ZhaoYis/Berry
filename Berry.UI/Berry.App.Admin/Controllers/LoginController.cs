@@ -103,6 +103,20 @@ namespace Berry.App.Admin.Controllers
         public ActionResult CheckLogin(string username, string password, string verifycode, int autologin)
         {
             ActionResult res = null;
+            LogEntity logEntity = new LogEntity
+            {
+                CategoryId = (int)CategoryType.Login,
+                OperateTypeId = ((int)OperationType.Login).ToString(),
+                OperateType = OperationType.Login.GetEnumDescription(),
+                OperateAccount = username,
+                OperateUserId = username,
+                OperateTime = DateTime.Now,
+                IPAddress = NetHelper.Ip,
+                IPAddressName = NetHelper.GetAddressByIP(NetHelper.Ip),
+                Browser = NetHelper.Browser,
+                Module = ConfigHelper.GetValue("SoftName")
+            };
+
             Logger(this.GetType(), "登录验证-CheckLogin", () =>
             {
                 #region 验证码验证
@@ -159,6 +173,11 @@ namespace Berry.App.Admin.Controllers
                         //写入登录信息
                         OperatorProvider.Provider.AddCurrent(operators);
 
+                        //写入日志
+                        logEntity.ExecuteResult = 1;
+                        logEntity.ExecuteResultJson = "登录成功";
+                        logBll.WriteLog(logEntity);
+
                         res = Success("登录成功", user, "/Home/AdminDefault");
                     }
                 }
@@ -166,6 +185,11 @@ namespace Berry.App.Admin.Controllers
 
             }, e =>
             {
+                CookieHelper.DelCookie("__autologin");//清除自动登录
+                logEntity.ExecuteResult = -1;
+                logEntity.ExecuteResultJson = e.Message;
+                logBll.WriteLog(logEntity);
+
                 res = Error("系统异常：" + e.Message);
             }, () =>
             {

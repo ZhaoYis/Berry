@@ -23,7 +23,7 @@
                 {
                     $("#layout").SetWebControls(data);
                     if (data.HeadIcon) {
-                        document.getElementById('uploadPreview').src = top.contentPath + data.HeadIcon;
+                        document.getElementById('uploadPreview').src = data.HeadIcon;
                     }
                 }
             }
@@ -164,7 +164,7 @@
                         verifyCode: $("#VerifyCode").val()
                     }
                     $.ajax({
-                        url: "@Url.Content("~/PersonCenter/SubmitResetPassword")",
+                        url: "@Url.Content("PersonCenter/SubmitResetPassword")",
                         data: postData,
                         type: "post",
                         dataType: "json",
@@ -197,7 +197,7 @@
             height: $(window).height() - 195,
             autowidth: true,
             colModel: [
-                { label: "主键", name: "LogId", hidden: true },
+                { label: "主键", name: "Id", hidden: true },
                 {
                     label: "操作时间", name: "OperateTime", index: "OperateTime", width: 160, align: "left",
                     formatter: function (cellvalue, options, rowObject) {

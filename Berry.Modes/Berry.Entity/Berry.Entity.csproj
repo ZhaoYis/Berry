@@ -60,6 +60,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicInfoManage\NewsEntity.cs" />
     <Compile Include="SystemManage\AreaEntity.cs" />
+    <Compile Include="SystemManage\DataBaseBackupEntity.cs" />
+    <Compile Include="SystemManage\DataBaseLinkEntity.cs" />
+    <Compile Include="SystemManage\DataBaseTableFieldEntity.cs" />
     <Compile Include="SystemManage\DataItemDetailEntity.cs" />
     <Compile Include="SystemManage\DataItemEntity.cs" />
     <Compile Include="SystemManage\LogEntity.cs" />

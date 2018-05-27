@@ -61,6 +61,9 @@
     <Compile Include="PublicInfoManage\INewsBLL.cs" />
     <Compile Include="PublicInfoManage\INoticeBLL.cs" />
     <Compile Include="SystemManage\IAreaBLL.cs" />
+    <Compile Include="SystemManage\IDataBaseBackupBLL.cs" />
+    <Compile Include="SystemManage\IDatabaseLinkBLL.cs" />
+    <Compile Include="SystemManage\IDataBaseTableBLL.cs" />
     <Compile Include="SystemManage\IDataItemBLL.cs" />
     <Compile Include="SystemManage\IDataItemDetailBLL.cs" />
     <Compile Include="SystemManage\ILogBLL.cs" />

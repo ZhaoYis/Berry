@@ -124,6 +124,7 @@
     <Content Include="Content\images\off-line.png" />
     <Content Include="Content\images\on-line.png" />
     <Content Include="Content\images\splitLine_bg.gif" />
+    <Content Include="Content\images\table_guide.png" />
     <Content Include="Content\images\tab_close.png" />
     <Content Include="Content\images\UserCard01.png" />
     <Content Include="Content\images\UserCard02.png" />
@@ -563,12 +564,15 @@
     <Content Include="Content\scripts\utils\berry-ui.js" />
     <Content Include="Content\scripts\utils\berry-utils.js" />
     <Content Include="Content\scripts\utils\berry-form.js" />
+    <Content Include="Content\scripts\utils\berry-applayout.js" />
     <Content Include="Content\styles\berry-index.css" />
     <Content Include="Content\styles\berry-login.css" />
     <Content Include="Content\styles\berry-report.css" />
     <Content Include="Content\styles\berry-ui.css" />
     <Content Include="Content\styles\font-awesome.min.css" />
     <Content Include="Content\styles\fonts\fontawesome-webfont.svg" />
+    <Content Include="Content\styles\berry-applayout.css" />
+    <Content Include="Content\styles\berry-ckbox-radio.css" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -603,6 +607,9 @@
     <Compile Include="Areas\PublicInfoManage\Controllers\NoticeController.cs" />
     <Compile Include="Areas\PublicInfoManage\PublicInfoManageAreaRegistration.cs" />
     <Compile Include="Areas\SystemManage\Controllers\AreaController.cs" />
+    <Compile Include="Areas\SystemManage\Controllers\DataBaseBackupController.cs" />
+    <Compile Include="Areas\SystemManage\Controllers\DataBaseLinkController.cs" />
+    <Compile Include="Areas\SystemManage\Controllers\DataBaseTableController.cs" />
     <Compile Include="Areas\SystemManage\Controllers\DataItemController.cs" />
     <Compile Include="Areas\SystemManage\Controllers\DataItemDetailController.cs" />
     <Compile Include="Areas\SystemManage\Controllers\DataItemListController.cs" />
@@ -698,6 +705,14 @@
     <Content Include="Content\scripts\plugins\UEditor\third-party\video-js\font\vjs.eot" />
     <Content Include="Content\scripts\plugins\UEditor\third-party\video-js\font\vjs.ttf" />
     <Content Include="Content\scripts\plugins\UEditor\third-party\video-js\font\vjs.woff" />
+    <Content Include="Areas\SystemManage\Views\DataBaseBackup\Form.cshtml" />
+    <Content Include="Areas\SystemManage\Views\DataBaseBackup\Index.cshtml" />
+    <Content Include="Areas\SystemManage\Views\DataBaseLink\Form.cshtml" />
+    <Content Include="Areas\SystemManage\Views\DataBaseLink\Index.cshtml" />
+    <Content Include="Areas\SystemManage\Views\DataBaseTable\FieldForm.cshtml" />
+    <Content Include="Areas\SystemManage\Views\DataBaseTable\Form.cshtml" />
+    <Content Include="Areas\SystemManage\Views\DataBaseTable\Index.cshtml" />
+    <Content Include="Areas\SystemManage\Views\DataBaseTable\TableData.cshtml" />
     <None Include="packages.config" />
     <Content Include="Views\Error\ErrorBrowser.cshtml" />
     <Content Include="Views\Error\ErrorMessage.cshtml" />

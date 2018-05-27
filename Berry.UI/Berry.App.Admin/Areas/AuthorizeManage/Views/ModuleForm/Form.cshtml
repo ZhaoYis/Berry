@@ -2,9 +2,11 @@
     ViewBag.Title = "表单创建";
     Layout = "~/Views/Shared/_LayoutForm.cshtml";
 }
-<link href="~/Content/styles/exsoft-ckbox-radio.css" rel="stylesheet" />
-<script src="~/Content/scripts/utils/exsoft-applayout.js"></script>
-<link href="~/Content/styles/exsoft-applayout.css" rel="stylesheet" />
+
+<link href="~/Content/styles/berry-ckbox-radio.css" rel="stylesheet" />
+<script src="~/Content/scripts/utils/berry-applayout.js"></script>
+<link href="~/Content/styles/berry-applayout.css" rel="stylesheet" />
+
 <script>
     var keyValue = request('keyValue');
     var postData = {};//提交数据
@@ -75,8 +77,7 @@
         });
     }
     /*=========基本配置（begin）==================================================================*/
-    function initBaseInfo()
-    {
+    function initBaseInfo() {
         //模块功能
         $("#ModuleId").ComboBoxTree({
             description: "==请选择==",
@@ -85,8 +86,7 @@
             allowSearch: true
         });
     }
-    function bindingBase()
-    {
+    function bindingBase() {
         if (!$('#step-1').Validform()) {
             return false;
         }
@@ -94,27 +94,25 @@
         var a = false;
         $.SetForm({
             url: "../../AuthorizeManage/ModuleForm/IsExistModuleId",
-            param: { keyValue: keyValue,moduleId: _postData.ModuleId},
+            param: { keyValue: keyValue, moduleId: _postData.ModuleId },
             success: function (data) {
                 a = data;
             }
         });
-        if (a)
-        {
+        if (a) {
             dialogTop("该模块已经有系统表单", "error");
             return false;
         }
         postData = $.extend(postData, _postData);
         setFrmInfo(postData);
         return true;
-       
+
     }
     /*=========基本配置（end）====================================================================*/
 
     /*=========表单选择（begin）==================================================================*/
 
-    function setFrmInfo(data)
-    {
+    function setFrmInfo(data) {
         postData.FormJson = data.FormJson;
         frmapp = $('#frmdesign').frmDesign({
             Height: 572,
@@ -242,13 +240,13 @@
         position: relative;
     }
 
-    .app_layout .item_row .item_field_label {
-        cursor: move;
-    }
+        .app_layout .item_row .item_field_label {
+            cursor: move;
+        }
 
-    .app_layout .item_row:last-child {
-        border-bottom: 1px solid #eeecec;
-    }
+        .app_layout .item_row:last-child {
+            border-bottom: 1px solid #eeecec;
+        }
 
     .app_layout .ui-state-highlight {
         border: none;

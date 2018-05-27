@@ -59,6 +59,9 @@
     <Compile Include="PublicInfoManage\INewsService.cs" />
     <Compile Include="PublicInfoManage\INoticeService.cs" />
     <Compile Include="SystemManage\IAreaService.cs" />
+    <Compile Include="SystemManage\IDataBaseBackupService.cs" />
+    <Compile Include="SystemManage\IDatabaseLinkService.cs" />
+    <Compile Include="SystemManage\IDataBaseTableService.cs" />
     <Compile Include="SystemManage\IDataItemDetailService.cs" />
     <Compile Include="SystemManage\IDataItemService.cs" />
     <Compile Include="SystemManage\ILogService.cs" />

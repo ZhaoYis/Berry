@@ -36,7 +36,13 @@ namespace Berry.Util
             foreach (var hostAddress in Dns.GetHostAddresses(ip))
             {
                 if (hostAddress.AddressFamily == AddressFamily.InterNetwork)
+                {
                     return hostAddress.ToString();
+                }
+                else
+                {
+                    return ip == "::1" ? "127.0.0.0" : ip;
+                }
             }
             return string.Empty;
         }

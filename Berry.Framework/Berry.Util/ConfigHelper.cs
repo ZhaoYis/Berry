@@ -14,6 +14,11 @@ namespace Berry.Util
         /// <returns></returns>
         public static string GetConnectionString(string name)
         {
+            //Data Source=101.200.33.46;database=LottomatBaseDB;uid=sa;pwd=zhaoyi18284594619;
+            string reg = @"Data Source=(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)";
+            if (StringHelper.QuickValidate(reg, name))
+                return name;
+
             string res = ConfigurationManager.ConnectionStrings[name].ConnectionString.ToString();
 
             return res;
