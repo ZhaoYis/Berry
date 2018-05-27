@@ -1,6 +1,4 @@
-﻿using Berry.Cache.Redis;
-using Berry.Cache.Web;
-using Berry.Util;
+﻿using Berry.Util;
 
 namespace Berry.Cache
 {

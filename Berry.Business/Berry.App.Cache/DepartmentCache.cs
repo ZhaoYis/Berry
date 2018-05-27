@@ -1,4 +1,5 @@
-﻿using Berry.BLL.BaseManage;
+﻿using System;
+using Berry.BLL.BaseManage;
 using Berry.Cache;
 using Berry.Entity.BaseManage;
 using System.Collections.Generic;
@@ -19,10 +20,10 @@ namespace Berry.App.Cache
         /// <returns></returns>
         public IEnumerable<DepartmentEntity> GetList()
         {
-            IEnumerable<DepartmentEntity> cacheList = CacheFactory.GetCacheInstance().GetCache<IEnumerable<DepartmentEntity>>(busines.CacheKey);
+            List<DepartmentEntity> cacheList = CacheFactory.GetCacheInstance().GetCache<List<DepartmentEntity>>(busines.CacheKey);
             if (cacheList == null)
             {
-                cacheList = busines.GetDepartmentList();
+                cacheList = busines.GetDepartmentList().ToList();
                 CacheFactory.GetCacheInstance().WriteCache(cacheList, busines.CacheKey);
             }
             return cacheList;

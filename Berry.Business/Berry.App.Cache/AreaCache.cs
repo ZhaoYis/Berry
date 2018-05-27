@@ -19,10 +19,10 @@ namespace Berry.App.Cache
         /// <returns></returns>
         private IEnumerable<AreaEntity> GetList()
         {
-            var cacheList = CacheFactory.GetCacheInstance().GetCache<IEnumerable<AreaEntity>>(areaBll.CacheKey);
+            var cacheList = CacheFactory.GetCacheInstance().GetCache<List<AreaEntity>>(areaBll.CacheKey);
             if (cacheList == null)
             {
-                cacheList = areaBll.GetList();
+                cacheList = areaBll.GetList().ToList();
                 CacheFactory.GetCacheInstance().WriteCache(cacheList, areaBll.CacheKey);
             }
             return cacheList;

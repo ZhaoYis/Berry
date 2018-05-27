@@ -21,7 +21,7 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public IEnumerable<AreaEntity> GetList()
         {
-            return this.BaseRepository().FindList<AreaEntity>(t => t.DeleteMark == false && t.EnabledMark == true).OrderBy(t => t.CreateDate).ToList();
+            return this.BaseRepository().FindList<AreaEntity>(t => t.DeleteMark == false && t.EnabledMark == true && t.Layer != 4).OrderBy(t => t.CreateDate).ToList();
         }
 
         /// <summary>
@@ -63,7 +63,8 @@ namespace Berry.Service.SystemManage
         /// 删除区域
         /// </summary>
         /// <param name="keyValue">主键</param>
-        public void RemoveForm(string keyValue){
+        public void RemoveForm(string keyValue)
+        {
 
             CacheFactory.GetCacheInstance().RemoveCache("__AreaCache");
             this.BaseRepository().Delete(keyValue);

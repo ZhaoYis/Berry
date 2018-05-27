@@ -91,11 +91,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="XmlConfig\redis.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Berry.Business\Berry.BLL\Berry.BLL.csproj">
       <Project>{6697b3a9-4865-42fe-8ecd-beab49a72b1f}</Project>
       <Name>Berry.BLL</Name>

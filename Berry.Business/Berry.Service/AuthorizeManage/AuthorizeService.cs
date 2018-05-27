@@ -130,7 +130,7 @@ namespace Berry.Service.AuthorizeManage
             if (authorizeUrlList == null || authorizeUrlList.Count == 0)
             {
                 authorizeUrlList = this.GetUrlList(userId).ToList();
-                CacheFactory.GetCacheInstance().WriteCache(authorizeUrlList, "__ActionAuthorize_" + userId, DateTime.Now.AddMinutes(5));
+                CacheFactory.GetCacheInstance().WriteCache(authorizeUrlList, "__ActionAuthorize_" + userId, DateTime.Now.AddMinutes(30));
             }
 
             authorizeUrlList = authorizeUrlList.FindAll(a => a.ModuleId == moduleId);

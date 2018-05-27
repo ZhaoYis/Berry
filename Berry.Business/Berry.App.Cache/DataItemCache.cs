@@ -1,4 +1,5 @@
-﻿using Berry.BLL.SystemManage;
+﻿using System;
+using Berry.BLL.SystemManage;
 using Berry.Cache;
 using Berry.Entity.SystemManage;
 using Berry.Entity.ViewModel;
@@ -28,10 +29,10 @@ namespace Berry.App.Cache
         /// <returns></returns>
         public IEnumerable<DataItemViewModel> GetDataItemList()
         {
-            IEnumerable<DataItemViewModel> cacheList = CacheFactory.GetCacheInstance().GetCache<IEnumerable<DataItemViewModel>>(_dataItemDetailBll.CacheKey);
+            List<DataItemViewModel> cacheList = CacheFactory.GetCacheInstance().GetCache<List<DataItemViewModel>>(_dataItemDetailBll.CacheKey);
             if (cacheList == null)
             {
-                cacheList = _dataItemDetailBll.GetDataItemList();
+                cacheList = _dataItemDetailBll.GetDataItemList().ToList();
                 CacheFactory.GetCacheInstance().WriteCache(cacheList, _dataItemDetailBll.CacheKey);
             }
             return cacheList;

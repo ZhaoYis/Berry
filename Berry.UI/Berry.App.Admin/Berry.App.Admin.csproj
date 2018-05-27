@@ -571,9 +571,6 @@
     <Content Include="Content\styles\fonts\fontawesome-webfont.svg" />
     <Content Include="Global.asax" />
     <Content Include="Web.config" />
-    <Content Include="XmlConfig\redis.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -728,6 +725,7 @@
     <Content Include="XmlConfig\log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="XmlConfig\Redis配置选项.txt" />
     <Content Include="XmlConfig\system.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
