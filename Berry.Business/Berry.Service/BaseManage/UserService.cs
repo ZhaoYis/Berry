@@ -44,14 +44,13 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool AddUser(UserEntity userEntity)
         {
-            ; int res = this.BaseRepository().Insert(userEntity);
+            int res = this.BaseRepository().Insert(userEntity);
 
             if (res > 0)
             {
                 #region 添加角色、岗位、职位信息
 
                 //删除历史用户角色关系
-                //res = this.BaseRepository().Delete<UserRelationEntity>(u => u.IsDefault == true && u.Id.Equals(userEntity.Id));
                 res = this.BaseRepository().Delete<UserRelationEntity>(u => u.Id == userEntity.Id && u.IsDefault == true);
                 //用户关系
                 List<UserRelationEntity> userRelation = new List<UserRelationEntity>();

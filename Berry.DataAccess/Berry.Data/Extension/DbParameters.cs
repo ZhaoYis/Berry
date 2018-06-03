@@ -36,9 +36,9 @@ namespace Berry.Data.Extension
                     character = "?";
                     break;
 
-                case DatabaseType.SqLite:
-                    character = "@";
-                    break;
+                //case DatabaseType.SqLite:
+                //    character = "@";
+                //    break;
 
                 default:
                     throw new Exception("数据库类型目前不支持！");
@@ -60,13 +60,13 @@ namespace Berry.Data.Extension
                     parameter = new SqlParameter();
                     break;
 
-                //case DatabaseType.Oracle:
-                //    parameter = new OracleParameter();
-                //    break;
+                case DatabaseType.Oracle:
+                    parameter = new OracleParameter();
+                    break;
 
-                //case DatabaseType.MySql:
-                //    parameter = new MySqlParameter();
-                //    break;
+                case DatabaseType.MySql:
+                    parameter = new MySqlParameter();
+                    break;
 
                 default:
                     parameter = new SqlParameter();
@@ -138,14 +138,14 @@ namespace Berry.Data.Extension
                         i++;
                     }
                     break;
-                case DatabaseType.Access:
-                    dbParameter = new DbParameter[size];
-                    while (i < size)
-                    {
-                        dbParameter[i] = new OleDbParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
-                        i++;
-                    }
-                    break;
+                //case DatabaseType.Access:
+                //    dbParameter = new DbParameter[size];
+                //    while (i < size)
+                //    {
+                //        dbParameter[i] = new OleDbParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
+                //        i++;
+                //    }
+                //    break;
                 //case DatabaseType.SqLite:
                 //    dbParameter = new DbParameter[size];
                 //    while (i < size)

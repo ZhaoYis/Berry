@@ -30,17 +30,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper, Version=1.50.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Dapper.1.50.0\lib\net45\Dapper.dll</HintPath>
+    <Reference Include="Dapper, Version=1.50.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Dapper.1.50.2\lib\net45\Dapper.dll</HintPath>
     </Reference>
     <Reference Include="MySql.Data, Version=6.9.11.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>..\..\packages\MySql.Data.6.9.11\lib\net45\MySql.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="SQLinq, Version=2.0.0.0, Culture=neutral, PublicKeyToken=1c5d57eb9e11fe4b, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SQLinq.2.0\lib\net\SQLinq.dll</HintPath>
-    </Reference>
-    <Reference Include="SQLinq.Dapper, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SQLinq.Dapper.1.2\lib\net\SQLinq.Dapper.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

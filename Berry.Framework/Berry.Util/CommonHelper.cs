@@ -64,12 +64,58 @@ namespace Berry.Util
         /// 获取全局唯一GUID
         /// </summary>
         /// <param name="needReplace">是否需要替换-</param>
+        /// <param name="format">格式化</param>
+        /// <example>N：38bddf48f43c48588e0d78761eaa1ce6</example>>
+        /// <example>P：(778406c2-efff-4262-ab03-70a77d09c2b5)</example>>
+        /// <example>B：{09f140d5-af72-44ba-a763-c861304b46f8}</example>>
+        /// <example>D：57d99d89-caab-482a-a0e9-a0a803eed3ba</example>>
         /// <returns></returns>
-        public static string GetGuid(bool needReplace = true)
+        public static string GetGuid(bool needReplace = true, string format = "N")
         {
-            string res = Guid.NewGuid().ToString();
+            Guid res = NewSequentialGuid();//Guid.NewGuid();
 
-            return needReplace ? res.Replace("-", "") : res;
+            return needReplace ? res.ToString(format) : res.ToString();
+        }
+
+        [System.Runtime.InteropServices.DllImport("rpcrt4.dll", SetLastError = true)]
+        static extern int UuidCreateSequential(byte[] buffer);
+        /// <summary>
+        /// 创建有序GUID
+        /// </summary>
+        /// <returns></returns>
+        private static Guid NewSequentialGuid()
+        {
+            byte[] raw = new byte[16];
+            if (UuidCreateSequential(raw) != 0)
+                throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
+
+            byte[] fix = new byte[16];
+
+            // reverse 0..3
+            fix[0x0] = raw[0x3];
+            fix[0x1] = raw[0x2];
+            fix[0x2] = raw[0x1];
+            fix[0x3] = raw[0x0];
+
+            // reverse 4 & 5
+            fix[0x4] = raw[0x5];
+            fix[0x5] = raw[0x4];
+
+            // reverse 6 & 7
+            fix[0x6] = raw[0x7];
+            fix[0x7] = raw[0x6];
+
+            // all other are unchanged
+            fix[0x8] = raw[0x8];
+            fix[0x9] = raw[0x9];
+            fix[0xA] = raw[0xA];
+            fix[0xB] = raw[0xB];
+            fix[0xC] = raw[0xC];
+            fix[0xD] = raw[0xD];
+            fix[0xE] = raw[0xE];
+            fix[0xF] = raw[0xF];
+
+            return new Guid(fix);
         }
 
         #endregion 获取全局唯一GUID

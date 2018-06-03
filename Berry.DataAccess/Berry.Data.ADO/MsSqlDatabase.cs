@@ -229,7 +229,7 @@ namespace Berry.Data.ADO
         /// </summary>
         /// <param name="entity">对象实体集合</param>
         /// <returns></returns>
-        public int Insert<T>(IEnumerable<T> entity) where T : class
+        public int Insert<T>(List<T> entity) where T : class
         {
             int res = 0;
             if (SqlTransaction == null)
@@ -294,7 +294,7 @@ namespace Berry.Data.ADO
         /// </summary>
         /// <param name="entity">对象实体集合</param>
         /// <returns></returns>
-        public int Delete<T>(IEnumerable<T> entity) where T : class
+        public int Delete<T>(List<T> entity) where T : class
         {
             if (SqlTransaction == null)
             {
@@ -452,7 +452,7 @@ namespace Berry.Data.ADO
         /// </summary>
         /// <param name="entity">实体对象集合</param>
         /// <returns></returns>
-        public int Update<T>(IEnumerable<T> entity) where T : class
+        public int Update<T>(List<T> entity) where T : class
         {
             int res = 0;
             if (SqlTransaction == null)
@@ -666,7 +666,7 @@ namespace Berry.Data.ADO
             using (var conn = Connection)
             {
                 DataSet data = SqlHelper.ExecuteDataset(conn, CommandType.Text, strSql, DatabaseCommon.DbParameterToSqlParameter(dbParameter));
-                if (data.Tables[0].IsExistRows())
+                if (data.Tables.Count > 0 && data.Tables[0].IsExistRows())
                 {
                     DataTable table = data.Tables[0];
                     res = table.DataTableToList<T>();

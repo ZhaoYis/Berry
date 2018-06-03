@@ -1,4 +1,5 @@
-﻿using Berry.Entity.BaseManage;
+﻿using System;
+using Berry.Entity.BaseManage;
 using System.Data.Entity.ModelConfiguration;
 
 namespace Berry.Entity.Mapping.BaseManage
@@ -6,6 +7,7 @@ namespace Berry.Entity.Mapping.BaseManage
     /// <summary>
     /// 用户管理
     /// </summary>
+    [Serializable]
     public class UserMap : EntityTypeConfiguration<UserEntity>
     {
         public UserMap()

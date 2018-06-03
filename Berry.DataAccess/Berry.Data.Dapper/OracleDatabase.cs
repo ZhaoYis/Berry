@@ -244,7 +244,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public int Insert<T>(IEnumerable<T> entities) where T : class
+        public int Insert<T>(List<T> entities) where T : class
         {
             if (DbTransaction == null)
             {
@@ -292,7 +292,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public int Delete<T>(IEnumerable<T> entities) where T : class
+        public int Delete<T>(List<T> entities) where T : class
         {
             if (DbTransaction == null)
             {
@@ -395,7 +395,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public int Update<T>(IEnumerable<T> entities) where T : class
+        public int Update<T>(List<T> entities) where T : class
         {
             if (DbTransaction == null)
             {

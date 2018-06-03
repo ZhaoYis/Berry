@@ -30,7 +30,7 @@ namespace Berry.UnitTest
 
             //IocTest();
 
-            InsertTest(1);
+            //InsertTest(20000);
 
             //InsertListTest(5000 * 10);
 
@@ -156,7 +156,7 @@ namespace Berry.UnitTest
 
             string time = Stopwatch(() =>
             {
-                List<UserEntity> res = _userBll.QueryUserList(u => u.DeleteMark == false && u.PK <= 100);
+                List<UserEntity> res = _userBll.QueryUserList(u => u.DeleteMark == false);
 
                 Console.WriteLine("共得到数据：" + res.Count + "条");
             });

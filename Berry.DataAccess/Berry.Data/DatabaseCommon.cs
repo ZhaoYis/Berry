@@ -119,7 +119,7 @@ namespace Berry.Data
             {
                 if (ht[key] != null)
                 {
-                    sb_prame.Append("," + key);
+                    sb_prame.Append(",[" + key + "]");
                     sp.Append("," + DbParameters.CreateDbParmCharacter() + "" + key);
                 }
             }
@@ -154,7 +154,7 @@ namespace Berry.Data
                 {
                     if (prop.GetValue(entity, null) != null)
                     {
-                        sb_prame.Append("," + (prop.Name));
+                        sb_prame.Append(",[" + prop.Name + "]");
                         sp.Append("," + DbParameters.CreateDbParmCharacter() + "" + (prop.Name));
                     }
                 }
@@ -189,13 +189,13 @@ namespace Berry.Data
                     if (isFirstValue)
                     {
                         isFirstValue = false;
-                        sb.Append(key);
+                        sb.Append("[" + key + "]");
                         sb.Append("=");
                         sb.Append(DbParameters.CreateDbParmCharacter() + key);
                     }
                     else
                     {
-                        sb.Append("," + key);
+                        sb.Append(",[" + key + "]");
                         sb.Append("=");
                         sb.Append(DbParameters.CreateDbParmCharacter() + key);
                     }
@@ -238,13 +238,13 @@ namespace Berry.Data
                         if (isFirstValue)
                         {
                             isFirstValue = false;
-                            sb.Append(prop.Name);
+                            sb.Append("[" + prop.Name + "]");
                             sb.Append("=");
                             sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
                         }
                         else
                         {
-                            sb.Append("," + prop.Name);
+                            sb.Append(",[" + prop.Name + "]");
                             sb.Append("=");
                             sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
                         }
@@ -294,13 +294,13 @@ namespace Berry.Data
                         if (isFirstValue)
                         {
                             isFirstValue = false;
-                            sb.Append(prop.Name);
+                            sb.Append("[" + prop.Name + "]");
                             sb.Append("=");
                             sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
                         }
                         else
                         {
-                            sb.Append("," + prop.Name);
+                            sb.Append(",[" + prop.Name + "]");
                             sb.Append("=");
                             sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
                         }
@@ -421,7 +421,7 @@ namespace Berry.Data
         /// 拼接 查询 SQL语句，自定义条件
         /// </summary>
         /// <returns></returns>
-        public static StringBuilder SelectSql<T>(string where) where T : class ,new()
+        public static StringBuilder SelectSql<T>(string where) where T : class, new()
         {
             //表名
             string table = EntityAttributeHelper.GetEntityTable<T>();
@@ -432,7 +432,7 @@ namespace Berry.Data
             foreach (PropertyInfo prop in props)
             {
                 //string propertytype = prop.PropertyType.ToString();
-                sbColumns.Append(prop.Name + ",");
+                sbColumns.Append("[" + prop.Name + "],");
             }
             if (sbColumns.Length > 0) sbColumns.Remove(sbColumns.ToString().Length - 1, 1);
 

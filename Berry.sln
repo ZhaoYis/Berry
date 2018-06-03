@@ -82,6 +82,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.DeepCopier", "Berry.F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.App.Admin", "Berry.UI\Berry.App.Admin\Berry.App.Admin.csproj", "{446F095C-0079-4E93-9643-955B42B683CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.CodeGenerator", "Berry.Framework\Berry.CodeGenerator\Berry.CodeGenerator.csproj", "{EE0F1360-7ED4-4ED3-AFD6-66A62957B9A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -180,6 +182,10 @@ Global
 		{446F095C-0079-4E93-9643-955B42B683CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{446F095C-0079-4E93-9643-955B42B683CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{446F095C-0079-4E93-9643-955B42B683CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE0F1360-7ED4-4ED3-AFD6-66A62957B9A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE0F1360-7ED4-4ED3-AFD6-66A62957B9A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE0F1360-7ED4-4ED3-AFD6-66A62957B9A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE0F1360-7ED4-4ED3-AFD6-66A62957B9A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -213,6 +219,7 @@ Global
 		{628542B5-ACE5-4C35-8384-3EA2349C5B5B} = {473D1AB0-2590-4D50-961F-E92115EE8507}
 		{E39B5CB8-C074-41CF-A610-B029B59459C9} = {E5A2C8A4-B1B3-467C-92B2-792BF367DF5D}
 		{446F095C-0079-4E93-9643-955B42B683CA} = {233E405C-FDAA-4276-B163-FD4F2FA2003F}
+		{EE0F1360-7ED4-4ED3-AFD6-66A62957B9A5} = {628542B5-ACE5-4C35-8384-3EA2349C5B5B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {402D764C-5259-4C6D-BDA4-DDBAA375944E}

@@ -60,7 +60,7 @@ namespace Berry.Data.Dapper
 
         #endregion 属性
 
-        #region 事物提交
+        #region 事务提交
 
         /// <summary>
         /// 事务开始
@@ -274,7 +274,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public int Insert<T>(IEnumerable<T> entities) where T : class
+        public int Insert<T>(List<T> entities) where T : class
         {
             int res = 0;
             Logger(this.GetType(), $"实体批量插入-Insert<T>(IEnumerable<T> entities)，参数：{entities.TryToJson()}", () =>
@@ -331,7 +331,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public int Delete<T>(IEnumerable<T> entities) where T : class
+        public int Delete<T>(List<T> entities) where T : class
         {
             if (DbTransaction == null)
             {
@@ -434,7 +434,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public int Update<T>(IEnumerable<T> entities) where T : class
+        public int Update<T>(List<T> entities) where T : class
         {
             if (DbTransaction == null)
             {

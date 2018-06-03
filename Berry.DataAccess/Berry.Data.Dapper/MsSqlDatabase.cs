@@ -4,8 +4,6 @@ using Berry.Log;
 using Berry.Util;
 using Berry.Util.CustomException;
 using Dapper;
-using SQLinq;
-using SQLinq.Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,6 +12,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using Berry.Util.LambdaToSQL;
 
 namespace Berry.Data.Dapper
 {
@@ -233,7 +232,7 @@ namespace Berry.Data.Dapper
 
         #endregion 执行 SQL 语句
 
-        #region 对象实体 添加、修改、删除，直接调用执行SQl方法
+        #region 对象实体 添加、修改、删除
 
         /// <summary>
         /// 实体插入
@@ -257,8 +256,7 @@ namespace Berry.Data.Dapper
             {
                 string sql = DatabaseCommon.InsertSql<T>(entity).ToString();
                 DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
-                DbTransaction.Connection.Execute(sql, parameter, DbTransaction);
-                return 0;
+                res = DbTransaction.Connection.Execute(sql, parameter, DbTransaction);
             }
             return res;
         }
@@ -269,25 +267,19 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public int Insert<T>(IEnumerable<T> entities) where T : class
+        public int Insert<T>(List<T> entities) where T : class
         {
-            if (DbTransaction == null)
+            int res = 0;
+            if (entities.Count > 0)
             {
-                BeginTrans();
-                foreach (var item in entities)
+                string sql = DatabaseCommon.InsertSql<T>(entities.FirstOrDefault()).ToString();
+                //DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
+                using (var connection = Connection)
                 {
-                    Insert<T>(item);
+                    res = connection.Execute(sql, entities);
                 }
-                return Commit();
             }
-            else
-            {
-                foreach (var item in entities)
-                {
-                    Insert<T>(item);
-                }
-                return 0;
-            }
+            return res;
         }
 
         /// <summary>
@@ -297,7 +289,12 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public int Delete<T>() where T : class
         {
-            return ExecuteBySql(DatabaseCommon.DeleteSql(EntityAttributeHelper.GetEntityTable<T>()).ToString());
+            int res = 0;
+            string tableName = EntityAttributeHelper.GetEntityTable<T>();
+            string sql = DatabaseCommon.DeleteSql(tableName).ToString();
+            res = ExecuteBySql(sql);
+
+            return res;
         }
 
         /// <summary>
@@ -326,7 +323,6 @@ namespace Berry.Data.Dapper
                 return 0;
             }
             return res;
-            //return ExecuteBySql(DatabaseCommon.DeleteSql<T>(entity).ToString(), DatabaseCommon.GetParameter<T>(entity));
         }
 
         /// <summary>
@@ -335,25 +331,18 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public int Delete<T>(IEnumerable<T> entities) where T : class
+        public int Delete<T>(List<T> entities) where T : class
         {
-            if (DbTransaction == null)
+            int res = 0;
+            if (entities.Count > 0)
             {
-                BeginTrans();
-                foreach (var item in entities)
+                string sql = DatabaseCommon.DeleteSql<T>(entities.FirstOrDefault()).ToString();
+                using (var connection = Connection)
                 {
-                    Delete<T>(item);
+                    res = connection.Execute(sql, entities);
                 }
-                return Commit();
             }
-            else
-            {
-                foreach (var item in entities)
-                {
-                    Delete<T>(item);
-                }
-                return 0;
-            }
+            return res;
         }
 
         /// <summary>
@@ -364,23 +353,18 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public int Delete<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
-            bool isTrans = true;
-            if (DbTransaction == null)
-            {
-                BeginTrans();
-                isTrans = false;
-            }
+            int res = 0;
 
-            string tableName = EntityAttributeHelper.GetEntityTable<T>();
-            SQLinq<T> query = new SQLinq<T>(tableName).Where(condition);
-            IEnumerable<T> entities = DbTransaction.Connection.Query<T>(query);
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
 
-            Delete<T>(entities);
-            if (!isTrans)
+            string sql = DatabaseCommon.DeleteSql<T>(where).ToString();
+            using (var connection = Connection)
             {
-                return Commit();
+                res = connection.Execute(sql);
             }
-            return 0;
+            return res;
         }
 
         /// <summary>
@@ -391,8 +375,26 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public int Delete<T>(object keyValue) where T : class
         {
-            T entity = DbTransaction.Connection.Query<T>(string.Format("select * from {0} where {1}=@primarykey", EntityAttributeHelper.GetEntityTable<T>(), EntityAttributeHelper.GetEntityKey<T>()), new { primarykey = keyValue }).FirstOrDefault();
-            return Delete<T>(entity);
+            int res = 0;
+
+            Type type = keyValue.GetType();
+            string key = EntityAttributeHelper.GetEntityKey<T>();
+            string where = " WHERE 1 = 1";
+            if (type == typeof(int))
+            {
+                where = $" WHERE {key} = {keyValue}";
+            }
+            else
+            {
+                where = $" WHERE {key} = '{keyValue}'";
+            }
+
+            string sql = DatabaseCommon.DeleteSql<T>(where).ToString();
+            using (var connection = Connection)
+            {
+                res = connection.Execute(sql);
+            }
+            return res;
         }
 
         /// <summary>
@@ -419,22 +421,26 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public int Delete<T>(object propertyValue, string propertyName) where T : class
         {
-            bool isTrans = true;
-            if (DbTransaction == null)
+            int res = 0;
+
+            Type type = propertyValue.GetType();
+
+            string where = " WHERE 1 = 1";
+            if (type == typeof(int))
             {
-                BeginTrans();
-                isTrans = false;
+                where = $" WHERE {propertyName} = {propertyValue}";
             }
-            IEnumerable<T> entitys = DbTransaction.Connection.Query<T>(string.Format("select * from {0} where {1}=@propertyValue", propertyName, new { propertyValue = propertyValue }));
-            foreach (var entity in entitys)
+            else
             {
-                Delete<T>(entity);
+                where = $" WHERE {propertyName} = '{propertyValue}'";
             }
-            if (!isTrans)
+
+            string sql = DatabaseCommon.DeleteSql<T>(where).ToString();
+            using (var connection = Connection)
             {
-                return Commit();
+                res = connection.Execute(sql);
             }
-            return 0;
+            return res;
         }
 
         /// <summary>
@@ -445,7 +451,10 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public int Update<T>(T entity) where T : class
         {
-            return ExecuteBySql(DatabaseCommon.UpdateSql<T>(entity).ToString(), DatabaseCommon.GetParameter<T>(entity));
+            string sql = DatabaseCommon.UpdateSql<T>(entity).ToString();
+            DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
+
+            return ExecuteBySql(sql, parameter);
         }
 
         /// <summary>
@@ -454,7 +463,7 @@ namespace Berry.Data.Dapper
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public int Update<T>(IEnumerable<T> entities) where T : class
+        public int Update<T>(List<T> entities) where T : class
         {
             if (DbTransaction == null)
             {
@@ -484,10 +493,21 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public int Update<T>(T modelModifyProps, Expression<Func<T, bool>> condition) where T : class, new()
         {
-            throw new NotImplementedException();
+            int res = 0;
+
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
+
+            string sql = DatabaseCommon.UpdateSql<T>(modelModifyProps, "", where).ToString();
+            DbParameter[] parameter = DatabaseCommon.GetParameter<T>(modelModifyProps);
+
+            res = ExecuteBySql(sql, parameter);
+
+            return res;
         }
 
-        #endregion 对象实体 添加、修改、删除Dapper下未作实现，直接调用执行SQl方法
+        #endregion 对象实体 添加、修改、删除
 
         #region 对象实体 查询
 
@@ -499,10 +519,22 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public T FindEntity<T>(object keyValue) where T : class, new()
         {
-            string tableName = EntityAttributeHelper.GetEntityTable<T>();
+            Type type = keyValue.GetType();
+            string key = EntityAttributeHelper.GetEntityKey<T>();
+            string where = " WHERE 1 = 1";
+            if (type == typeof(int))
+            {
+                where = $" WHERE {key} = {keyValue}";
+            }
+            else
+            {
+                where = $" WHERE {key} = '{keyValue}'";
+            }
+            string sql = DatabaseCommon.SelectSql<T>(where).ToString();
+
             using (var dbConnection = Connection)
             {
-                var data = dbConnection.Query<T>($"select * from {tableName} where key=@key", new { key = keyValue });
+                var data = dbConnection.Query<T>(sql);
                 return data.FirstOrDefault();
             }
         }
@@ -515,9 +547,14 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public T FindEntity<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
+            string sql = DatabaseCommon.SelectSql<T>(where).ToString();
+
             using (var dbConnection = Connection)
             {
-                var data = dbConnection.Query<T>(new SQLinq<T>().Where(condition));
+                var data = dbConnection.Query<T>(sql);
                 return data.FirstOrDefault();
             }
         }
@@ -529,9 +566,11 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public IQueryable<T> IQueryable<T>() where T : class, new()
         {
+            string sql = DatabaseCommon.SelectSql<T>("").ToString();
+
             using (var dbConnection = Connection)
             {
-                return (IQueryable<T>)dbConnection.Query<T>(new SQLinq<T>());
+                return (IQueryable<T>)dbConnection.Query<T>(sql);
             }
         }
 
@@ -543,9 +582,14 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public IQueryable<T> IQueryable<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
+            string sql = DatabaseCommon.SelectSql<T>(where).ToString();
+
             using (var dbConnection = Connection)
             {
-                return (IQueryable<T>)dbConnection.Query<T>(new SQLinq<T>().Where(condition));
+                return (IQueryable<T>)dbConnection.Query<T>(sql);
             }
         }
 
@@ -556,9 +600,10 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public IEnumerable<T> FindList<T>() where T : class, new()
         {
+            string sql = DatabaseCommon.SelectSql<T>("").ToString();
             using (var dbConnection = Connection)
             {
-                return dbConnection.Query<T>(new SQLinq<T>()).ToList();
+                return dbConnection.Query<T>(sql).ToList();
             }
         }
 
@@ -570,11 +615,14 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition) where T : class, new()
         {
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
+            string sql = DatabaseCommon.SelectSql<T>(where).ToString();
+
             using (var dbConnection = Connection)
             {
-                SQLinq<T> where = new SQLinq<T>().Where(condition);
-
-                return dbConnection.Query<T>(where).ToList();
+                return dbConnection.Query<T>(sql).ToList();
             }
         }
 
@@ -605,78 +653,127 @@ namespace Berry.Data.Dapper
         }
 
         /// <summary>
-        /// 分页查询
+        /// 获取分页数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="orderField"></param>
-        /// <param name="isAsc"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="total"></param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
+        /// <param name="isAsc">是否升序</param>
+        /// <param name="pageSize">每页条数</param>
+        /// <param name="pageIndex">索引</param>
+        /// <param name="total">总记录</param>
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
+            StringBuilder sb = new StringBuilder();
+            if (pageIndex == 0)
+            {
+                pageIndex = 1;
+            }
+            int num = (pageIndex - 1) * pageSize;
+            int num1 = (pageIndex) * pageSize;
+            string orderBy = "";
+            string strSql = DatabaseCommon.SelectSql<T>("").ToString();
+
+            if (!string.IsNullOrEmpty(orderField))
+            {
+                if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
+                {
+                    orderBy = "Order By " + orderField;
+                }
+                else
+                {
+                    orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
+                }
+            }
+            else
+            {
+                orderBy = "Order By (Select 0)";
+            }
+            sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
+            sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
+
             using (var dbConnection = Connection)
             {
-                string[] orderIds = orderField.Split(',');
-                var dataLinq = new SQLinq<T>();
-                foreach (string item in orderIds)
-                {
-                    var parameter = Expression.Parameter(typeof(T), "t");
-                    var property = typeof(T).GetProperty(item);
-                    var propertyAccess = Expression.MakeMemberAccess(parameter, property);
-                    Expression<Func<T, object>> orderBy = t => propertyAccess;
-                    dataLinq.OrderByExpressions.Add(new SQLinq<T>.OrderByExpression { Ascending = isAsc, Expression = orderBy });
-                }
-                var dataQuery = dbConnection.Query<T>(dataLinq);
-                total = dataQuery.Count();
-                var data = dataQuery.Skip<T>(pageSize * (pageIndex - 1)).Take<T>(pageSize).AsQueryable();
-                return data.ToList();
+                //total = SqlHelper.ExecuteNonQuery(dbConnection as SqlConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t");
+
+                //SqlDataReader dataReader = SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, sb.ToString());
+
+                IEnumerable<T> data = dbConnection.Query<T>(sb.ToString()).ToList();
+                total = data.Count();
+
+                return data;
             }
         }
 
         /// <summary>
-        /// 分页查询
+        /// 根据条件获取分页数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="condition"></param>
-        /// <param name="orderField"></param>
-        /// <param name="isAsc"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="total"></param>
+        /// <param name="condition">条件</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
+        /// <param name="isAsc">是否升序</param>
+        /// <param name="pageSize">每页条数</param>
+        /// <param name="pageIndex">索引</param>
+        /// <param name="total">总记录</param>
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
+            StringBuilder sb = new StringBuilder();
+            if (pageIndex == 0)
+            {
+                pageIndex = 1;
+            }
+            int num = (pageIndex - 1) * pageSize;
+            int num1 = (pageIndex) * pageSize;
+            string orderBy = "";
+
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
+
+            string strSql = DatabaseCommon.SelectSql<T>(where).ToString();
+
+            if (!string.IsNullOrEmpty(orderField))
+            {
+                if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
+                {
+                    orderBy = "Order By " + orderField;
+                }
+                else
+                {
+                    orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
+                }
+            }
+            else
+            {
+                orderBy = "Order By (Select 0)";
+            }
+            sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
+            sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
+
             using (var dbConnection = Connection)
             {
-                string[] fields = orderField.Split(',');
-                var dataLinq = new SQLinq<T>().Where(condition);
-                foreach (string item in fields)
-                {
-                    var parameter = Expression.Parameter(typeof(T), "t");
-                    var property = typeof(T).GetProperty(item);
-                    var propertyAccess = Expression.MakeMemberAccess(parameter, property);
-                    Expression<Func<T, object>> orderBy = t => propertyAccess;
-                    dataLinq.OrderByExpressions.Add(new SQLinq<T>.OrderByExpression { Ascending = isAsc, Expression = orderBy });
-                }
-                var dataQuery = dbConnection.Query<T>(dataLinq);
-                total = dataQuery.Count();
-                var data = dataQuery.Skip<T>(pageSize * (pageIndex - 1)).Take<T>(pageSize).AsQueryable();
-                return data.ToList();
+                //total = SqlHelper.ExecuteNonQuery(dbConnection as SqlConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t");
+
+                //SqlDataReader dataReader = SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, sb.ToString());
+
+                IEnumerable<T> data = dbConnection.Query<T>(sb.ToString()).ToList();
+                total = data.Count();
+
+                return data;
             }
         }
 
         /// <summary>
-        /// 分页查询
+        /// 根据T-SQL获取分页数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="strSql"></param>
-        /// <param name="orderField"></param>
-        /// <param name="isAsc"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="total"></param>
+        /// <param name="strSql">T-SQL语句</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
+        /// <param name="isAsc">是否升序</param>
+        /// <param name="pageSize">每页条数</param>
+        /// <param name="pageIndex">索引</param>
+        /// <param name="total">总记录</param>
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
@@ -684,53 +781,56 @@ namespace Berry.Data.Dapper
         }
 
         /// <summary>
-        /// 分页查询
+        /// 根据T-SQL获取分页数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="strSql"></param>
-        /// <param name="dbParameter"></param>
-        /// <param name="orderField"></param>
-        /// <param name="isAsc"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="total"></param>
+        /// <param name="strSql">T-SQL语句</param>
+        /// <param name="dbParameter">DbCommand参数</param>
+        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
+        /// <param name="isAsc">是否升序</param>
+        /// <param name="pageSize">每页条数</param>
+        /// <param name="pageIndex">索引</param>
+        /// <param name="total">总记录</param>
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
-            using (var dbConnection = Connection)
+            StringBuilder sb = new StringBuilder();
+            if (pageIndex == 0)
             {
-                StringBuilder sb = new StringBuilder();
-                if (pageIndex == 0)
-                {
-                    pageIndex = 1;
-                }
-                int num = (pageIndex - 1) * pageSize;
-                int num1 = (pageIndex) * pageSize;
-                string orderBy = "";
+                pageIndex = 1;
+            }
+            int num = (pageIndex - 1) * pageSize;
+            int num1 = (pageIndex) * pageSize;
+            string orderBy = "";
 
-                if (!string.IsNullOrEmpty(orderField))
+            if (!string.IsNullOrEmpty(orderField))
+            {
+                if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
                 {
-                    if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
-                    {
-                        orderBy = "Order By " + orderField;
-                    }
-                    else
-                    {
-                        orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
-                    }
+                    orderBy = "Order By " + orderField;
                 }
                 else
                 {
-                    orderBy = "Order By (Select 0)";
+                    orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
                 }
-                sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
-                sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
+            }
+            else
+            {
+                orderBy = "Order By (Select 0)";
+            }
+            sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
+            sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
 
-                total = SqlHelper.ExecuteNonQuery(dbConnection as SqlConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+            using (var dbConnection = Connection)
+            {
+                //total = SqlHelper.ExecuteNonQuery(dbConnection as SqlConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", DatabaseCommon.DbParameterToSqlParameter(dbParameter));
 
-                SqlDataReader dataReader = SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, sb.ToString(), DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+                //SqlDataReader dataReader = SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, sb.ToString(), DatabaseCommon.DbParameterToSqlParameter(dbParameter));
 
-                return ConvertExtension.IDataReaderToList<T>(dataReader);
+                IEnumerable<T> data = dbConnection.Query<T>(sb.ToString(), DatabaseCommon.DbParameterToSqlParameter(dbParameter)).ToList();
+                total = data.Count();
+
+                return data;
             }
         }
 
@@ -792,35 +892,35 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public DataTable FindTable(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total)
         {
-            using (var dbConnection = Connection)
+            StringBuilder sb = new StringBuilder();
+            if (pageIndex == 0)
             {
-                StringBuilder sb = new StringBuilder();
-                if (pageIndex == 0)
-                {
-                    pageIndex = 1;
-                }
-                int num = (pageIndex - 1) * pageSize;
-                int num1 = (pageIndex) * pageSize;
-                string orderBy = "";
+                pageIndex = 1;
+            }
+            int num = (pageIndex - 1) * pageSize;
+            int num1 = (pageIndex) * pageSize;
+            string orderBy = "";
 
-                if (!string.IsNullOrEmpty(orderField))
+            if (!string.IsNullOrEmpty(orderField))
+            {
+                if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
                 {
-                    if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
-                    {
-                        orderBy = "Order By " + orderField;
-                    }
-                    else
-                    {
-                        orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
-                    }
+                    orderBy = "Order By " + orderField;
                 }
                 else
                 {
-                    orderBy = "Order By (Select 0)";
+                    orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
                 }
-                sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
-                sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
+            }
+            else
+            {
+                orderBy = "Order By (Select 0)";
+            }
+            sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
+            sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
 
+            using (var dbConnection = Connection)
+            {
                 total = SqlHelper.ExecuteNonQuery(dbConnection as SqlConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", DatabaseCommon.DbParameterToSqlParameter(dbParameter));
 
                 SqlDataReader dataReader = SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, sb.ToString(), DatabaseCommon.DbParameterToSqlParameter(dbParameter));
@@ -851,7 +951,7 @@ namespace Berry.Data.Dapper
         {
             using (var dbConnection = Connection)
             {
-                return SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, strSql, DatabaseCommon.DbParameterToSqlParameter(dbParameter)); //new DbHelper(dbConnection).ExecuteScalar(CommandType.Text, strSql, dbParameter);
+                return SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, strSql, DatabaseCommon.DbParameterToSqlParameter(dbParameter));
             }
         }
 

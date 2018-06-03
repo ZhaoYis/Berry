@@ -76,7 +76,7 @@ namespace Berry.Data
         /// </summary>
         /// <param name="entity">对象实体集合</param>
         /// <returns></returns>
-        int Insert<T>(IEnumerable<T> entity) where T : class;
+        int Insert<T>(List<T> entity) where T : class;
 
         /// <summary>
         /// 删除
@@ -96,7 +96,7 @@ namespace Berry.Data
         /// </summary>
         /// <param name="entity">对象实体集合</param>
         /// <returns></returns>
-        int Delete<T>(IEnumerable<T> entity) where T : class;
+        int Delete<T>(List<T> entity) where T : class;
 
         /// <summary>
         /// 根据条件删除数据
@@ -139,7 +139,7 @@ namespace Berry.Data
         /// </summary>
         /// <param name="entity">实体对象集合</param>
         /// <returns></returns>
-        int Update<T>(IEnumerable<T> entity) where T : class;
+        int Update<T>(List<T> entity) where T : class;
 
         /// <summary>
         /// 根据条件更新

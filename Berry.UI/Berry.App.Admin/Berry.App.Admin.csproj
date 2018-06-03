@@ -229,6 +229,54 @@
     <Content Include="Content\scripts\plugins\simditor\js\simditor.min.js" />
     <Content Include="Content\scripts\plugins\simditor\js\uploader.js" />
     <Content Include="Content\scripts\plugins\simditor\js\uploader.min.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shAutoloader.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushAppleScript.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushAS3.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushBash.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushColdFusion.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushCpp.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushCSharp.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushCss.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushDelphi.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushDiff.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushErlang.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushGroovy.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushJava.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushJavaFX.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushJScript.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushPerl.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushPhp.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushPlain.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushPowerShell.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushPython.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushRuby.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushSass.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushScala.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushSql.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushVb.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shBrushXml.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shCore.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\scripts\shLegacy.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\src\shAutoloader.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\src\shCore.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\src\shLegacy.js" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shCore.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shCoreDefault.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shCoreDjango.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shCoreEclipse.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shCoreEmacs.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shCoreFadeToGrey.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shCoreMDUltra.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shCoreMidnight.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shCoreRDark.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shThemeDefault.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shThemeDjango.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shThemeEclipse.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shThemeEmacs.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shThemeFadeToGrey.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shThemeMDUltra.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shThemeMidnight.css" />
+    <Content Include="Content\scripts\plugins\syntaxhighlighter\styles\shThemeRDark.css" />
     <Content Include="Content\scripts\plugins\tree\images\icons\add.png" />
     <Content Include="Content\scripts\plugins\tree\images\icons\addStep.gif" />
     <Content Include="Content\scripts\plugins\tree\images\icons\addStep_dsbl.gif" />
@@ -603,6 +651,10 @@
     <Compile Include="Areas\BaseManage\Controllers\RoleController.cs" />
     <Compile Include="Areas\BaseManage\Controllers\UserController.cs" />
     <Compile Include="Areas\BaseManage\Controllers\UserGroupController.cs" />
+    <Compile Include="Areas\GeneratorManage\Controllers\MultiTableController.cs" />
+    <Compile Include="Areas\GeneratorManage\Controllers\SingleTableController.cs" />
+    <Compile Include="Areas\GeneratorManage\Controllers\TemplateController.cs" />
+    <Compile Include="Areas\GeneratorManage\GeneratorManageAreaRegistration.cs" />
     <Compile Include="Areas\PublicInfoManage\Controllers\NewsController.cs" />
     <Compile Include="Areas\PublicInfoManage\Controllers\NoticeController.cs" />
     <Compile Include="Areas\PublicInfoManage\PublicInfoManageAreaRegistration.cs" />
@@ -713,6 +765,13 @@
     <Content Include="Areas\SystemManage\Views\DataBaseTable\Form.cshtml" />
     <Content Include="Areas\SystemManage\Views\DataBaseTable\Index.cshtml" />
     <Content Include="Areas\SystemManage\Views\DataBaseTable\TableData.cshtml" />
+    <Content Include="Areas\GeneratorManage\Views\web.config" />
+    <Content Include="Areas\GeneratorManage\Views\MultiTable\CodeBuilder.cshtml" />
+    <Content Include="Areas\GeneratorManage\Views\MultiTable\EditControl.cshtml" />
+    <Content Include="Areas\GeneratorManage\Views\SingleTable\CodeBuilder.cshtml" />
+    <Content Include="Areas\GeneratorManage\Views\SingleTable\EditControl.cshtml" />
+    <Content Include="Areas\GeneratorManage\Views\SingleTable\EditGrid.cshtml" />
+    <Content Include="Areas\GeneratorManage\Views\Template\Index.cshtml" />
     <None Include="packages.config" />
     <Content Include="Views\Error\ErrorBrowser.cshtml" />
     <Content Include="Views\Error\ErrorMessage.cshtml" />
@@ -771,6 +830,10 @@
     <ProjectReference Include="..\..\Berry.DataAccess\Berry.Data\Berry.Data.csproj">
       <Project>{b01d7040-aa2f-4642-8454-f13a3b92923a}</Project>
       <Name>Berry.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Berry.Framework\Berry.CodeGenerator\Berry.CodeGenerator.csproj">
+      <Project>{ee0f1360-7ed4-4ed3-afd6-66a62957b9a5}</Project>
+      <Name>Berry.CodeGenerator</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Berry.Framework\Berry.Code\Berry.Code.csproj">
       <Project>{3efa4e6a-73e4-40c6-ade4-9100a98860c1}</Project>

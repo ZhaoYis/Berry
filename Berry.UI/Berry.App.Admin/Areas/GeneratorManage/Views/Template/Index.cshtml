@@ -1,0 +1,70 @@
+﻿@{
+    ViewBag.Title = "模板列表";
+    Layout = "~/Views/Shared/_LayoutIndex.cshtml";
+}
+<script>
+    $(function () {
+        resize();
+    })
+    function resize() {
+        $('#pageayout').height($(window).height() - 20);
+        $(window).resize(function (e) {
+            window.setTimeout(function () {
+                $('#pageayout').height($(window).height() - 20);
+            }, 200);
+            e.stopPropagation();
+        });
+    }
+    //在线开发（单表）
+    function btn_singletable() {
+        dialogOpen({
+            id: "Form",
+            title: '在线代码生成器 并自动创建代码',
+            url: '/GeneratorManage/SingleTable/CodeBuilder',
+            width: "1100px",
+            height: "800px",
+            btn: null
+        });
+    }
+    //在线开发（多表）
+    function btn_multitable() {
+        dialogOpen({
+            id: "Form",
+            title: '在线代码生成器 并自动创建代码',
+            url: '/GeneratorManage/MultiTable/CodeBuilder',
+            width: "1100px",
+            height: "800px",
+            btn: null
+        });
+    }
+</script>
+<div id="pageayout" class="border" style="background: #fff; overflow: auto;">
+    <div style="margin: 20px;">
+        <div class="cover-box">
+            <div class="cover-img">
+                <i class="fa fa-television" style="font-size: 130px; color: #666666;margin-top:20px;"></i>
+            </div>
+            <div class="cover-info">
+                <h4>单表开发模板（A）</h4>
+                <small>单表开发功能。</small>
+            </div>
+            <div class="cover-button">
+                <a class="btn btn-default"><i class="fa fa-eye"></i>&nbsp;效果</a>
+                <a class="btn btn-default" onclick="btn_singletable()"><i class="fa fa-bug"></i>&nbsp;开发</a>
+            </div>
+        </div>
+        <div class="cover-box">
+            <div class="cover-img">
+                <i class="fa fa-gears" style="font-size: 130px; color: #666666;margin-top:20px;"></i>
+            </div>
+            <div class="cover-info">
+                <h4>主从表开发模板（B）</h4>
+                <small>类似订单、有表头信息、有明细信息</small>
+            </div>
+            <div class="cover-button">
+                <a class="btn btn-default"><i class="fa fa-eye"></i>&nbsp;效果</a>
+                <a class="btn btn-default" onclick="btn_multitable()"><i class="fa fa-bug"></i>&nbsp;开发</a>
+            </div>
+        </div>
+    </div>
+</div>

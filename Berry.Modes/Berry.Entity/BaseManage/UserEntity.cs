@@ -1,13 +1,13 @@
 ﻿using Berry.Util;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-
 namespace Berry.Entity.BaseManage
 {
     /// <summary>
     /// 用户实体
     /// </summary>
     [Table("Base_User")]
+    [Serializable]
     public class UserEntity : BaseEntity
     {
         #region 扩展操作
@@ -38,7 +38,7 @@ namespace Berry.Entity.BaseManage
         }
 
         #endregion 扩展操作
-
+        
         /// <summary>
         /// 用户编码
         /// </summary>
@@ -294,4 +294,19 @@ namespace Berry.Entity.BaseManage
         /// </summary>
         public string ModifyUserName { get; set; }
     }
+    
+    ///// <summary>
+    ///// 实体对象映射关系  
+    ///// </summary>
+    //[Serializable]
+    //public sealed class UserMap : ClassMapper<UserEntity>
+    //{
+    //    public UserMap()
+    //    {
+    //        base.Table("Base_User");
+    //        Map(f => f.PK).Ignore();//设置忽略
+    //        Map(f => f.Id).Key(KeyType.NotAKey);//设置主键  (如果主键名称不包含字母“ID”，请设置)      
+    //        this.AutoMap();
+    //    }
+    //}
 }

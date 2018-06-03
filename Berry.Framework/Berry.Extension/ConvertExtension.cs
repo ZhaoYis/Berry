@@ -449,7 +449,7 @@ namespace Berry.Extension
         public static List<T> DataTableToList<T>(this DataTable dt) where T : new()
         {
             // 定义集合
-            IList<T> ts = new List<T>();
+            List<T> ts = new List<T>();
 
             // 获得此模型的类型
             Type type = typeof(T);
@@ -476,7 +476,8 @@ namespace Berry.Extension
                 }
                 ts.Add(t);
             }
-            return ts.CastTo<List<T>>();
+            //return ts.CastTo<List<T>>();
+            return ts;
         }
 
         #endregion DataTable转换成List集合
