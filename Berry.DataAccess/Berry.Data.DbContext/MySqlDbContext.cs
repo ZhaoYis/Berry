@@ -37,7 +37,7 @@ namespace Berry.Data.DbContext
         /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            string assembleFileName = AppDomain.CurrentDomain.BaseDirectory + "Berry.Entity.Mapping.DLL";
+            string assembleFileName = AppDomain.CurrentDomain.BaseDirectory + "bin/Berry.Entity.Mapping.dll";
             Assembly asm = Assembly.LoadFile(assembleFileName);
             var typesToRegister = asm.GetTypes()
             .Where(type => !String.IsNullOrEmpty(type.Namespace))

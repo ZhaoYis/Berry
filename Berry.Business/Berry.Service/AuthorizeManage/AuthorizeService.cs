@@ -46,7 +46,7 @@ namespace Berry.Service.AuthorizeManage
                                         ObjectId IN (
                                                 SELECT  ObjectId
                                                 FROM    Base_UserRelation
-                                                WHERE   Id = @UserId)";
+                                                WHERE   Id = @Id)";
             }
             else
             {
@@ -56,12 +56,12 @@ namespace Berry.Service.AuthorizeManage
                                         ObjectId IN (
                                                 SELECT  ObjectId
                                                 FROM    Base_UserRelation
-                                                WHERE   Id = @UserId)";
+                                                WHERE   Id = @Id)";
             }
 
             DbParameter[] parameter =
             {
-                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "UserId", userId, DbType.String)
+                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
             };
             whereSb.Append(string.Format("AND( Id ='{0}'", userId));
 
@@ -168,8 +168,8 @@ namespace Berry.Service.AuthorizeManage
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     Id = @UserId ) )
-                                            OR ObjectId = @UserId )
+                                                  WHERE     Id = @Id ) )
+                                            OR ObjectId = @Id )
                                     AND EnabledMark = 1
                                     AND DeleteMark = 0
                                     AND IsMenu = 1
@@ -187,15 +187,15 @@ namespace Berry.Service.AuthorizeManage
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     Id = @UserId ) )
-                                            OR ObjectId = @UserId )
+                                                  WHERE     Id = @Id ) )
+                                            OR ObjectId = @Id )
                                     AND ActionAddress IS NOT NULL");
 
             DbParameter[] parameter =
             {
-                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "UserId", userId, DbType.String)
+                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
             };
-            //string sql = strSql.ToString().Replace("@UserId", $"'{userId}'");
+            //string sql = strSql.ToString().Replace("@Id", $"'{userId}'");
 
             DataTable data = this.BaseRepository().FindTable(strSql.ToString(), parameter);
             if (data.IsExistRows())

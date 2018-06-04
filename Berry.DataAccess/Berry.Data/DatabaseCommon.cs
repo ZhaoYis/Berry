@@ -311,6 +311,55 @@ namespace Berry.Data
             return sb;
         }
 
+        /// <summary>
+        /// 泛型方法，反射生成UpdateSql语句
+        /// </summary>
+        /// <param name="entity">实体类</param>
+        /// <param name="where">更新条件</param>
+        /// <returns>int</returns>
+        public static StringBuilder UpdateSql<T>(T entity, string where = "")
+        {
+            Type type = entity.GetType();
+            //表名
+            string table = EntityAttributeHelper.GetEntityTable<T>();
+            //主键
+            string keyField = EntityAttributeHelper.GetEntityKey<T>();
+            //获取不做映射的字段
+            List<string> notMappedField = EntityAttributeHelper.GetNotMappedFields<T>();
+
+            PropertyInfo[] props = type.GetProperties();
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("Update ");
+            sb.Append(table);
+            sb.Append(" Set ");
+            bool isFirstValue = true;
+            foreach (PropertyInfo prop in props)
+            {
+                if (!notMappedField.Contains(prop.Name))
+                {
+                    if (prop.GetValue(entity, null) != null && keyField != prop.Name)
+                    {
+                        if (isFirstValue)
+                        {
+                            isFirstValue = false;
+                            sb.Append("[" + prop.Name + "]");
+                            sb.Append("=");
+                            sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                        }
+                        else
+                        {
+                            sb.Append(",[" + prop.Name + "]");
+                            sb.Append("=");
+                            sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                        }
+                    }
+                }
+            }
+            sb.Append(" Where ").Append(keyField).Append("=").Append(DbParameters.CreateDbParmCharacter() + keyField);
+            return sb;
+        }
+
         #endregion 拼接 Update SQL语句
 
         #region 拼接 Delete SQL语句
@@ -420,21 +469,30 @@ namespace Berry.Data
         /// <summary>
         /// 拼接 查询 SQL语句，自定义条件
         /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="where">条件</param>
+        /// <param name="allFieid">是否查询所有字段</param>
         /// <returns></returns>
-        public static StringBuilder SelectSql<T>(string where) where T : class, new()
+        public static StringBuilder SelectSql<T>(string where, bool allFieid = false) where T : class, new()
         {
             //表名
             string table = EntityAttributeHelper.GetEntityTable<T>();
 
             PropertyInfo[] props = EntityAttributeHelper.GetProperties(typeof(T));
             StringBuilder sbColumns = new StringBuilder();
-
-            foreach (PropertyInfo prop in props)
+            if (allFieid)
             {
-                //string propertytype = prop.PropertyType.ToString();
-                sbColumns.Append("[" + prop.Name + "],");
+                sbColumns.Append(" * ");
             }
-            if (sbColumns.Length > 0) sbColumns.Remove(sbColumns.ToString().Length - 1, 1);
+            else
+            {
+                foreach (PropertyInfo prop in props)
+                {
+                    //string propertytype = prop.PropertyType.ToString();
+                    sbColumns.Append("[" + prop.Name + "],");
+                }
+                if (sbColumns.Length > 0) sbColumns.Remove(sbColumns.ToString().Length - 1, 1);
+            }
 
             if (string.IsNullOrWhiteSpace(where)) where = " WHERE 1 = 1";
 

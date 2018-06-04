@@ -4,6 +4,8 @@ using System.Data;
 using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Reflection;
 using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
 
@@ -12,7 +14,7 @@ namespace Berry.Data.Extension
     /// <summary>
     /// SQL参数化
     /// </summary>
-    public class DbParameters
+    public static class DbParameters
     {
         /// <summary>
         /// 根据配置文件中所配置的数据库类型
@@ -158,6 +160,40 @@ namespace Berry.Data.Extension
                     throw new Exception("数据库类型目前不支持！");
             }
             return dbParameter;
+        }
+
+        /// <summary>
+        /// DbParameter转成对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dbParameter"></param>
+        /// <returns></returns>
+        public static T DbParameterToObject<T>(this DbParameter[] dbParameter) where T : new()
+        {
+            T t = new T();
+            if (dbParameter != null)
+            {
+                Type type = typeof(T);
+                PropertyInfo[] props = type.GetProperties();
+
+                foreach (DbParameter parameter in dbParameter)
+                {
+                    if (parameter.Value != null)
+                    {
+                        foreach (PropertyInfo prop in props)
+                        {
+                            // 判断此属性是否有Setter  
+                            if (!prop.CanWrite) continue;//该属性不可写，直接跳出  
+
+                            if (prop.Name == parameter.ParameterName.Replace(DbParameters.CreateDbParmCharacter(), ""))
+                            {
+                                prop.SetValue(t, parameter.Value, null);
+                            }
+                        }
+                    }
+                }
+            }
+            return t;
         }
     }
 }

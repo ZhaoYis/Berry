@@ -44,6 +44,7 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool AddUser(UserEntity userEntity)
         {
+            userEntity.Create();
             int res = this.BaseRepository().Insert(userEntity);
 
             if (res > 0)
@@ -437,7 +438,17 @@ namespace Berry.Service.BaseManage
                             user.LogOnCount = logOnCount;
                             user.UserOnLine = 1;
                             //更新登录信息
-                            int isSucc = this.BaseRepository().Update<UserEntity>(user);
+                            //int isSucc = this.BaseRepository().Update<UserEntity>(new UserEntity { Id = user.Id, LastVisit = lastVisit, LogOnCount = logOnCount, UserOnLine = 1 }, e => e.Id == user.Id);
+                            UserEntity update = new UserEntity
+                            {
+                                Id = user.Id,
+                                LastVisit = lastVisit,
+                                LogOnCount = logOnCount,
+                                UserOnLine = 1,
+                                EnabledMark = user.EnabledMark,
+                                DeleteMark = user.DeleteMark
+                            };
+                            int isSucc = this.BaseRepository().Update<UserEntity>(update);
 
                             status = JsonObjectStatus.Success;
                             return user;

@@ -383,12 +383,15 @@ namespace Berry.Data.EF
             Hashtable props = ConvertExtension.GetPropertyInfo<T>(entity);
             foreach (string item in props.Keys)
             {
-                object value = Dbcontext.Entry(entity).Property(item).CurrentValue;
-                if (value != null)
+                if (item != "PK")
                 {
-                    if (value.ToString() == "&nbsp;")
-                        Dbcontext.Entry(entity).Property(item).CurrentValue = null;
-                    Dbcontext.Entry(entity).Property(item).IsModified = true;
+                    object value = Dbcontext.Entry(entity).Property(item).CurrentValue;
+                    if (value != null)
+                    {
+                        if (value.ToString() == "&nbsp;")
+                            Dbcontext.Entry(entity).Property(item).CurrentValue = null;
+                        Dbcontext.Entry(entity).Property(item).IsModified = true;
+                    }
                 }
             }
             return DbTransaction == null ? this.Commit() : 0;

@@ -159,12 +159,17 @@ namespace Berry.App.Admin.Controllers
                         };
 
                         //写入当前用户数据权限
+                        string ReadAutorize = authorizeBLL.GetDataAuthor(operators);
+                        string ReadAutorizeUserId = authorizeBLL.GetDataAuthorUserId(operators);
+                        string WriteAutorize = authorizeBLL.GetDataAuthor(operators, true);
+                        string WriteAutorizeUserId = authorizeBLL.GetDataAuthorUserId(operators, true);
+
                         AuthorizeDataModel dataAuthorize = new AuthorizeDataModel
                         {
-                            ReadAutorize = authorizeBLL.GetDataAuthor(operators),
-                            ReadAutorizeUserId = authorizeBLL.GetDataAuthorUserId(operators),
-                            WriteAutorize = authorizeBLL.GetDataAuthor(operators, true),
-                            WriteAutorizeUserId = authorizeBLL.GetDataAuthorUserId(operators, true)
+                            ReadAutorize = ReadAutorize,
+                            ReadAutorizeUserId = ReadAutorizeUserId,
+                            WriteAutorize = WriteAutorize,
+                            WriteAutorizeUserId = WriteAutorizeUserId
                         };
                         operators.DataAuthorize = dataAuthorize;
                         //判断是否系统管理员

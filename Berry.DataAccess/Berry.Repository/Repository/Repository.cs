@@ -224,7 +224,7 @@ namespace Berry.Data.Repository
         /// <returns>返回受影响行数</returns>
         public int Update<T>(T modelModifyProps, Expression<Func<T, bool>> condition) where T : class, new()
         {
-            throw new NotImplementedException();
+            return _db.Update<T>(modelModifyProps, condition);
         }
 
         #endregion 对象实体 添加、修改、删除

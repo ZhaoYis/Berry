@@ -687,45 +687,90 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
-            IQueryable<T> tempData = this.FindList<T>().AsQueryable();
-            string[] order = !string.IsNullOrEmpty(orderField) ? orderField.Split(',') : new[] { "" };
-            MethodCallExpression resultExp = null;
-            try
+            StringBuilder sb = new StringBuilder();
+            if (pageIndex == 0)
             {
-                if (!string.IsNullOrEmpty(order[0]))
+                pageIndex = 1;
+            }
+            int num = (pageIndex - 1) * pageSize;
+            int num1 = (pageIndex) * pageSize;
+            string orderBy = "";
+            //表名
+            string table = EntityAttributeHelper.GetEntityTable<T>();
+            string strSql = DatabaseCommon.SelectSql(table).ToString();
+
+            if (!string.IsNullOrEmpty(orderField))
+            {
+                if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
                 {
-                    foreach (string item in order)
-                    {
-                        string orderPart = item;
-                        orderPart = Regex.Replace(orderPart, @"\s+", " ");
-                        string[] orderArry = orderPart.Split(' ');
-
-                        bool sort = isAsc;
-                        if (orderArry.Length == 2)
-                        {
-                            sort = orderArry[1].ToUpper() == "ASC" ? true : false;
-                        }
-                        var parameter = Expression.Parameter(typeof(T), "t");
-                        var property = typeof(T).GetProperty(orderArry[0]);
-                        if (property != null)
-                        {
-                            var propertyAccess = Expression.MakeMemberAccess(parameter, property);
-                            var orderByExp = Expression.Lambda(propertyAccess, parameter);
-                            resultExp = Expression.Call(typeof(Queryable), sort ? "OrderBy" : "OrderByDescending", new Type[] { typeof(T), property.PropertyType }, tempData.Expression, Expression.Quote(orderByExp));
-                        }
-                    }
+                    orderBy = "Order By " + orderField;
                 }
-                if (resultExp != null)
-                    tempData = tempData.Provider.CreateQuery<T>(resultExp);
-                tempData = tempData.Skip<T>(pageSize * (pageIndex - 1)).Take<T>(pageSize).AsQueryable();
+                else
+                {
+                    orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
+                }
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine(e);
+                orderBy = "Order By (Select 0)";
+            }
+            sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
+            sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
+
+            using (var dbConnection = Connection)
+            {
+                IEnumerable<T> data = new List<T>();
+                string selectCountSql = "Select Count(*) From " + table + " WHERE 1 = 1";
+                total = (int)SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, selectCountSql);
+
+                DataSet dataSet = SqlHelper.ExecuteDataset(dbConnection, CommandType.Text, sb.ToString());
+                if (dataSet.Tables.Count > 0 && dataSet.Tables[0].IsExistRows())
+                {
+                    DataTable dataTable = dataSet.Tables[0];
+                    data = dataTable.DataTableToList<T>();
+                }
+                return data;
             }
 
-            total = tempData.Count();
-            return tempData.ToList();
+            //IQueryable<T> tempData = this.FindList<T>().AsQueryable();
+            //string[] order = !string.IsNullOrEmpty(orderField) ? orderField.Split(',') : new[] { "" };
+            //MethodCallExpression resultExp = null;
+            //try
+            //{
+            //    if (!string.IsNullOrEmpty(order[0]))
+            //    {
+            //        foreach (string item in order)
+            //        {
+            //            string orderPart = item;
+            //            orderPart = Regex.Replace(orderPart, @"\s+", " ");
+            //            string[] orderArry = orderPart.Split(' ');
+
+            //            bool sort = isAsc;
+            //            if (orderArry.Length == 2)
+            //            {
+            //                sort = orderArry[1].ToUpper() == "ASC" ? true : false;
+            //            }
+            //            var parameter = Expression.Parameter(typeof(T), "t");
+            //            var property = typeof(T).GetProperty(orderArry[0]);
+            //            if (property != null)
+            //            {
+            //                var propertyAccess = Expression.MakeMemberAccess(parameter, property);
+            //                var orderByExp = Expression.Lambda(propertyAccess, parameter);
+            //                resultExp = Expression.Call(typeof(Queryable), sort ? "OrderBy" : "OrderByDescending", new Type[] { typeof(T), property.PropertyType }, tempData.Expression, Expression.Quote(orderByExp));
+            //            }
+            //        }
+            //    }
+            //    if (resultExp != null)
+            //        tempData = tempData.Provider.CreateQuery<T>(resultExp);
+            //    tempData = tempData.Skip<T>(pageSize * (pageIndex - 1)).Take<T>(pageSize).AsQueryable();
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e);
+            //}
+
+            //total = tempData.Count();
+            //return tempData.ToList();
         }
 
         /// <summary>
@@ -741,37 +786,87 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
-            MethodCallExpression resultExp = null;
-
-            var tempData = this.FindList<T>(condition).AsQueryable();
-
-            string[] order = orderField.Split(',');
-            foreach (string item in order)
+            StringBuilder sb = new StringBuilder();
+            if (pageIndex == 0)
             {
-                string orderPart = item;
-                orderPart = Regex.Replace(orderPart, @"\s+", " ");
-                string[] orderArry = orderPart.Split(' ');
+                pageIndex = 1;
+            }
+            int num = (pageIndex - 1) * pageSize;
+            int num1 = (pageIndex) * pageSize;
+            string orderBy = "";
 
-                bool sort = isAsc;
-                if (orderArry.Length == 2)
+            LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
+            lambda.AddAndWhere(condition);
+            string where = lambda.Where();
+
+            //表名
+            string table = EntityAttributeHelper.GetEntityTable<T>();
+            string strSql = DatabaseCommon.SelectSql<T>(where, true).ToString();
+
+            if (!string.IsNullOrEmpty(orderField))
+            {
+                if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
                 {
-                    sort = orderArry[1].ToUpper() == "ASC" ? true : false;
+                    orderBy = "Order By " + orderField;
                 }
-                var parameter = Expression.Parameter(typeof(T), "t");
-                var property = typeof(T).GetProperty(orderArry[0]);
-                if (property != null)
+                else
                 {
-                    var propertyAccess = Expression.MakeMemberAccess(parameter, property);
-                    var orderByExp = Expression.Lambda(propertyAccess, parameter);
-                    resultExp = Expression.Call(typeof(Queryable), sort ? "OrderBy" : "OrderByDescending", new Type[] { typeof(T), property.PropertyType }, tempData.Expression, Expression.Quote(orderByExp));
+                    orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
                 }
             }
-            if (resultExp != null)
-                tempData = tempData.Provider.CreateQuery<T>(resultExp);
-            total = tempData.Count();
-            tempData = tempData.Skip<T>(pageSize * (pageIndex - 1)).Take<T>(pageSize).AsQueryable();
+            else
+            {
+                orderBy = "Order By (Select 0)";
+            }
+            sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
+            sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
 
-            return tempData.ToList();
+            using (var dbConnection = Connection)
+            {
+                IEnumerable<T> data = new List<T>();
+                string selectCountSql = "Select Count(*) From " + table + " WHERE 1 = 1";
+                total = (int)SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, selectCountSql);
+
+                DataSet dataSet = SqlHelper.ExecuteDataset(dbConnection, CommandType.Text, sb.ToString());
+                if (dataSet.Tables.Count > 0 && dataSet.Tables[0].IsExistRows())
+                {
+                    DataTable dataTable = dataSet.Tables[0];
+                    data = dataTable.DataTableToList<T>();
+                }
+                return data;
+            }
+            
+            //MethodCallExpression resultExp = null;
+
+            //var tempData = this.FindList<T>(condition).AsQueryable();
+
+            //string[] order = orderField.Split(',');
+            //foreach (string item in order)
+            //{
+            //    string orderPart = item;
+            //    orderPart = Regex.Replace(orderPart, @"\s+", " ");
+            //    string[] orderArry = orderPart.Split(' ');
+
+            //    bool sort = isAsc;
+            //    if (orderArry.Length == 2)
+            //    {
+            //        sort = orderArry[1].ToUpper() == "ASC" ? true : false;
+            //    }
+            //    var parameter = Expression.Parameter(typeof(T), "t");
+            //    var property = typeof(T).GetProperty(orderArry[0]);
+            //    if (property != null)
+            //    {
+            //        var propertyAccess = Expression.MakeMemberAccess(parameter, property);
+            //        var orderByExp = Expression.Lambda(propertyAccess, parameter);
+            //        resultExp = Expression.Call(typeof(Queryable), sort ? "OrderBy" : "OrderByDescending", new Type[] { typeof(T), property.PropertyType }, tempData.Expression, Expression.Quote(orderByExp));
+            //    }
+            //}
+            //if (resultExp != null)
+            //    tempData = tempData.Provider.CreateQuery<T>(resultExp);
+            //total = tempData.Count();
+            //tempData = tempData.Skip<T>(pageSize * (pageIndex - 1)).Take<T>(pageSize).AsQueryable();
+
+            //return tempData.ToList();
         }
 
         /// <summary>
@@ -804,39 +899,49 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new()
         {
-            using (var dbConnection = Connection)
+            StringBuilder sb = new StringBuilder();
+            if (pageIndex == 0)
             {
-                StringBuilder sb = new StringBuilder();
-                if (pageIndex == 0)
-                {
-                    pageIndex = 1;
-                }
-                int num = (pageIndex - 1) * pageSize;
-                int num1 = (pageIndex) * pageSize;
-                string orderBy = "";
+                pageIndex = 1;
+            }
+            int num = (pageIndex - 1) * pageSize;
+            int num1 = (pageIndex) * pageSize;
+            string orderBy = "";
 
-                if (!string.IsNullOrEmpty(orderField))
+            //表名
+            string table = EntityAttributeHelper.GetEntityTable<T>();
+
+            if (!string.IsNullOrEmpty(orderField))
+            {
+                if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
                 {
-                    if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
-                    {
-                        orderBy = "Order By " + orderField;
-                    }
-                    else
-                    {
-                        orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
-                    }
+                    orderBy = "Order By " + orderField;
                 }
                 else
                 {
-                    orderBy = "Order By (Select 0)";
+                    orderBy = "Order By " + orderField + " " + (isAsc ? "ASC" : "DESC");
                 }
-                sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
-                sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
+            }
+            else
+            {
+                orderBy = "Order By (Select 0)";
+            }
+            sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
+            sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
 
-                total = Convert.ToInt32(SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
-                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, sb.ToString(), dbParameter);
+            using (var dbConnection = Connection)
+            {
+                IEnumerable<T> data = new List<T>();
+                string selectCountSql = "Select Count(*) From " + table + " WHERE 1 = 1";
+                total = (int)SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, selectCountSql);
 
-                return ConvertExtension.IDataReaderToList<T>(dataReader);
+                DataSet dataSet = SqlHelper.ExecuteDataset(dbConnection, CommandType.Text, sb.ToString(), DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+                if (dataSet.Tables.Count > 0 && dataSet.Tables[0].IsExistRows())
+                {
+                    DataTable dataTable = dataSet.Tables[0];
+                    data = dataTable.DataTableToList<T>();
+                }
+                return data;
             }
         }
 

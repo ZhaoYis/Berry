@@ -11,6 +11,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using Berry.Util.LambdaToSQL;
 
@@ -184,6 +185,30 @@ namespace Berry.Data.Dapper
             {
                 res = 0;
             });
+            return res;
+        }
+
+        /// <summary>
+        /// 执行 SQL 语句
+        /// </summary>
+        /// <param name="strSql"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public int ExecuteBySql<T>(string strSql, T entity)
+        {
+            int res = 0;
+            if (DbTransaction == null)
+            {
+                using (var connection = Connection)
+                {
+                    res = connection.Execute(strSql, entity);
+                }
+            }
+            else
+            {
+                DbTransaction.Connection.Execute(strSql, entity, DbTransaction);
+                res = 0;
+            }
             return res;
         }
 
@@ -452,9 +477,9 @@ namespace Berry.Data.Dapper
         public int Update<T>(T entity) where T : class
         {
             string sql = DatabaseCommon.UpdateSql<T>(entity).ToString();
-            DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
+            //DbParameter[] parameter = DatabaseCommon.GetParameter<T>(entity);
 
-            return ExecuteBySql(sql, parameter);
+            return ExecuteBySql(sql, entity);
         }
 
         /// <summary>
@@ -500,9 +525,9 @@ namespace Berry.Data.Dapper
             string where = lambda.Where();
 
             string sql = DatabaseCommon.UpdateSql<T>(modelModifyProps, "", where).ToString();
-            DbParameter[] parameter = DatabaseCommon.GetParameter<T>(modelModifyProps);
+            //DbParameter[] parameter = DatabaseCommon.GetParameter<T>(modelModifyProps);
 
-            res = ExecuteBySql(sql, parameter);
+            res = ExecuteBySql(sql, modelModifyProps);
 
             return res;
         }
@@ -648,7 +673,8 @@ namespace Berry.Data.Dapper
         {
             using (var dbConnection = Connection)
             {
-                return dbConnection.Query<T>(strSql, dbParameter);
+                T t = dbParameter.DbParameterToObject<T>();
+                return dbConnection.Query<T>(strSql, t);
             }
         }
 
@@ -672,7 +698,9 @@ namespace Berry.Data.Dapper
             int num = (pageIndex - 1) * pageSize;
             int num1 = (pageIndex) * pageSize;
             string orderBy = "";
-            string strSql = DatabaseCommon.SelectSql<T>("").ToString();
+            //表名
+            string table = EntityAttributeHelper.GetEntityTable<T>();
+            string strSql = DatabaseCommon.SelectSql(table).ToString();
 
             if (!string.IsNullOrEmpty(orderField))
             {
@@ -694,13 +722,10 @@ namespace Berry.Data.Dapper
 
             using (var dbConnection = Connection)
             {
-                //total = SqlHelper.ExecuteNonQuery(dbConnection as SqlConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t");
-
-                //SqlDataReader dataReader = SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, sb.ToString());
+                string selectCountSql = "Select Count(*) From " + table + " WHERE 1 = 1";
+                total = (int)dbConnection.ExecuteScalar(selectCountSql);
 
                 IEnumerable<T> data = dbConnection.Query<T>(sb.ToString()).ToList();
-                total = data.Count();
-
                 return data;
             }
         }
@@ -731,7 +756,9 @@ namespace Berry.Data.Dapper
             lambda.AddAndWhere(condition);
             string where = lambda.Where();
 
-            string strSql = DatabaseCommon.SelectSql<T>(where).ToString();
+            //表名
+            string table = EntityAttributeHelper.GetEntityTable<T>();
+            string strSql = DatabaseCommon.SelectSql<T>(where, true).ToString();
 
             if (!string.IsNullOrEmpty(orderField))
             {
@@ -753,13 +780,10 @@ namespace Berry.Data.Dapper
 
             using (var dbConnection = Connection)
             {
-                //total = SqlHelper.ExecuteNonQuery(dbConnection as SqlConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t");
-
-                //SqlDataReader dataReader = SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, sb.ToString());
+                string selectCountSql = "Select Count(*) From " + table + " WHERE 1 = 1";
+                total = (int)dbConnection.ExecuteScalar(selectCountSql);
 
                 IEnumerable<T> data = dbConnection.Query<T>(sb.ToString()).ToList();
-                total = data.Count();
-
                 return data;
             }
         }
@@ -803,6 +827,9 @@ namespace Berry.Data.Dapper
             int num1 = (pageIndex) * pageSize;
             string orderBy = "";
 
+            //表名
+            string table = EntityAttributeHelper.GetEntityTable<T>();
+
             if (!string.IsNullOrEmpty(orderField))
             {
                 if (orderField.ToUpper().IndexOf("ASC", StringComparison.Ordinal) + orderField.ToUpper().IndexOf("DESC", StringComparison.Ordinal) > 0)
@@ -823,12 +850,11 @@ namespace Berry.Data.Dapper
 
             using (var dbConnection = Connection)
             {
-                //total = SqlHelper.ExecuteNonQuery(dbConnection as SqlConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+                string selectCountSql = "Select Count(*) From " + table + " WHERE 1 = 1";
+                total = (int)dbConnection.ExecuteScalar(selectCountSql);
 
-                //SqlDataReader dataReader = SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, sb.ToString(), DatabaseCommon.DbParameterToSqlParameter(dbParameter));
-
-                IEnumerable<T> data = dbConnection.Query<T>(sb.ToString(), DatabaseCommon.DbParameterToSqlParameter(dbParameter)).ToList();
-                total = data.Count();
+                T t = dbParameter.DbParameterToObject<T>();
+                IEnumerable<T> data = dbConnection.Query<T>(sb.ToString(), t).ToList();
 
                 return data;
             }
@@ -921,13 +947,14 @@ namespace Berry.Data.Dapper
 
             using (var dbConnection = Connection)
             {
-                total = SqlHelper.ExecuteNonQuery(dbConnection as SqlConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+                string selectCountSql = "Select Count(*) From (" + strSql + ") WHERE 1 = 1";
+                total = (int)dbConnection.ExecuteScalar(selectCountSql);
 
-                SqlDataReader dataReader = SqlHelper.ExecuteReader(dbConnection as SqlConnection, CommandType.Text, sb.ToString(), DatabaseCommon.DbParameterToSqlParameter(dbParameter));
+                DataTable table = new DataTable("MyTable");
+                IDataReader reader = dbConnection.ExecuteReader(sb.ToString(), dbParameter);//ConvertExtension.IDataReaderToDataTable(dataReader);
+                table.Load(reader);
 
-                DataTable resultTable = ConvertExtension.IDataReaderToDataTable(dataReader);
-                resultTable.Columns.Remove("rowNum");
-                return resultTable;
+                return table;
             }
         }
 

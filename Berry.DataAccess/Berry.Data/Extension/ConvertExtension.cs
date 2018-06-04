@@ -10,7 +10,7 @@ namespace Berry.Data.Extension
     /// <summary>
     /// 描 述：转换扩展类
     /// </summary>
-    public class ConvertExtension
+    public static class ConvertExtension
     {
         /// <summary>
         /// 将DataReader数据转为Dynamic对象

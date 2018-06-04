@@ -34,13 +34,13 @@ namespace Berry.Service.AuthorizeManage
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     Id = @UserId ) )
+                                                  WHERE     Id = @Id ) )
                                             OR ObjectId = @UserId )  Order By SortCode");
 
             DbParameter[] parameter =
             {
-                //new SqlParameter("@UserId",SqlDbType.NVarChar,36)
-                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "UserId", userId, DbType.String)
+                //new SqlParameter("@Id",SqlDbType.NVarChar,36)
+                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
             };
 
             IEnumerable<ModuleColumnEntity> res = this.BaseRepository().FindList<ModuleColumnEntity>(strSql.ToString(), parameter);
