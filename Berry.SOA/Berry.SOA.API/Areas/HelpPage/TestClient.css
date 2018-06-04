@@ -36,3 +36,8 @@ select {
     float: left;
     border: none;
 }
+
+/*Òş²ØÏìÓ¦Í·Div*/
+.responseHeaderDiv {
+    display: none
+}

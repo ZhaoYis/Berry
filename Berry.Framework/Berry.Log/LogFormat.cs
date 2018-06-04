@@ -15,7 +15,7 @@ namespace Berry.Log
         public static string ErrorFormat(LogMessage logMessage)
         {
             StringBuilder strInfo = new StringBuilder();
-            strInfo.Append("1. 错误: >> 操作时间: " + logMessage.OperationTime + "   操作人: " + logMessage.UserName + " \r\n");
+            strInfo.Append("\r\n1. 错误: >> 操作时间: " + logMessage.OperationTime + "   操作人: " + logMessage.UserName + " \r\n");
             strInfo.Append("2. 地址: " + logMessage.Url + "    \r\n");
             strInfo.Append("3. 类名: " + logMessage.Class + " \r\n");
             strInfo.Append("4. Ip  : " + logMessage.Ip + "   主机: " + logMessage.Host + "   浏览器: " + logMessage.Browser + "    \r\n");
@@ -32,7 +32,7 @@ namespace Berry.Log
         public static string WarnFormat(LogMessage logMessage)
         {
             StringBuilder strInfo = new StringBuilder();
-            strInfo.Append("1. 警告: >> 操作时间: " + logMessage.OperationTime + "   操作人: " + logMessage.UserName + " \r\n");
+            strInfo.Append("\r\n1. 警告: >> 操作时间: " + logMessage.OperationTime + "   操作人: " + logMessage.UserName + " \r\n");
             strInfo.Append("2. 地址: " + logMessage.Url + "    \r\n");
             strInfo.Append("3. 类名: " + logMessage.Class + " \r\n");
             strInfo.Append("4. Ip  : " + logMessage.Ip + "   主机: " + logMessage.Host + "   浏览器: " + logMessage.Browser + "    \r\n");
@@ -49,7 +49,7 @@ namespace Berry.Log
         public static string InfoFormat(LogMessage logMessage)
         {
             StringBuilder strInfo = new StringBuilder();
-            strInfo.Append("1. 信息: >> 操作时间: " + logMessage.OperationTime + "   操作人: " + logMessage.UserName + " \r\n");
+            strInfo.Append("\r\n1. 信息: >> 操作时间: " + logMessage.OperationTime + "   操作人: " + logMessage.UserName + " \r\n");
             strInfo.Append("2. 地址: " + logMessage.Url + "    \r\n");
             strInfo.Append("3. 类名: " + logMessage.Class + " \r\n");
             strInfo.Append("4. Ip  : " + logMessage.Ip + "   主机: " + logMessage.Host + "   浏览器: " + logMessage.Browser + "    \r\n");
@@ -66,7 +66,7 @@ namespace Berry.Log
         public static string DebugFormat(LogMessage logMessage)
         {
             StringBuilder strInfo = new StringBuilder();
-            strInfo.Append("1. 调试: >> 操作时间: " + logMessage.OperationTime + "   操作人: " + logMessage.UserName + " \r\n");
+            strInfo.Append("\r\n1. 调试: >> 操作时间: " + logMessage.OperationTime + "   操作人: " + logMessage.UserName + " \r\n");
             strInfo.Append("2. 地址: " + logMessage.Url + "    \r\n");
             strInfo.Append("3. 类名: " + logMessage.Class + " \r\n");
             strInfo.Append("4. Ip  : " + logMessage.Ip + "   主机: " + logMessage.Host + "   浏览器: " + logMessage.Browser + "    \r\n");
@@ -83,7 +83,7 @@ namespace Berry.Log
         public static string ExceptionFormat(LogMessage logMessage)
         {
             StringBuilder strInfo = new StringBuilder();
-            strInfo.Append("1. 调试: >> 操作时间: " + logMessage.OperationTime + "   描述: " + logMessage.Content + " \r\n");
+            strInfo.Append("\r\n1. 调试: >> 操作时间: " + logMessage.OperationTime + "   描述: " + logMessage.Content + " \r\n");
             strInfo.Append("2. 地址: " + logMessage.Url + "    \r\n");
             strInfo.Append("3. 类名: " + logMessage.Class + " \r\n");
             strInfo.Append("4. 主机: " + logMessage.Host + "   Ip  : " + logMessage.Ip + "   浏览器: " + logMessage.Browser + "    \r\n");

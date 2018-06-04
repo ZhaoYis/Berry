@@ -4,6 +4,186 @@
         <name>Berry.SOA.API</name>
     </assembly>
     <members>
+        <member name="T:Berry.SOA.API.Attributes.RequestAuthorizeAttribute">
+            <summary>
+            自定义此特性用于接口的身份验证
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Attributes.RequestAuthorizeAttribute.ValidateAppKey(System.String)">
+            <summary>
+            校验授权信息
+            </summary>
+            <param name="encryptTicket"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Caching.IThrottleStore.TryGetValue(System.String,Berry.SOA.API.Caching.ThrottleEntry@)">
+            <summary>
+            获取字典的值
+            </summary>
+            <param name="key"></param>
+            <param name="entry"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Caching.IThrottleStore.IncrementRequests(System.String)">
+            <summary>
+            计算访问量
+            </summary>
+            <param name="key"></param>
+        </member>
+        <member name="M:Berry.SOA.API.Caching.IThrottleStore.Rollover(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="key"></param>
+        </member>
+        <member name="P:Berry.SOA.API.Caching.ThrottleEntry.PeriodStart">
+            <summary>
+            第一次请求开始时间
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.Caching.ThrottleEntry.Requests">
+            <summary>
+            请求次数
+            </summary>
+        </member>
+        <member name="T:Berry.SOA.API.Filters.ApiSecurityFilter">
+            <summary>
+            验证
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Filters.ApiSecurityFilter.OnActionExecuting(System.Web.Http.Controllers.HttpActionContext)">
+            <summary>
+            正在请求时
+            </summary>
+            <param name="actionContext"></param>
+        </member>
+        <member name="M:Berry.SOA.API.Filters.ApiSecurityFilter.OnActionExecuted(System.Web.Http.Filters.HttpActionExecutedContext)">
+            <summary>
+            请求完成时
+            </summary>
+            <param name="actionExecutedContext"></param>
+        </member>
+        <member name="T:Berry.SOA.API.Filters.RequireHttpsFilter">
+            <summary>
+            Https过滤器，判断请求是否来自HTTPS
+            </summary>
+        </member>
+        <member name="T:Berry.SOA.API.Filters.TimingActionFilter">
+            <summary>
+            接口执行时间监控
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Filters.TimingActionFilter.SkipLogging(System.Web.Http.Controllers.HttpActionContext)">
+            <summary>
+            是否跳过
+            </summary>
+            <param name="actionContext"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Berry.SOA.API.Filters.NoLogAttribute">
+            <summary>
+            不记录调用时间特性
+            </summary>
+        </member>
+        <member name="T:Berry.SOA.API.Handlers.CrosHandler">
+            <summary>
+            解决自定义请求头下的跨域问题
+            <example>调用方式：在Global.asax文件的Application_Start方法添加GlobalConfiguration.Configuration.MessageHandlers.Add(new CrosHandler());</example>
+            </summary>
+        </member>
+        <member name="T:Berry.SOA.API.Handlers.RequestFrequencyLimitHandlers">
+            <summary>
+            请求频率限制
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Handlers.RequestFrequencyLimitHandlers.#ctor(Berry.SOA.API.Caching.IThrottleStore,System.Func{System.String,System.Int64},System.TimeSpan,System.String)">
+            <summary>
+            构造
+            </summary>
+            <param name="store"></param>
+            <param name="maxRequestsForUserIdentifier"></param>
+            <param name="period"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:Berry.SOA.API.Handlers.RequestFrequencyLimitHandlers.GetUserIdentifier(System.Net.Http.HttpRequestMessage)">
+            <summary>
+            获取请求IP地址
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Handlers.RequestFrequencyLimitHandlers.CreateResponse(System.Net.Http.HttpRequestMessage,System.Net.HttpStatusCode,System.String)">
+            <summary>
+            返回到客户端的消息
+            </summary>
+            <param name="request"></param>
+            <param name="statusCode"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Berry.SOA.API.Selector.WebApiControllerSelector">
+            <summary>
+            WebApi版本控制
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Selector.WebApiControllerSelector.#ctor(System.Web.Http.HttpConfiguration)">
+            <summary>
+            构造
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="M:Berry.SOA.API.Selector.WebApiControllerSelector.InitializeControllerDictionary">
+            <summary>
+            初始化字典
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Selector.WebApiControllerSelector.GetRouteVariable``1(System.Web.Http.Routing.IHttpRouteData,System.String)">
+            <summary>
+            取路由相应值
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="routeData"></param>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Selector.WebApiControllerSelector.SelectController(System.Net.Http.HttpRequestMessage)">
+            <summary>
+            匹配相应路由
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Selector.WebApiControllerSelector.GetControllerMapping">
+            <summary>
+            获取映射信息
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Selector.WebApiControllerSelector.GetVersionFromAcceptHeaderVersion(System.Net.Http.HttpRequestMessage)">
+            <summary>
+            从请求头里面获取版本信息
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Berry.SOA.API.WebApiConfig">
+            <summary>
+            Web API 配置和服务
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.WebApiConfig.Register(System.Web.Http.HttpConfiguration)">
+            <summary>
+            注册
+            </summary>
+            <param name="config"></param>
+        </member>
+        <member name="M:Berry.SOA.API.WebApiConfig.RegisterRequestLimitHandlers(System.Web.Http.HttpConfiguration)">
+            <summary>
+            注册请求频率限制
+            </summary>
+            <param name="config"></param>
+        </member>
         <member name="M:Berry.SOA.API.Areas.HelpPage.ApiDescriptionExtensions.GetFriendlyId(System.Web.Http.Description.ApiDescription)">
             <summary>
             Generates an URI-friendly ID for the <see cref="T:System.Web.Http.Description.ApiDescription"/>. E.g. "Get-Values-id_name" instead of "GetValues/{id}?name={name}"
@@ -481,6 +661,27 @@
             </summary>
             <param name="documentPath">The physical path to XML document.</param>
         </member>
+        <member name="T:Berry.SOA.API.Controllers.Base.BaseApiController">
+            <summary>
+            基控Api制器
+            </summary>
+        </member>
+        <member name="F:Berry.SOA.API.Controllers.Base.BaseApiController._logHelper">
+            <summary>
+            系统日志 主动调用
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseApiController.Logger(System.Type,System.String,System.Action,System.Action{System.Exception},System.Action,Berry.Code.ErrorHandel)">
+            <summary>
+            利用Action委托封装Log4net对日志的处理
+            </summary>
+            <param name="type"></param>
+            <param name="desc">方法名称</param>
+            <param name="errorHandel">异常处理方式</param>
+            <param name="tryHandel">调试代码</param>
+            <param name="catchHandel">异常处理方式</param>
+            <param name="finallHandel">最终处理方式</param>
+        </member>
         <member name="M:Berry.SOA.API.Controllers.HomeController.Index">
             <summary>
             首页
@@ -498,12 +699,43 @@
             API测试控制器
             </summary>
         </member>
-        <member name="M:Berry.SOA.API.Controllers.TestController.GetUserNameById(System.Int32)">
+        <member name="M:Berry.SOA.API.Controllers.TestController.HelloWorld(Berry.SOA.API.ParameterModel.TestApiArgEntity)">
             <summary>
-            根据用户ID获取用户名
+            测试是否连接成功
             </summary>
-            <param name="userId">用户ID</param>
-            <returns>用户名</returns>
+            <param name="arg">测试参数</param>
+            <returns>请求成功则返回成功状态信息</returns>
+        </member>
+        <member name="T:Berry.SOA.API.ParameterModel.BaseParameterEntity">
+            <summary>
+            基础参数实体
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.BaseParameterEntity.t">
+            <summary>
+            校验值，一般为时间戳
+            </summary>
+        </member>
+        <member name="T:Berry.SOA.API.ParameterModel.TestApiArgEntity">
+            <summary>
+            用于测试API的实体
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.Id">
+            <summary>
+            ID
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.Code">
+            <summary>
+            特征码
+            <value>A-区域001 B-区域002</value>
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.StarTime">
+            <summary>
+            开始时间
+            </summary>
         </member>
     </members>
 </doc>

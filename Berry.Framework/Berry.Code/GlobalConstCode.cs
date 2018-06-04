@@ -43,5 +43,23 @@
         /// </summary>
         private const string RegOnclickTag = @"(onclick|ONCLICK)='[\s\S]*?'";
         #endregion 正则表达式
+
+        #region 系统Api接口相关
+
+        /// <summary>
+        /// 获取Token服务器地址
+        /// </summary>
+        public const string GET_TOKTN_URL = "/api/v1/OAuth/GetToken?appkey={0}&appsecret={1}";
+        
+        /// <summary>
+        /// Tkoen过期时间，单位：小时
+        /// </summary>
+        public const int TOKEN_EXPIRE_TIME = 2;
+
+        /// <summary>
+        /// 无需请求签名信息的Action方法
+        /// </summary>
+        public static readonly string[] NOT_NEED_DIGITAL_SIGNATURE = { "GetToken", "Login" };
+        #endregion
     }
 }

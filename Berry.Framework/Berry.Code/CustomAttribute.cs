@@ -25,4 +25,5 @@ namespace Berry.Code
         /// </summary>
         public string Name { get; set; }
     }
+    
 }

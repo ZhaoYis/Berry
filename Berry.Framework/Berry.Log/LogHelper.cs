@@ -188,7 +188,7 @@ namespace Berry.Log
                     Host = NetHelper.Host,
                     ExceptionInfo = e.Message,
                     ExceptionSource = e.Source,
-                    ExceptionRemark = "当前异常消息：" + e.Message,
+                    ExceptionRemark = e.Message + "" + e.StackTrace,
                     Content = desc
                 };
                 string msg = LogFormat.ExceptionFormat(message);

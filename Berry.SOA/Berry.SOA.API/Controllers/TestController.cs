@@ -1,26 +1,65 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Berry.Code;
+using Berry.Entity;
+using Berry.Extension;
+using Berry.SOA.API.Controllers.Base;
+using Berry.SOA.API.ParameterModel;
 
 namespace Berry.SOA.API.Controllers
 {
     /// <summary>
     /// API测试控制器
     /// </summary>
-    public class TestController : ApiController
+    public class TestController : BaseApiController
     {
         /// <summary>
-        /// 根据用户ID获取用户名
+        /// 测试是否连接成功
         /// </summary>
-        /// <param name="userId">用户ID</param>
-        /// <returns>用户名</returns>
-        [HttpGet]
-        public string GetUserNameById(int userId)
+        /// <param name="arg">测试参数</param>
+        /// <returns>请求成功则返回成功状态信息</returns>
+        [HttpPost]
+        public HttpResponseMessage HelloWorld(TestApiArgEntity arg)
         {
-            return "用户ID：" + userId;
+            BaseJsonResult<string> resultMsg = new BaseJsonResult<string> { Status = (int)JsonObjectStatus.Error, Message = "服务器未知错误。", Data = null };
+
+            Logger(typeof(TestController), "测试是否连接成功-HelloWorld", () =>
+            {
+                 if (!string.IsNullOrEmpty(arg.t))
+                 {
+                    //TODO DoSomething
+
+                    resultMsg = new BaseJsonResult<string>
+                     {
+                         Status = (int)JsonObjectStatus.Success,
+                         Data = "传入参数为：" + arg.TryToJson(),
+                         Message = JsonObjectStatus.Success.GetEnumDescription(),
+                         BackUrl = null
+                     };
+                 }
+                 else
+                 {
+                     resultMsg = new BaseJsonResult<string>
+                     {
+                         Status = (int)JsonObjectStatus.Fail,
+                         Data = null,
+                         Message = JsonObjectStatus.Fail.GetEnumDescription() + "，请求参数有误。",
+                         BackUrl = null
+                     };
+                 }
+             }, e =>
+             {
+                 resultMsg = new BaseJsonResult<string>
+                 {
+                     Status = (int)JsonObjectStatus.Exception,
+                     Data = null,
+                     Message = JsonObjectStatus.Exception.GetEnumDescription() + "，异常信息：" + e.Message,
+                     BackUrl = null
+                 };
+             });
+
+            return resultMsg.TryToJson().ToHttpResponseMessage();
         }
     }
 }

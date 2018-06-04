@@ -1,19 +1,91 @@
 ﻿<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>ASP.NET Web API is a framework that makes it easy to build HTTP services that reach
-        a broad range of clients, including browsers and mobile devices. ASP.NET Web API
-        is an ideal platform for building RESTful applications on the .NET Framework.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301870">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301871">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301872">Learn more &raquo;</a></p>
-    </div>
+    <h3>API序,使用此API前请仔细阅读</h3>
+    <hr />
+</div>
+
+<div class="row">
+    <blockquote>
+        <p><b>版权声明</b></p>
+    </blockquote>
+    <p style="text-indent: 2em">未经成都携手同鑫网络有限公司明确的书面许可，本文的任何部分不得以任何方式或手段进行复制或传播，或用于任何用途。</p>
+    <p style="text-indent: 2em">对于本文涉及的任何主题，本公司已用于专利、专利应用程序、商标、版权或其他知识产权。提供本文，并不意味着向您授予这些专利、商标、版权或其他知识产权的任何许可。</p>
+    <p style="text-indent: 2em">©2017-2018 成都携手同鑫网络有限公司版权所有。</p>
+</div>
+
+<div class="row">
+    <blockquote>
+        <p><b>调用须知</b></p>
+    </blockquote>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>应用环境</th>
+                <th>请求地址</th>
+                <th>备注</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>测试环境</td>
+                <td>http://192.168.2.5:4422/</td>
+                <td>本地开发测试环境</td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <th scope="row">2</th>
+                <td>正式环境</td>
+                <td>http://m.api.55128.cn</td>
+                <td>线上正式环境</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="row">
+    <blockquote>
+        <p><b>开发注释规范</b></p>
+    </blockquote>
+    <pre>
+        /// &lt;summary>
+        /// API测试控制器
+        /// &lt;/summary>
+        public class TestController : BaseApiController
+        {
+            /// &lt;summary&gt;
+            /// 测试是否连接成功
+            /// &lt;/summary>
+            /// &lt;param name="arg">测试参数&lt;/param&gt;
+            /// &lt;returns>请求成功则返回成功状态信息&lt;/returns&gt;
+            [HttpPost]
+            public HttpResponseMessage HelloWorld(TestApiArgEntity arg)
+            {
+                //TODO 具体业务实现
+            }
+        }
+
+        /// &lt;summary&gt;
+        /// 用于测试API的参数实体
+        /// &lt;/summary&gt;
+        public class TestApiArgEntity : BaseParameterEntity
+        {
+            /// &lt;summary&gt;
+            /// ID
+            /// &lt;/summary&gt;
+            public int Id { get; set; }
+
+            /// &lt;summary&gt;
+            /// 特征码
+            /// &lt;value&gt;A-区域001 B-区域002&lt;/value&gt;
+            /// &lt;/summary&gt;
+            public string Code { get; set; }
+
+            /// &lt;summary&gt;
+            /// 开始时间
+            /// &lt;/summary&gt;
+            public DateTime StarTime { get; set; }
+        }
+    </pre>
 </div>

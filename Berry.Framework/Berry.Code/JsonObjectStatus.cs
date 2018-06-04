@@ -9,12 +9,16 @@ namespace Berry.Code
     /// </summary>
     public enum JsonObjectStatus
     {
-        #region 系统
+        #region 系统保留
 
         /// <summary>
         /// 默认，无实际意义。
         /// </summary>
-        Default = -1,
+        Default = 1000,
+
+        #endregion
+
+        #region 系统
 
         /// <summary>
         /// 请求(或处理)成功
@@ -39,6 +43,18 @@ namespace Berry.Code
         /// </summary>
         [Description("服务器异常")]
         Exception = 2003,
+
+        /// <summary>
+        /// 记录（资源）已经存在
+        /// </summary>
+        [Description("记录（资源）已经存在")]
+        RecordAlreadyExists = 2004,
+
+        /// <summary>
+        /// 记录（资源）不存在
+        /// </summary>
+        [Description("记录（资源）不存在")]
+        RecordNotExists = 2005,
 
         #endregion 系统
 
@@ -85,7 +101,7 @@ namespace Berry.Code
         /// </summary>
         [Description("该URL已经失效或请求时间戳失效")]
         UrlExpireError = 3007,
-
+        
         #endregion Http请求
 
         #region 登录验证
@@ -115,46 +131,31 @@ namespace Berry.Code
         UserNotExist = 4004,
 
         /// <summary>
-        /// 记录已经存在
-        /// </summary>
-        [Description("记录已经存在")]
-        RecordAlreadyExists = 4005,
-
-        /// <summary>
-        /// 记录不存在
-        /// </summary>
-        [Description("记录不存在")]
-        RecordNotExists = 4006,
-
-        #endregion 登录验证
-
-        #region 账号状态
-
-        /// <summary>
         /// 正常
         /// </summary>
-        [Description("正常")]
-        AccountNormal = 4007,
+        [Description("账号正常")]
+        AccountNormal = 4005,
 
         /// <summary>
         /// 账号被锁定
         /// </summary>
         [Description("账号被锁定")]
-        AccountLock = 4008,
+        AccountLock = 4006,
 
         /// <summary>
         /// 账号被禁用
         /// </summary>
         [Description("账号被禁用")]
-        AccountDisable = 4009,
+        AccountDisable = 4007,
 
         /// <summary>
         /// 未启用
         /// </summary>
         [Description("未启用")]
-        AccountNotEnabled = 4010,
+        AccountNotEnabled = 4008,
 
-        #endregion 账号状态
+        #endregion 登录验证
+        
     }
 
     #endregion ===========全局通用状态枚举===========

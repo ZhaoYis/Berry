@@ -20,6 +20,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -70,6 +72,7 @@
     <Compile Include="SystemManage\DataItemEntity.cs" />
     <Compile Include="SystemManage\LogEntity.cs" />
     <Compile Include="ViewModel\DataItemViewModel.cs" />
+    <Compile Include="ViewModel\TokenViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Berry.Framework\Berry.Code\Berry.Code.csproj">

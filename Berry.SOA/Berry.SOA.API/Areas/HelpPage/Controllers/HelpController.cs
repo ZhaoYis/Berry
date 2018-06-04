@@ -1,10 +1,12 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Web.Mvc;
 using Berry.SOA.API.Areas.HelpPage.ModelDescriptions;
 using Berry.SOA.API.Areas.HelpPage.Models;
+using WebGrease.Css.Extensions;
 
 namespace Berry.SOA.API.Areas.HelpPage.Controllers
 {
@@ -33,6 +35,11 @@ namespace Berry.SOA.API.Areas.HelpPage.Controllers
             ViewBag.DocumentationProvider = provider;
 
             Collection<ApiDescription> descriptions = Configuration.Services.GetApiExplorer().ApiDescriptions;
+            
+            //NotApiMethodAttribute attr = Attribute.GetCustomAttribute(fieldInfo, typeof(NotApiMethodAttribute), false) as NotApiMethodAttribute;
+            //descriptions[1].ActionDescriptor.ActionName
+            //"Logger"
+
             return View(descriptions);
         }
 
