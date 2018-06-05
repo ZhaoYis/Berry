@@ -232,7 +232,7 @@ loadnav = function () {
     });
     //个人中心
     $("#UserSetting").click(function () {
-        tablist.newTab({ id: "UserSetting", title: "个人中心", closed: true, icon: "fa fa fa-user", url: contentPath + "/PersonCenter/Index" });
+        tablist.newTab({ id: "UserSetting", title: "个人中心", closed: true, icon: "fa fa fa-user", url: "/PersonCenter/Index" });
     });
     //动态加载导航菜单
     var _html = "";
@@ -257,7 +257,7 @@ loadnav = function () {
         var id = $(this).attr('id');
         var data = navJson[id];
         if (data.Target == "iframe") {
-            tablist.newTab({ moduleIdCookie: true, id: id, title: data.FullName, closed: true, icon: data.Icon, url: contentPath + data.UrlAddress });
+            tablist.newTab({ moduleIdCookie: true, id: id, title: data.FullName, closed: true, icon: data.Icon, url: data.UrlAddress });
         }
     })
     $("#nav li.item").hover(function (e) {
@@ -344,11 +344,11 @@ function IndexOut() {
             Loading(true, "正在安全退出...");
             window.setTimeout(function () {
                 $.ajax({
-                    url: contentPath + "/Login/OutLogin",
+                    url: "/Login/OutLogin",
                     type: "post",
                     dataType: "json",
                     success: function (data) {
-                        window.location.href = contentPath + "/Login/Index";
+                        window.location.href = "/Login/Index";
                     }
                 });
             }, 500);

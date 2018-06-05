@@ -424,7 +424,7 @@ $.fn.GetWebControls = function (keyValue) {
     return postdata;
 };
 $.fn.SetWebControls = function (data) {
-    var $id = $(this)
+    var $id = this
     for (var key in data) {
         var id = $id.find('#' + key);
         if (id.attr('id')) {

@@ -173,7 +173,7 @@ namespace Berry.Service.AuthorizeManage
         {
             //先清除历史授权数据
             int isSucc = this.BaseRepository().Delete<AuthorizeDataEntity>(u => u.ObjectId == objectId);
-            if (isSucc > 0)
+            if (isSucc >= 0)
             {
                 #region 功能
 

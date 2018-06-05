@@ -18,6 +18,8 @@ namespace Berry.Util
         /// <returns></returns>
         public static string Md5(string source, string len = "x2")
         {
+            if (string.IsNullOrEmpty(source)) return "";
+
             byte[] sor = Encoding.Default.GetBytes(source);
             MD5 md5 = new MD5CryptoServiceProvider();//MD5.Create();
             byte[] result = md5.ComputeHash(sor);

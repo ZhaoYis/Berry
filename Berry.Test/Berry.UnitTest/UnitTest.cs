@@ -30,9 +30,9 @@ namespace Berry.UnitTest
 
             //IocTest();
 
-            InsertTest(20000);
+            InsertTest(2);
 
-            InsertListTest(5000 * 10);
+            //InsertListTest(5000 * 10);
 
             QueryTest();
 

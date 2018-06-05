@@ -12,11 +12,11 @@
         void AddCurrent(OperatorEntity user);
 
         /// <summary>
-        /// 获取当前用户
+        /// 获取当前用户基础信息
         /// </summary>
         /// <returns></returns>
         OperatorEntity Current();
-
+        
         /// <summary>
         /// 删除当前用户
         /// </summary>

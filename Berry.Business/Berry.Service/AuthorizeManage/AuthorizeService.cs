@@ -156,38 +156,38 @@ namespace Berry.Service.AuthorizeManage
         public IEnumerable<AuthorizeUrlModel> GetUrlList(string userId)
         {
             StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT  ModuleId AS AuthorizeId ,
-                                    ModuleId ,
+            strSql.Append(@"SELECT  Id AS AuthorizeId ,
+                                    Id AS ModuleId,
                                     UrlAddress ,
                                     FullName
                             FROM    Base_Module
-                            WHERE   ModuleId IN (
+                            WHERE   Id IN (
                                     SELECT  ItemId
                                     FROM    Base_Authorize
                                     WHERE   ItemType = 1
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     Id = @Id ) )
+                                                  WHERE     UserId = @Id ) )
                                             OR ObjectId = @Id )
                                     AND EnabledMark = 1
                                     AND DeleteMark = 0
                                     AND IsMenu = 1
                                     AND UrlAddress IS NOT NULL
                             UNION
-                            SELECT  ModuleButtonId AS AuthorizeId ,
+                            SELECT  Id AS AuthorizeId ,
                                     ModuleId ,
                                     ActionAddress AS UrlAddress ,
                                     FullName
                             FROM    Base_ModuleButton
-                            WHERE   ModuleButtonId IN (
+                            WHERE   Id IN (
                                     SELECT  ItemId
                                     FROM    Base_Authorize
                                     WHERE   ItemType = 2
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     Id = @Id ) )
+                                                  WHERE     UserId = @Id ) )
                                             OR ObjectId = @Id )
                                     AND ActionAddress IS NOT NULL");
 

@@ -333,6 +333,7 @@
     <Content Include="XmlConfig\system.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Views\Home\ApiOAuth.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Berry.Framework\Berry.Cache\Berry.Cache.csproj">

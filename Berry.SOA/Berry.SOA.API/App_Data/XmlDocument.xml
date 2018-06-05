@@ -688,6 +688,12 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:Berry.SOA.API.Controllers.HomeController.ApiOAuth">
+            <summary>
+            接口授权说明
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:Berry.SOA.API.Controllers.HomeController.ErrorCode">
             <summary>
             错误码说明

@@ -180,7 +180,7 @@ namespace Berry.Entity.BaseManage
         public int? SecurityLevel { get; set; }
 
         /// <summary>
-        /// 在线状态
+        /// 在线状态 1-在线 2-离线
         /// </summary>
         public int? UserOnLine { get; set; }
 

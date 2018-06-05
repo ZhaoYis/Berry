@@ -42,6 +42,10 @@
         /// 匹配onclick特性
         /// </summary>
         private const string RegOnclickTag = @"(onclick|ONCLICK)='[\s\S]*?'";
+        /// <summary>
+        /// 匹配标签
+        /// </summary>
+        private const string RegImgTag = @"<(img|IMG).*src=(.*?)[^>]*?>";
         #endregion 正则表达式
 
         #region 系统Api接口相关

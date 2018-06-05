@@ -27,15 +27,15 @@ namespace Berry.Service.AuthorizeManage
             StringBuilder strSql = new StringBuilder();
             strSql.Append(@"SELECT  *
                             FROM    Base_ModuleColumn
-                            WHERE   ModuleColumnId IN (
-                                    SELECT  Id
+                            WHERE   Id IN (
+                                    SELECT  ItemId
                                     FROM    Base_Authorize
                                     WHERE   ItemType = 3
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
                                                   WHERE     Id = @Id ) )
-                                            OR ObjectId = @UserId )  Order By SortCode");
+                                            OR ObjectId = @Id )  Order By SortCode");
 
             DbParameter[] parameter =
             {

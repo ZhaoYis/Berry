@@ -32,7 +32,7 @@ namespace Berry.Service.BaseManage
                 data = data.Where(d => d.Id != keyValue).ToList();
             }
 
-            bool hasExist = data.Any();
+            bool hasExist = data.Count == 0;
 
             return hasExist;
         }
@@ -210,7 +210,12 @@ namespace Berry.Service.BaseManage
         /// <param name="keyValue">主键</param>
         public void RemoveUserByKey(string keyValue)
         {
-            this.BaseRepository().Update<UserEntity>(new UserEntity { Id = keyValue }, u => u.DeleteMark == true && u.EnabledMark == false);
+            UserEntity entity = new UserEntity
+            {
+                DeleteMark = true,
+                EnabledMark = false
+            };
+            this.BaseRepository().Update<UserEntity>(entity, u => u.Id == keyValue);
         }
 
         /// <summary>

@@ -27,8 +27,8 @@ namespace Berry.Service.AuthorizeManage
             StringBuilder strSql = new StringBuilder();
             strSql.Append(@"SELECT  *
                             FROM    Base_ModuleButton
-                            WHERE   ModuleButtonId IN (
-                                    SELECT  Id
+                            WHERE   Id IN (
+                                    SELECT  ItemId
                                     FROM    Base_Authorize
                                     WHERE   ItemType = 2
                                             AND ( ObjectId IN (

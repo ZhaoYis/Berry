@@ -19,8 +19,8 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
     {
         private OrganizeBLL organizeBLL = new OrganizeBLL();
         private DepartmentBLL departmentBLL = new DepartmentBLL();
-        private RoleBLL roleBLL = new RoleBLL();
-        private UserBLL userBLL = new UserBLL();
+        //private RoleBLL roleBLL = new RoleBLL();
+        //private UserBLL userBLL = new UserBLL();
         private ModuleBLL moduleBLL = new ModuleBLL();
         private ModuleButtonBLL moduleButtonBLL = new ModuleButtonBLL();
         private ModuleColumnBLL moduleColumnBLL = new ModuleColumnBLL();
@@ -269,7 +269,8 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
         public ActionResult SaveAuthorize(string userId, string moduleIds, string moduleButtonIds, string moduleColumnIds, string authorizeDataJson)
         {
             List<AuthorizeDataEntity> authorize = authorizeDataJson.JsonToList<AuthorizeDataEntity>();
-            permissionBLL.SaveAuthorize(AuthorizeTypeEnum.User, userId, new[] { moduleIds }, new[] { moduleButtonIds }, new[] { moduleColumnIds }, authorize);
+
+            permissionBLL.SaveAuthorize(AuthorizeTypeEnum.User, userId, moduleIds.Split(','), moduleButtonIds.Split(','), moduleColumnIds.Split(','), authorize);
             return Success("保存成功。");
         }
 

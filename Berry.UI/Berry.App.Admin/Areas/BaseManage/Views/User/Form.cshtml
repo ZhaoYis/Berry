@@ -1,6 +1,6 @@
 ﻿@{
     ViewBag.Title = "用户管理";
-    Layout = "~/Views/Shared/_FlowForm.cshtml";
+    Layout = "~/Views/Shared/_LayoutForm.cshtml";
 }
 <script>
     var keyValue = request('keyValue');
@@ -119,6 +119,9 @@
                 url: "../../BaseManage/User/GetFormJson",
                 param: { keyValue: keyValue },
                 success: function (data) {
+
+                    console.log(data)
+
                     $("#form1").SetWebControls(data);
                     $("#OrganizeId").trigger("change");
                     $("#DepartmentId").ComboBoxTreeSetValue(data.DepartmentId).trigger("change");

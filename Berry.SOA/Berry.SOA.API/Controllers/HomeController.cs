@@ -20,6 +20,15 @@ namespace Berry.SOA.API.Controllers
         }
 
         /// <summary>
+        /// 接口授权说明
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult ApiOAuth()
+        {
+            return View();
+        }
+
+        /// <summary>
         /// 错误码说明
         /// </summary>
         /// <returns></returns>

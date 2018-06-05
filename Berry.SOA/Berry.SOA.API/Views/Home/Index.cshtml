@@ -1,5 +1,5 @@
 ﻿<div class="row">
-    <h3>API序,使用此API前请仔细阅读</h3>
+    <h3>API序<span style="color: #ce4844">【使用此API前请仔细阅读】</span></h3>
     <hr />
 </div>
 
@@ -39,6 +39,146 @@
                 <td>正式环境</td>
                 <td>http://m.api.55128.cn</td>
                 <td>线上正式环境</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="row">
+    <blockquote>
+        <p><b>返回结果示例（不带分页）</b></p>
+    </blockquote>
+    <pre>
+       {
+            "Status": 2000,
+            "Data": [
+                {
+                    "Id": "8adcef5987fa456eb6bc3cd5de84207f",
+                    "Title": "测试广告"
+                }
+            ],
+            "Message": "请求(或处理)成功",
+            "BackUrl": null,
+            "ExecutionTime": null
+        }
+    </pre>
+</div>
+
+<div class="row">
+    <blockquote>
+        <p><b>返回结果示例（带分页）</b></p>
+    </blockquote>
+    <pre>
+       {
+            "Status": 2000,
+            "Data": {
+                "TotalPage": 162,
+                "PageIndex": 1,
+                "TotalRow": 1613,
+                "Rows": [
+                    {
+                        "PK": 7823,
+                        "TypeName": "大乐透技巧"
+                    }
+                ]
+            },
+            "Message": "请求(或处理)成功",
+            "BackUrl": null,
+            "ExecutionTime": null
+        }
+    </pre>
+</div>
+
+<div class="row">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>字段名</th>
+                <th>类型</th>
+                <th>描述</th>
+                <th>备注</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>Status</td>
+                <td>int</td>
+                <td>状态码</td>
+                <td>详情参见【@Html.ActionLink("错误码说明", "ErrorCode", "Home")】</td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <th scope="row">2</th>
+                <td>Data</td>
+                <td>具体对象</td>
+                <td>数据集</td>
+                <td></td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr class="warning">
+                <th scope="row">3</th>
+                <td>TotalPage</td>
+                <td>int</td>
+                <td>总页数</td>
+                <td>仅返回带分页数据时有值</td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr class="warning">
+                <th scope="row">4</th>
+                <td>PageIndex</td>
+                <td>int</td>
+                <td>当前页</td>
+                <td>仅返回带分页数据时有值</td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr class="warning">
+                <th scope="row">5</th>
+                <td>TotalRow</td>
+                <td>int</td>
+                <td>总行数</td>
+                <td>仅返回带分页数据时有值</td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr class="warning">
+                <th scope="row">6</th>
+                <td>Rows</td>
+                <td>具体对象</td>
+                <td>数据集</td>
+                <td>仅返回带分页数据时有值</td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <th scope="row">7</th>
+                <td>Message</td>
+                <td>string</td>
+                <td>服务器消息</td>
+                <td></td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <th scope="row">8</th>
+                <td>BackUrl</td>
+                <td>string</td>
+                <td>跳转地址</td>
+                <td>如果有需要跳转的地址会返回数据</td>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr>
+                <th scope="row">9</th>
+                <td>ExecutionTime</td>
+                <td>string</td>
+                <td>执行时间</td>
+                <td>单位：毫秒(ms)</td>
             </tr>
         </tbody>
     </table>

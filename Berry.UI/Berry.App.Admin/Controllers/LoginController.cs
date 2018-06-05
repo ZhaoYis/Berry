@@ -69,6 +69,7 @@ namespace Berry.App.Admin.Controllers
         [AjaxOnly]
         public ActionResult OutLogin()
         {
+            #region 用户下线操作
             LogEntity logEntity = new LogEntity
             {
                 CategoryId = (int)CategoryType.Login,
@@ -82,10 +83,22 @@ namespace Berry.App.Admin.Controllers
             };
             logBll.WriteLog(logEntity);
 
+            //TODO 更新用户下线状态
+            UserEntity update = new UserEntity
+            {
+                Id = OperatorProvider.Provider.Current().UserId,
+                LastVisit = DateTime.Now,
+                UserOnLine = 2,
+                EnabledMark = true,
+                DeleteMark = false
+            };
+            userBll.UpdateUserInfo(update);
+
             Session.Abandon();//清除当前会话
             Session.Clear();//清除当前浏览器所有Session
             OperatorProvider.Provider.EmptyCurrent();//清除登录者信息
-            CookieHelper.DelCookie("__autologin");//清除自动登录
+            CookieHelper.DelCookie("__autologin");//清除自动登录 
+            #endregion
 
             return Content(new BaseJsonResult<string> { Status = (int)JsonObjectStatus.Success, Message = "退出系统" }.TryToJson());
         }

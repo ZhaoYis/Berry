@@ -16,6 +16,44 @@
     <link href="~/Content/styles/berry-login.css" rel="stylesheet" />
     <link href="~/Content/scripts/plugins/layer/skin/default/layer.css" rel="stylesheet" />
 
+    <script type="text/javascript">
+        //window.onbeforeunload = function () {
+        //    var n = window.event.screenX - window.screenLeft;
+        //    var b = n > document.documentElement.scrollWidth - 20;
+        //    if (b && window.event.clientY < 0 || window.event.altKey) {
+        //        console.log("你关闭了浏览器")
+        //        window.event.returnValue = ""; //这里可以放置你想做的操作代码
+                
+        //        IndexOut();
+        //    } else {
+        //        console.log("你正在刷新页面")
+        //    }
+        //}
+
+        window.onbeforeunload = function () {
+            console.log("onbeforeunload")
+            if (event.clientX > document.body.clientWidth && event.clientY < 0 || event.altKey) {
+                console.log("你关闭了浏览器")
+
+                IndexOut();
+            } else {
+                console.log("你正在刷新页面")
+            }
+        }
+
+        //安全退出
+        function IndexOut() {
+            $.ajax({
+                ansyc: false,
+                url: "/Login/OutLogin",
+                type: "post",
+                dataType: "json",
+                success: function (data) {
+                    window.location.href = "/Login/Index";
+                }
+            });
+        }
+    </script>
 </head>
 <body>
     <div style="position: absolute; top: 20px; left: 20px; color: #4b4b4b; font-size: 13px; line-height: 22px;"></div>
