@@ -436,11 +436,11 @@
                 success: function (data) {
                     $(".drag-tip").show();
                     if (data.Status == 2000) {
-                        $("#finish-msg").html(data.message).css("color", "#0FA74F");
+                        $("#finish-msg").html(data.Message).css("color", "#0FA74F");
                         $("#finish-msg").prev('i').attr('class', 'fa fa-check-circle').css("color", "#0FA74F");
                         $("#finish-msg").next('p').show();
                     } else {
-                        $("#finish-msg").html(data.message).css("color", "#d9534f");
+                        $("#finish-msg").html(data.Message).css("color", "#d9534f");
                         $("#finish-msg").prev('i').attr('class', 'fa fa-times-circle').css("color", "#d9534f");
                         $("#finish-msg").next('p').hide();
                     }
@@ -638,10 +638,10 @@
                 <div class="editview border" style="height: 60px;">
                     <div style="float: right;">
                         <ul class="sys_spec_text">
-                            <li class="active"><a data-value="lr-replace"><i class="fa fa-refresh"></i>&nbsp;刷新</a></li>
-                            <li class="active"><a data-value="lr-add"><i class="fa fa-plus"></i>&nbsp;新增</a></li>
-                            <li class="active"><a data-value="lr-edit"><i class="fa fa-pencil-square-o"></i>&nbsp;编辑</a></li>
-                            <li class="active"><a data-value="lr-delete"><i class="fa fa-trash-o"></i>&nbsp;删除</a></li>
+                            <li class="active"><a data-value="bt-replace"><i class="fa fa-refresh"></i>&nbsp;刷新</a></li>
+                            <li class="active"><a data-value="bt-add"><i class="fa fa-plus"></i>&nbsp;新增</a></li>
+                            <li class="active"><a data-value="bt-edit"><i class="fa fa-pencil-square-o"></i>&nbsp;编辑</a></li>
+                            <li class="active"><a data-value="bt-delete"><i class="fa fa-trash-o"></i>&nbsp;删除</a></li>
                         </ul>
                     </div>
                 </div>

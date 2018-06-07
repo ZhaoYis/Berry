@@ -831,10 +831,10 @@ namespace Berry.CodeGenerator.Template
             sb.Append("    </div>\r\n");
             sb.Append("    <div class=\"toolbar\">\r\n");
             sb.Append("        <div class=\"btn-group\">\r\n");
-            sb.Append("            <a id=\"lr-replace\" class=\"btn btn-default\" onclick=\"reload()\"><i class=\"fa fa-refresh\"></i>★刷新</a>\r\n");
-            sb.Append("            <a id=\"lr-add\" class=\"btn btn-default\" onclick=\"btn_add()\"><i class=\"fa fa-plus\"></i>★新增</a>\r\n");
-            sb.Append("            <a id=\"lr-edit\" class=\"btn btn-default\" onclick=\"btn_edit()\"><i class=\"fa fa-pencil-square-o\"></i>★编辑</a>\r\n");
-            sb.Append("            <a id=\"lr-delete\" class=\"btn btn-default\" onclick=\"btn_delete()\"><i class=\"fa fa-trash-o\"></i>★删除</a>\r\n");
+            sb.Append("            <a id=\"bt-replace\" class=\"btn btn-default\" onclick=\"reload()\"><i class=\"fa fa-refresh\"></i>★刷新</a>\r\n");
+            sb.Append("            <a id=\"bt-add\" class=\"btn btn-default\" onclick=\"btn_add()\"><i class=\"fa fa-plus\"></i>★新增</a>\r\n");
+            sb.Append("            <a id=\"bt-edit\" class=\"btn btn-default\" onclick=\"btn_edit()\"><i class=\"fa fa-pencil-square-o\"></i>★编辑</a>\r\n");
+            sb.Append("            <a id=\"bt-delete\" class=\"btn btn-default\" onclick=\"btn_delete()\"><i class=\"fa fa-trash-o\"></i>★删除</a>\r\n");
             sb.Append("        </div>\r\n");
             sb.Append("        <script>$('.toolbar').authorizeButton()</script>\r\n");
             sb.Append("    </div>\r\n");

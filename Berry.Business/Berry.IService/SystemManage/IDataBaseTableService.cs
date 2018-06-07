@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using Berry.Entity.CommonEntity;
-using Lottomat.Application.Entity.SystemManage;
+using Berry.Entity.SystemManage;
 
 namespace Berry.IService.SystemManage
 {

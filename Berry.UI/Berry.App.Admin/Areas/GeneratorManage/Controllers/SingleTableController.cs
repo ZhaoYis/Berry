@@ -8,11 +8,11 @@ using Berry.CodeGenerator.Template;
 using Berry.Entity.AuthorizeManage;
 using Berry.Extension;
 using Berry.Util;
-using Lottomat.Application.Entity.SystemManage;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web.Mvc;
+using Berry.Entity.SystemManage;
 
 namespace Berry.App.Admin.Areas.GeneratorManage.Controllers
 {

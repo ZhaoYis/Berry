@@ -72,6 +72,7 @@ namespace Berry.App.Admin.Controllers
             #region 用户下线操作
             LogEntity logEntity = new LogEntity
             {
+
                 CategoryId = (int)CategoryType.Login,
                 OperateTypeId = ((int)OperationType.Exit).ToString(),
                 OperateType = OperationType.Exit.GetEnumDescription(),

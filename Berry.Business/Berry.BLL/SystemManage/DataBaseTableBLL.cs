@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using Berry.Entity.CommonEntity;
+using Berry.Entity.SystemManage;
 using Berry.Extension;
 using Berry.IBLL.SystemManage;
 using Berry.IService.SystemManage;
 using Berry.Service.SystemManage;
-using Lottomat.Application.Entity.SystemManage;
 
 namespace Berry.BLL.SystemManage
 {

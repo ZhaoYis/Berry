@@ -1,5 +1,5 @@
 ﻿
-namespace Lottomat.Application.Entity.SystemManage
+namespace Berry.Entity.SystemManage
 {
     /// <summary>
     /// 数据库表字段
@@ -10,6 +10,10 @@ namespace Lottomat.Application.Entity.SystemManage
         /// 字段名称
         /// </summary>
         public string column { get; set; }
+        /// <summary>
+        /// 表名
+        /// </summary>
+        public string tableName { get; set; }
         /// <summary>
         /// 数据类型
         /// </summary>

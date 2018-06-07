@@ -20,7 +20,7 @@ namespace Berry.Service.SystemManage
         {
             IEnumerable<DataItemEntity> res = this.BaseRepository()
                 .FindList<DataItemEntity>(d => d.DeleteMark == false && d.EnabledMark == true)
-                .OrderByDescending(d => d.CreateDate).ToList();
+                .OrderBy(d => d.SortCode).ToList();
 
             return res;
         }

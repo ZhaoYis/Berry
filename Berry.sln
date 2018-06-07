@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "05 UI 界面应用层", "05
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "06 SOA 对外提供API服务", "06 SOA 对外提供API服务", "{DC009827-CA78-467C-AE01-5B3E9199DBDA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "07 测试用例", "07 测试用例", "{B1FB57BC-9E53-4226-8CFD-9F860805AE21}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "08 测试用例", "08 测试用例", "{B1FB57BC-9E53-4226-8CFD-9F860805AE21}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01 Cache 系统缓存", "01 Cache 系统缓存", "{3C0AD3EA-80AA-45D3-81E3-172E1BF4BFBB}"
 EndProject
@@ -85,6 +85,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.CodeGenerator", "Berry.Framework\Berry.CodeGenerator\Berry.CodeGenerator.csproj", "{EE0F1360-7ED4-4ED3-AFD6-66A62957B9A5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.SOA.API", "Berry.SOA\Berry.SOA.API\Berry.SOA.API.csproj", "{BB601C02-6B22-4070-B38F-C9C2511BA639}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "07 任务调度", "07 任务调度", "{FE775C0D-D588-421A-A622-79AFC34E3345}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

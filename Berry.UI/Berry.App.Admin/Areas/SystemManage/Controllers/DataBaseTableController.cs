@@ -3,10 +3,10 @@ using Berry.BLL.SystemManage;
 using Berry.Code;
 using Berry.Util;
 using Berry.WebControl.Tree;
-using Lottomat.Application.Entity.SystemManage;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using Berry.Entity.CommonEntity;
+using Berry.Entity.SystemManage;
 
 namespace Berry.App.Admin.Areas.SystemManage.Controllers
 {

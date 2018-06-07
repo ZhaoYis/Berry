@@ -3,6 +3,9 @@ using System.Text;
 
 namespace Berry.Extension
 {
+    /// <summary>
+    /// 隐藏敏感信息
+    /// </summary>
     public static class HideSensitiveInfoExtension
     {
         /// <summary>

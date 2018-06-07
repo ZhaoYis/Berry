@@ -152,10 +152,23 @@ namespace Berry.Data
             {
                 if (!notMappedField.Contains(prop.Name))
                 {
-                    if (prop.GetValue(entity, null) != null)
+                    object value = prop.GetValue(entity, null);
+                    if (value != null)
                     {
-                        sb_prame.Append(",[" + prop.Name + "]");
-                        sp.Append("," + DbParameters.CreateDbParmCharacter() + "" + (prop.Name));
+                        if (value.GetType() == typeof(DateTime))
+                        {
+                            var time = (DateTime)value;
+                            if (time.Ticks != 0 && time.Kind != DateTimeKind.Unspecified)
+                            {
+                                sb_prame.Append(",[" + prop.Name + "]");
+                                sp.Append("," + DbParameters.CreateDbParmCharacter() + "" + (prop.Name));
+                            }
+                        }
+                        else
+                        {
+                            sb_prame.Append(",[" + prop.Name + "]");
+                            sp.Append("," + DbParameters.CreateDbParmCharacter() + "" + (prop.Name));
+                        }
                     }
                 }
             }
@@ -289,20 +302,44 @@ namespace Berry.Data
             {
                 if (!notMappedField.Contains(prop.Name))
                 {
-                    if (prop.GetValue(entity, null) != null && keyField != prop.Name)
+                    object value = prop.GetValue(entity, null);
+                    if (value != null && keyField != prop.Name)
                     {
-                        if (isFirstValue)
+                        if (value.GetType() == typeof(DateTime))
                         {
-                            isFirstValue = false;
-                            sb.Append("[" + prop.Name + "]");
-                            sb.Append("=");
-                            sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            var time = (DateTime)value;
+                            if (time.Ticks != 0 && time.Kind != DateTimeKind.Unspecified)
+                            {
+                                if (isFirstValue)
+                                {
+                                    isFirstValue = false;
+                                    sb.Append("[" + prop.Name + "]");
+                                    sb.Append("=");
+                                    sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                                }
+                                else
+                                {
+                                    sb.Append(",[" + prop.Name + "]");
+                                    sb.Append("=");
+                                    sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                                }
+                            }
                         }
                         else
                         {
-                            sb.Append(",[" + prop.Name + "]");
-                            sb.Append("=");
-                            sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            if (isFirstValue)
+                            {
+                                isFirstValue = false;
+                                sb.Append("[" + prop.Name + "]");
+                                sb.Append("=");
+                                sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            }
+                            else
+                            {
+                                sb.Append(",[" + prop.Name + "]");
+                                sb.Append("=");
+                                sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            }
                         }
                     }
                 }
@@ -338,20 +375,44 @@ namespace Berry.Data
             {
                 if (!notMappedField.Contains(prop.Name))
                 {
-                    if (prop.GetValue(entity, null) != null && keyField != prop.Name)
+                    object value = prop.GetValue(entity, null);
+                    if (value != null && keyField != prop.Name)
                     {
-                        if (isFirstValue)
+                        if (value.GetType() == typeof(DateTime))
                         {
-                            isFirstValue = false;
-                            sb.Append("[" + prop.Name + "]");
-                            sb.Append("=");
-                            sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            var time = (DateTime)value;
+                            if (time.Ticks != 0 && time.Kind != DateTimeKind.Unspecified)
+                            {
+                                if (isFirstValue)
+                                {
+                                    isFirstValue = false;
+                                    sb.Append("[" + prop.Name + "]");
+                                    sb.Append("=");
+                                    sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                                }
+                                else
+                                {
+                                    sb.Append(",[" + prop.Name + "]");
+                                    sb.Append("=");
+                                    sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                                }
+                            }
                         }
                         else
                         {
-                            sb.Append(",[" + prop.Name + "]");
-                            sb.Append("=");
-                            sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            if (isFirstValue)
+                            {
+                                isFirstValue = false;
+                                sb.Append("[" + prop.Name + "]");
+                                sb.Append("=");
+                                sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            }
+                            else
+                            {
+                                sb.Append(",[" + prop.Name + "]");
+                                sb.Append("=");
+                                sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            }
                         }
                     }
                 }

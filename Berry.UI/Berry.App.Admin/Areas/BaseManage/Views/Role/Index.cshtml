@@ -230,22 +230,22 @@
     </div>
     <div class="toolbar">
         <div class="btn-group">
-            <a id="lr-replace" class="btn btn-default" onclick="reload();"><i class="fa fa-refresh"></i>&nbsp;刷新</a>
-            <a id="lr-add" class="btn btn-default" onclick="btn_add()"><i class="fa fa-plus"></i>&nbsp;新增</a>
-            <a id="lr-edit" class="btn btn-default" onclick="btn_edit()"><i class="fa fa-pencil-square-o"></i>&nbsp;编辑</a>
-            <a id="lr-delete" class="btn btn-default" onclick="btn_delete()"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            <a id="bt-replace" class="btn btn-default" onclick="reload();"><i class="fa fa-refresh"></i>&nbsp;刷新</a>
+            <a id="bt-add" class="btn btn-default" onclick="btn_add()"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            <a id="bt-edit" class="btn btn-default" onclick="btn_edit()"><i class="fa fa-pencil-square-o"></i>&nbsp;编辑</a>
+            <a id="bt-delete" class="btn btn-default" onclick="btn_delete()"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
         </div>
         <div class="btn-group">
-            <a id="lr-member" class="btn btn-default" onclick="btn_member()"><i class="fa fa fa-group"></i>&nbsp;角色成员</a>
-            <a id="lr-authorize" class="btn btn-default" onclick="btn_authorize()"><i class="fa fa-gavel"></i>&nbsp;角色授权</a>
+            <a id="bt-member" class="btn btn-default" onclick="btn_member()"><i class="fa fa fa-group"></i>&nbsp;角色成员</a>
+            <a id="bt-authorize" class="btn btn-default" onclick="btn_authorize()"><i class="fa fa-gavel"></i>&nbsp;角色授权</a>
         </div>
         <div class="btn-group">
-            <a id="lr-appfilter" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+            <a id="bt-appfilter" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                 <i class="fa fa-filter"></i>&nbsp;访问过滤<span class="caret"></span>
             </a>
             <ul class="dropdown-menu pull-right">
-                <li id="lr-ipfilter"><a onclick="btn_ipfilter()"><i></i>&nbsp;IP过滤</a></li>
-                <li id="lr-timefilter"><a onclick="btn_timefilter()"><i></i>&nbsp;时段过滤</a></li>
+                <li id="bt-ipfilter"><a onclick="btn_ipfilter()"><i></i>&nbsp;IP过滤</a></li>
+                <li id="bt-timefilter"><a onclick="btn_timefilter()"><i></i>&nbsp;时段过滤</a></li>
             </ul>
         </div>
         <script>$('.toolbar').authorizeButton()</script>

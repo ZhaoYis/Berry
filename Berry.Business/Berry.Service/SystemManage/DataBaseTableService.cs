@@ -3,7 +3,6 @@ using Berry.Data.Repository;
 using Berry.Entity.CommonEntity;
 using Berry.Entity.SystemManage;
 using Berry.IService.SystemManage;
-using Lottomat.Application.Entity.SystemManage;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -69,7 +68,7 @@ namespace Berry.Service.SystemManage
                                 ORDER BY a.id , a.colorder");
                 DbParameter[] parameter =
                 {
-                    DbParameters.CreateDbParameter("@tableName",tableName)
+                    DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "tableName", tableName, DbType.String)
                 };
                 return this.BaseRepository(dataBaseLinkEntity.DbConnection).FindList<DataBaseTableFieldEntity>(strSql.ToString(), parameter);
             }

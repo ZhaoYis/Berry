@@ -61,23 +61,27 @@ namespace Berry.App.Admin.Controllers
             }
             string fileEextension = Path.GetExtension(files[0].FileName);
             string userId = OperatorProvider.Provider.Current().UserId;
-            string virtualPath = string.Format("/Resource/PhotoFile/{0}{1}", userId, fileEextension);
+            string virtualPath = string.Format("/upload/images/head/{0}{1}", userId, fileEextension);
 
             string fullFileName = DirFileHelper.MapPath(virtualPath);
             //创建文件夹，保存文件
             string path = Path.GetDirectoryName(fullFileName);
-            Directory.CreateDirectory(path);
-            files[0].SaveAs(fullFileName);
-
+            if (!string.IsNullOrEmpty(path))
+            {
+                Directory.CreateDirectory(path);
+                files[0].SaveAs(fullFileName);
+            }
             UserEntity userEntity = new UserEntity
             {
                 Id = OperatorProvider.Provider.Current().UserId,
-                HeadIcon = virtualPath
+                HeadIcon = virtualPath,
+                EnabledMark = true,
+                DeleteMark = false
             };
 
-            userBLL.AddUser(userEntity.Id, userEntity,out userId);
+            bool isSucc = userBLL.AddUser(userEntity.Id, userEntity, out userId);
 
-            return Success("上传成功。");
+            return Success(isSucc ? "上传成功。" : "上传失败");
         }
 
         /// <summary>
@@ -88,8 +92,11 @@ namespace Berry.App.Admin.Controllers
         [HttpPost]
         public ActionResult ValidationOldPassword(string oldPassword)
         {
-            oldPassword = Md5Helper.Md5(DESEncryptHelper.Encrypt(Md5Helper.Md5(oldPassword).ToLower(), OperatorProvider.Provider.Current().Secretkey).ToLower()).ToLower();
-            if (oldPassword != OperatorProvider.Provider.Current().Password)
+            string secretkey = OperatorProvider.Provider.Current().Secretkey;
+            string md5 = Md5Helper.Md5(oldPassword);
+            string realPassword = Md5Helper.Md5(DESEncryptHelper.Encrypt(md5, secretkey));
+
+            if (realPassword != OperatorProvider.Provider.Current().Password)
             {
                 return Error("原密码错误，请重新输入");
             }

@@ -945,13 +945,24 @@ namespace Berry.Data.Dapper
             sb.Append("Select * From (Select ROW_NUMBER() Over (" + orderBy + ")");
             sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
 
+            Dictionary<string, object> dict = new Dictionary<string, object>();
+            if (dbParameter.Length > 0)
+            {
+                foreach (DbParameter par in dbParameter)
+                {
+                    var name = par.ParameterName.Replace(DbParameters.CreateDbParmCharacter(), "");
+                    var value = par.Value;
+                    dict.Add(name, value);
+                }
+            }
+
             using (var dbConnection = Connection)
             {
-                string selectCountSql = "Select Count(*) From (" + strSql + ") WHERE 1 = 1";
-                total = (int)dbConnection.ExecuteScalar(selectCountSql);
+                string selectCountSql = "Select Count(*) From (" + strSql + ") AS t";
+                total = (int)dbConnection.ExecuteScalar(selectCountSql, dict);
 
                 DataTable table = new DataTable("MyTable");
-                IDataReader reader = dbConnection.ExecuteReader(sb.ToString(), dbParameter);//ConvertExtension.IDataReaderToDataTable(dataReader);
+                IDataReader reader = dbConnection.ExecuteReader(sb.ToString(), dict);
                 table.Load(reader);
 
                 return table;

@@ -169,7 +169,7 @@
             });
         }
         //新增
-        $("#lr-add-button").click(function () {
+        $("#bt-add-button").click(function () {
             var parentId = $("#gridTable-button").jqGridRowValue("Id");
             dialogOpen({
                 id: "buttonForm",
@@ -186,7 +186,7 @@
             });
         })
         //编辑
-        $("#lr-edit-button").click(function () {
+        $("#bt-edit-button").click(function () {
             var moduleButtonId = $("#gridTable-button").jqGridRowValue("Id");
             if (checkedRow(moduleButtonId)) {
                 dialogOpen({
@@ -209,7 +209,7 @@
             }
         })
         //删除
-        $("#lr-delete-button").click(function () {
+        $("#bt-delete-button").click(function () {
             var moduleButtonId = $("#gridTable-button").jqGridRowValue("Id");
             if (checkedRow(moduleButtonId)) {
                 $.each(buttonJson, function (i) {
@@ -222,7 +222,7 @@
             }
         });
         //复制
-        $("#lr-copy-button").click(function () {
+        $("#bt-copy-button").click(function () {
             var moduleButtonId = $("#gridTable-button").jqGridRowValue("Id");
             if (checkedRow(moduleButtonId)) {
                 dialogOpen({
@@ -282,7 +282,7 @@
             });
         }
         //新增
-        $("#lr-add-view").click(function () {
+        $("#bt-add-view").click(function () {
             dialogOpen({
                 id: "viewForm",
                 title: '添加视图',
@@ -298,7 +298,7 @@
             });
         })
         //编辑
-        $("#lr-edit-view").click(function () {
+        $("#bt-edit-view").click(function () {
             var moduleColumnId = $("#gridTable-view").jqGridRowValue("Id");
             if (checkedRow(moduleColumnId)) {
                 dialogOpen({
@@ -321,7 +321,7 @@
             }
         })
         //删除
-        $("#lr-delete-view").click(function () {
+        $("#bt-delete-view").click(function () {
             var moduleColumnId = $("#gridTable-view").jqGridRowValue("Id");
             if (checkedRow(moduleColumnId)) {
                 $.each(columnJson, function (i) {
@@ -334,7 +334,7 @@
             }
         });
         //批量添加
-        $("#lr-batch-addview").click(function () {
+        $("#bt-batch-addview").click(function () {
             dialogOpen({
                 id: "viewForm",
                 title: '批量添加视图',
@@ -445,12 +445,12 @@
         <div class="step-pane" id="step-2" style="margin: 5px;">
             <div style="height: 40px; line-height: 33px; text-align: right;">
                 <div class="btn-group">
-                    <a id="lr-add-button" class="btn btn-default"><i class="fa fa-plus"></i>&nbsp;新增</a>
-                    <a id="lr-edit-button" class="btn btn-default"><i class="fa fa-pencil-square-o"></i>&nbsp;编辑</a>
-                    <a id="lr-delete-button" class="btn btn-default"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+                    <a id="bt-add-button" class="btn btn-default"><i class="fa fa-plus"></i>&nbsp;新增</a>
+                    <a id="bt-edit-button" class="btn btn-default"><i class="fa fa-pencil-square-o"></i>&nbsp;编辑</a>
+                    <a id="bt-delete-button" class="btn btn-default"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
                 </div>
                 <div class="btn-group">
-                    <a id="lr-copy-button" class="btn btn-default"><i class="fa fa-copy"></i>&nbsp;复制</a>
+                    <a id="bt-copy-button" class="btn btn-default"><i class="fa fa-copy"></i>&nbsp;复制</a>
                 </div>
             </div>
             <table id="gridTable-button"></table>
@@ -458,12 +458,12 @@
         <div class="step-pane" id="step-3" style="margin: 5px;">
             <div style="height: 40px; line-height: 33px; text-align: right;">
                 <div class="btn-group">
-                    <a id="lr-add-view" class="btn btn-default"><i class="fa fa-plus"></i>&nbsp;新增</a>
-                    <a id="lr-edit-view" class="btn btn-default"><i class="fa fa-pencil-square-o"></i>&nbsp;编辑</a>
-                    <a id="lr-delete-view" class="btn btn-default"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+                    <a id="bt-add-view" class="btn btn-default"><i class="fa fa-plus"></i>&nbsp;新增</a>
+                    <a id="bt-edit-view" class="btn btn-default"><i class="fa fa-pencil-square-o"></i>&nbsp;编辑</a>
+                    <a id="bt-delete-view" class="btn btn-default"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
                 </div>
                 <div class="btn-group">
-                    <a id="lr-batch-addview" class="btn btn-default"><i class="fa fa-sign-in"></i>&nbsp;批量添加</a>
+                    <a id="bt-batch-addview" class="btn btn-default"><i class="fa fa-sign-in"></i>&nbsp;批量添加</a>
                 </div>
             </div>
             <table id="gridTable-view"></table>

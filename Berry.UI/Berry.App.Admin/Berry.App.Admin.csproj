@@ -121,6 +121,7 @@
     <Content Include="Content\images\datepicker_icon.png" />
     <Content Include="Content\images\duihao_03.png" />
     <Content Include="Content\images\file_arrow.png" />
+    <Content Include="Content\images\large_tiles.png" />
     <Content Include="Content\images\line.png" />
     <Content Include="Content\images\loading.gif" />
     <Content Include="Content\images\loading1.gif" />
@@ -628,6 +629,11 @@
     <Content Include="Content\styles\berry-applayout.css" />
     <Content Include="Content\styles\berry-ckbox-radio.css" />
     <Content Include="Global.asax" />
+    <Content Include="upload\images\head\head_1.png" />
+    <Content Include="upload\images\head\head_2.png" />
+    <Content Include="upload\images\head\head_3.png" />
+    <Content Include="upload\images\head\head_4.png" />
+    <Content Include="upload\images\head\head_5.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace Berry.Code
 {
@@ -157,6 +158,6 @@ namespace Berry.Code
         #endregion 登录验证
         
     }
-
+    
     #endregion ===========全局通用状态枚举===========
 }
