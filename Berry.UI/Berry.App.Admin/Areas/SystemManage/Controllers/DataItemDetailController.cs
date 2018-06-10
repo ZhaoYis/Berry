@@ -11,6 +11,7 @@ using Berry.WebControl.Tree;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using Berry.Util;
 
 namespace Berry.App.Admin.Areas.SystemManage.Controllers
 {
@@ -234,6 +235,7 @@ namespace Berry.App.Admin.Areas.SystemManage.Controllers
         [AjaxOnly]
         public ActionResult SaveForm(string keyValue, DataItemDetailEntity dataItemDetailEntity)
         {
+            dataItemDetailEntity.SimpleSpelling = PinYinHelper.GetPinYinSimple(dataItemDetailEntity.ItemName);
             dataItemDetailBLL.SaveDataItemDetail(keyValue, dataItemDetailEntity);
             return Success("操作成功。");
         }

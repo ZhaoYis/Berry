@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Web.Http;
 using Berry.Code;
 using Berry.Entity;
@@ -7,10 +6,10 @@ using Berry.Extension;
 using Berry.SOA.API.Controllers.Base;
 using Berry.SOA.API.ParameterModel;
 
-namespace Berry.SOA.API.Controllers
+namespace Berry.SOA.API.Controllers.V1
 {
     /// <summary>
-    /// API测试控制器
+    /// API测试控制器，版本：V1.0
     /// </summary>
     public class TestController : BaseApiController
     {
@@ -20,7 +19,7 @@ namespace Berry.SOA.API.Controllers
         /// <param name="arg">测试参数</param>
         /// <returns>请求成功则返回成功状态信息</returns>
         [HttpPost]
-        public HttpResponseMessage HelloWorld(TestApiArgEntity arg)
+        public virtual HttpResponseMessage HelloWorld(TestApiArgEntity arg)
         {
             BaseJsonResult<string> resultMsg = new BaseJsonResult<string> { Status = (int)JsonObjectStatus.Error, Message = "服务器未知错误。", Data = null };
 
@@ -34,7 +33,7 @@ namespace Berry.SOA.API.Controllers
                      {
                          Status = (int)JsonObjectStatus.Success,
                          Data = "传入参数为：" + arg.TryToJson(),
-                         Message = JsonObjectStatus.Success.GetEnumDescription(),
+                         Message = JsonObjectStatus.Success.GetEnumDescription() + "，当前版本：V1",
                          BackUrl = null
                      };
                  }
@@ -60,6 +59,12 @@ namespace Berry.SOA.API.Controllers
              });
 
             return resultMsg.TryToJson().ToHttpResponseMessage();
+        }
+
+        [HttpGet]
+        public string GetIndex()
+        {
+            return "这是v1版本的Index";
         }
     }
 }

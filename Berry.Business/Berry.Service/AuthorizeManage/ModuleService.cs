@@ -171,27 +171,40 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public void SaveForm(string keyValue, ModuleEntity moduleEntity, List<ModuleButtonEntity> moduleButtonList, List<ModuleColumnEntity> moduleColumnList)
         {
+            int res = -1;
             if (!string.IsNullOrEmpty(keyValue))
             {
                 moduleEntity.Modify(keyValue);
-                this.BaseRepository().Update<ModuleEntity>(moduleEntity);
+                res = this.BaseRepository().Update<ModuleEntity>(moduleEntity);
             }
             else
             {
                 moduleEntity.Create();
-                this.BaseRepository().Insert(moduleEntity);
+                res = this.BaseRepository().Insert(moduleEntity);
             }
 
-            this.BaseRepository().Delete<ModuleButtonEntity>(t => t.ModuleId == keyValue);
+            res = this.BaseRepository().Delete<ModuleButtonEntity>(t => t.ModuleId == keyValue);
             if (moduleButtonList != null)
             {
-                this.BaseRepository().Insert<ModuleButtonEntity>(moduleButtonList);
+                List<ModuleButtonEntity> temp = new List<ModuleButtonEntity>();
+                foreach (ModuleButtonEntity buttonEntity in moduleButtonList)
+                {
+                    buttonEntity.Create();
+                    temp.Add(buttonEntity);
+                }
+                res = this.BaseRepository().Insert<ModuleButtonEntity>(temp);
             }
 
-            this.BaseRepository().Delete<ModuleColumnEntity>(t => t.ModuleId == keyValue);
+            res = this.BaseRepository().Delete<ModuleColumnEntity>(t => t.ModuleId == keyValue);
             if (moduleColumnList != null)
             {
-                this.BaseRepository().Insert<ModuleColumnEntity>(moduleColumnList);
+                List<ModuleColumnEntity> temp = new List<ModuleColumnEntity>();
+                foreach (ModuleColumnEntity columnEntity in moduleColumnList)
+                {
+                    columnEntity.Create();
+                    temp.Add(columnEntity);
+                }
+                res = this.BaseRepository().Insert<ModuleColumnEntity>(temp);
             }
         }
     }

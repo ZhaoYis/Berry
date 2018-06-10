@@ -32,7 +32,7 @@ namespace Berry.CodeGenerator.Template
             sb.Append("namespace Berry.Entity." + baseConfigModel.OutputAreas + "\r\n");
             sb.Append("{\r\n");
             sb.Append("    /// <summary>\r\n");
-            sb.Append("    /// 版 本\r\n");
+            sb.Append("    /// 版 本：V1.0.0\r\n");
             sb.Append("    /// Copyright (c) 2017-2018\r\n");
             sb.Append("    /// 创 建：" + baseConfigModel.CreateUser + "\r\n");
             sb.Append("    /// 日 期：" + baseConfigModel.CreateDate + "\r\n");
@@ -173,7 +173,7 @@ namespace Berry.CodeGenerator.Template
             sb.Append("namespace Berry.Entity.Mapping." + baseConfigModel.OutputAreas + "\r\n");
             sb.Append("{\r\n");
             sb.Append("    /// <summary>\r\n");
-            sb.Append("    /// 版 本\r\n");
+            sb.Append("    /// 版 本：V1.0.0\r\n");
             sb.Append("    /// Copyright (c) 2017-2018\r\n");
             sb.Append("    /// 创 建：" + baseConfigModel.CreateUser + "\r\n");
             sb.Append("    /// 日 期：" + baseConfigModel.CreateDate + "\r\n");
@@ -213,14 +213,14 @@ namespace Berry.CodeGenerator.Template
             sb.Append("using Berry.Entity." + baseConfigModel.OutputAreas + ";\r\n");
             sb.Append("using Berry.IService." + baseConfigModel.OutputAreas + ";\r\n");
             sb.Append("using Berry.Data.Repository;\r\n");
-            sb.Append("using Berry.WebControl;\r\n");
+            sb.Append("using Berry.Entity.CommonEntity;\r\n");
             sb.Append("using System.Collections.Generic;\r\n");
             sb.Append("using System.Linq;\r\n\r\n");
 
             sb.Append("namespace Berry.Service." + baseConfigModel.OutputAreas + "\r\n");
             sb.Append("{\r\n");
             sb.Append("    /// <summary>\r\n");
-            sb.Append("    /// 版 本 1.0\r\n");
+            sb.Append("    /// 版 本：V1.0.0\r\n");
             sb.Append("    /// Copyright (c) 2017-2018\r\n");
             sb.Append("    /// 创 建：" + baseConfigModel.CreateUser + "\r\n");
             sb.Append("    /// 日 期：" + baseConfigModel.CreateDate + "\r\n");
@@ -310,13 +310,13 @@ namespace Berry.CodeGenerator.Template
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("using Berry.Entity." + baseConfigModel.OutputAreas + ";\r\n");
-            sb.Append("using Berry.WebControl;\r\n");
+            sb.Append("using Berry.Entity.CommonEntity;\r\n");
             sb.Append("using System.Collections.Generic;\r\n\r\n");
 
             sb.Append("namespace Berry.IService." + baseConfigModel.OutputAreas + "\r\n");
             sb.Append("{\r\n");
             sb.Append("    /// <summary>\r\n");
-            sb.Append("    /// 版 本 1.0\r\n");
+            sb.Append("    /// 版 本：V1.0.0\r\n");
             sb.Append("    /// Copyright (c) 2017-2018\r\n");
             sb.Append("    /// 创 建：" + baseConfigModel.CreateUser + "\r\n");
             sb.Append("    /// 日 期：" + baseConfigModel.CreateDate + "\r\n");
@@ -383,14 +383,15 @@ namespace Berry.CodeGenerator.Template
             sb.Append("using Berry.Entity." + baseConfigModel.OutputAreas + ";\r\n");
             sb.Append("using Berry.IService." + baseConfigModel.OutputAreas + ";\r\n");
             sb.Append("using Berry.Service." + baseConfigModel.OutputAreas + ";\r\n");
-            sb.Append("using Berry.WebControl;\r\n");
+            sb.Append("using Berry.IBLL." + baseConfigModel.OutputAreas + ";\r\n");
+            sb.Append("using Berry.Entity.CommonEntity;\r\n");
             sb.Append("using System.Collections.Generic;\r\n");
             sb.Append("using System;\r\n\r\n");
 
             sb.Append("namespace Berry.BLL." + baseConfigModel.OutputAreas + "\r\n");
             sb.Append("{\r\n");
             sb.Append("    /// <summary>\r\n");
-            sb.Append("    /// 版 本 1.0\r\n");
+            sb.Append("    /// 版 本：V1.0.0\r\n");
             sb.Append("    /// Copyright (c) 2017-2018\r\n");
             sb.Append("    /// 创 建：" + baseConfigModel.CreateUser + "\r\n");
             sb.Append("    /// 日 期：" + baseConfigModel.CreateDate + "\r\n");
@@ -473,13 +474,13 @@ namespace Berry.CodeGenerator.Template
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("using Berry.Entity." + baseConfigModel.OutputAreas + ";\r\n");
-            sb.Append("using Berry.WebControl;\r\n");
+            sb.Append("using Berry.Entity.CommonEntity;\r\n");
             sb.Append("using System.Collections.Generic;\r\n\r\n");
 
             sb.Append("namespace Berry.IBLL." + baseConfigModel.OutputAreas + "\r\n");
             sb.Append("{\r\n");
             sb.Append("    /// <summary>\r\n");
-            sb.Append("    /// 版 本 1.0\r\n");
+            sb.Append("    /// 版 本：V1.0.0\r\n");
             sb.Append("    /// Copyright (c) 2017-2018\r\n");
             sb.Append("    /// 创 建：" + baseConfigModel.CreateUser + "\r\n");
             sb.Append("    /// 日 期：" + baseConfigModel.CreateDate + "\r\n");
@@ -552,7 +553,7 @@ namespace Berry.CodeGenerator.Template
             sb.Append("namespace Berry.App.Admin.Areas." + baseConfigModel.OutputAreas + ".Controllers\r\n");
             sb.Append("{\r\n");
             sb.Append("    /// <summary>\r\n");
-            sb.Append("    /// 版 本 1.0\r\n");
+            sb.Append("    /// 版 本：V1.0.0\r\n");
             sb.Append("    /// Copyright (c) 2017-2018\r\n");
             sb.Append("    /// 创 建：" + baseConfigModel.CreateUser + "\r\n");
             sb.Append("    /// 日 期：" + baseConfigModel.CreateDate + "\r\n");

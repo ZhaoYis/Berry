@@ -46,6 +46,29 @@
             请求次数
             </summary>
         </member>
+        <member name="T:Berry.SOA.API.Explorer.CustomApiExplorer">
+            <summary>
+            自定义API探测器
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Explorer.CustomApiExplorer.ShouldExploreAction(System.String,System.Web.Http.Controllers.HttpActionDescriptor,System.Web.Http.Routing.IHttpRoute)">
+            <summary>
+            Action探测
+            </summary>
+            <param name="actionVariableValue"></param>
+            <param name="actionDescriptor"></param>
+            <param name="route"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Explorer.CustomApiExplorer.ShouldExploreController(System.String,System.Web.Http.Controllers.HttpControllerDescriptor,System.Web.Http.Routing.IHttpRoute)">
+            <summary>
+            Controller探测
+            </summary>
+            <param name="controllerVariableValue"></param>
+            <param name="controllerDescriptor"></param>
+            <param name="route"></param>
+            <returns></returns>
+        </member>
         <member name="T:Berry.SOA.API.Filters.ApiSecurityFilter">
             <summary>
             验证
@@ -202,6 +225,26 @@
             <summary>
             The controller that will handle requests for the help page.
             </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Areas.HelpPage.Controllers.HelpController.Index">
+            <summary>
+            接口列表
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Areas.HelpPage.Controllers.HelpController.Api(System.String)">
+            <summary>
+            接口详细信息
+            </summary>
+            <param name="apiId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Areas.HelpPage.Controllers.HelpController.ResourceModel(System.String)">
+            <summary>
+            实体资源
+            </summary>
+            <param name="modelName"></param>
+            <returns></returns>
         </member>
         <member name="M:Berry.SOA.API.Areas.HelpPage.HelpPageConfigurationExtensions.SetDocumentationProvider(System.Web.Http.HttpConfiguration,System.Web.Http.Description.IDocumentationProvider)">
             <summary>
@@ -700,17 +743,22 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Berry.SOA.API.Controllers.TestController">
+        <member name="T:Berry.SOA.API.Controllers.V1.TestController">
             <summary>
-            API测试控制器
+            API测试控制器，版本：V1.0
             </summary>
         </member>
-        <member name="M:Berry.SOA.API.Controllers.TestController.HelloWorld(Berry.SOA.API.ParameterModel.TestApiArgEntity)">
+        <member name="M:Berry.SOA.API.Controllers.V1.TestController.HelloWorld(Berry.SOA.API.ParameterModel.TestApiArgEntity)">
             <summary>
             测试是否连接成功
             </summary>
             <param name="arg">测试参数</param>
             <returns>请求成功则返回成功状态信息</returns>
+        </member>
+        <member name="T:Berry.SOA.API.Controllers.TestController">
+            <summary>
+            API测试控制器，版本：V2.0
+            </summary>
         </member>
         <member name="T:Berry.SOA.API.ParameterModel.BaseParameterEntity">
             <summary>

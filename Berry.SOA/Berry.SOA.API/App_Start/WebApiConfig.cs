@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Description;
 using System.Web.Http.Dispatcher;
 using System.Web.Routing;
 using Berry.Extension;
 using Berry.SOA.API.Caching;
+using Berry.SOA.API.Explorer;
 using Berry.SOA.API.Handlers;
 using Berry.SOA.API.Selector;
 using Berry.Util;
@@ -26,24 +26,27 @@ namespace Berry.SOA.API
             // Web API 路由
             config.MapHttpAttributeRoutes();
 
-            //config.Routes.MapHttpRoute(
-            //    name: "DefaultVersionApi",
-            //    routeTemplate: "api/{version}/{controller}/{action}/{id}",
-            //    defaults: new { id = RouteParameter.Optional, version = "v1" },
-            //    constraints: new { HttpMethod = new HttpMethodConstraint("GET", "POST", "OPTIONS") }
-            //);
-
             config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{action}/{id}",
-                defaults: new { id = RouteParameter.Optional }
+                name: "DefaultVersionApi",
+                routeTemplate: "api/{version}/{controller}/{action}/{id}",
+                defaults: new { id = RouteParameter.Optional, version = "v1" },
+                constraints: new { HttpMethod = new HttpMethodConstraint("GET", "POST", "OPTIONS") }
             );
+
+            //config.Routes.MapHttpRoute(
+            //    name: "DefaultApi",
+            //    routeTemplate: "api/{controller}/{action}/{id}",
+            //    defaults: new { id = RouteParameter.Optional }
+            //);
 
             //注册自定义API过滤器
             //config.Filters.Add(new ApiSecurityFilter());
 
             //添加版本控制
-            //config.Services.Replace(typeof(IHttpControllerSelector), new WebApiControllerSelector(config));
+            config.Services.Replace(typeof(IHttpControllerSelector), new WebApiControllerSelector(config));
+
+            //注册自定义API探测器
+            config.Services.Replace(typeof(IApiExplorer), new CustomApiExplorer(config));
 
             //注册请求频率限制
             RegisterRequestLimitHandlers(config);

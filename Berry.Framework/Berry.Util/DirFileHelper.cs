@@ -631,6 +631,20 @@ namespace Berry.Util
 
         #endregion 向文本文件的尾部追加内容
 
+        #region 读取文件
+        /// <summary>
+        /// 读取文件
+        /// </summary>
+        /// <param name="filepath"></param>
+        /// <returns></returns>
+        public static string ReadAllText(string filepath)
+        {
+            if (!IsExistFile(filepath)) return "";
+            return File.ReadAllText(filepath, Encoding.Default);
+        }
+
+        #endregion
+
         #region 将现有文件的内容复制到新文件中
 
         /// <summary>

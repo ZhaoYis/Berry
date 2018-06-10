@@ -22,6 +22,8 @@ namespace Berry.Entity.AuthorizeManage
             this.CreateDate = DateTime.Now;
             this.CreateUserId = OperatorProvider.Provider.Current().UserId;
             this.CreateUserName = OperatorProvider.Provider.Current().UserName;
+            this.DeleteMark = false;
+            this.EnabledMark = true;
         }
 
         /// <summary>

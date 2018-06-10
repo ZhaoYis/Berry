@@ -87,10 +87,10 @@
         if (postData["ParentId"] == "") {
             postData["ParentId"] = 0;
         }
-        postData["moduleButtonListJson"] = buttonJson;//JSON.stringify(buttonJson);
+        postData["moduleButtonListJson"] = JSON.stringify(buttonJson);//JSON.stringify(buttonJson);
         postData["moduleColumnListJson"] = columnJson;//JSON.stringify(columnJson);
 
-        console.log(postData)
+        //console.log(postData)
 
         $.SaveForm({
             url: "../../AuthorizeManage/Module/SaveForm?keyValue=" + keyValue,
@@ -133,8 +133,8 @@
             type: "get",
             dataType: "text",
             success: function (data) {
-                buttonJson = data;
-            },
+                buttonJson = JSON.parse(data);
+            }
         });
         var $grid = $("#gridTable-button");
         $grid.jqGrid({
@@ -159,12 +159,13 @@
         function buttonListToListTreeJson(buttonJson) {
             $.ajax({
                 url: "../../AuthorizeManage/ModuleButton/ListToListTreeJson",
-                data: { moduleButtonJson: buttonJson }, //JSON.stringify(buttonJson)
+                data: { moduleButtonJson: JSON.stringify(buttonJson) }, //JSON.stringify(buttonJson)
                 type: "post",
                 dataType: "text",
                 success: function (data) {
+                    var json = JSON.parse(data);
                     $grid.clearGridData();
-                    $grid[0].addJSONData(data);
+                    $grid[0].addJSONData(json);
                 },
             });
         }
@@ -250,7 +251,7 @@
             dataType: "json",
             success: function (data) {
                 columnJson = data;
-            },
+            }
         });
         var $grid = $("#gridTable-view");
         $grid.jqGrid({
@@ -434,7 +435,8 @@
                     </td>
                 </tr>
                 <tr>
-                    <th class="formTitle" valign="top" style="padding-top: 4px;">描述
+                    <th class="formTitle" valign="top" style="padding-top: 4px;">
+                        描述
                     </th>
                     <td class="formValue" colspan="3">
                         <textarea id="Description" class="form-control" style="height: 70px;"></textarea>

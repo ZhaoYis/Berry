@@ -91,21 +91,21 @@ namespace Berry.Util
 
             byte[] fix = new byte[16];
 
-            // reverse 0..3
+            // 反转 0..3
             fix[0x0] = raw[0x3];
             fix[0x1] = raw[0x2];
             fix[0x2] = raw[0x1];
             fix[0x3] = raw[0x0];
 
-            // reverse 4 & 5
+            // 反转 4 & 5
             fix[0x4] = raw[0x5];
             fix[0x5] = raw[0x4];
 
-            // reverse 6 & 7
+            // 反转 6 & 7
             fix[0x6] = raw[0x7];
             fix[0x7] = raw[0x6];
 
-            // all other are unchanged
+            // 后8位不做操作，实际为当前MAC地址
             fix[0x8] = raw[0x8];
             fix[0x9] = raw[0x9];
             fix[0xA] = raw[0xA];

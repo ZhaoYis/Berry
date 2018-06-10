@@ -678,6 +678,7 @@
     <Compile Include="Areas\SystemManage\Controllers\DataItemDetailController.cs" />
     <Compile Include="Areas\SystemManage\Controllers\DataItemListController.cs" />
     <Compile Include="Areas\SystemManage\Controllers\LogController.cs" />
+    <Compile Include="Areas\SystemManage\Controllers\RedisMonitorController.cs" />
     <Compile Include="Areas\SystemManage\SystemManageAreaRegistration.cs" />
     <Compile Include="Content\scripts\plugins\UEditor\net\App_Code\Config.cs" />
     <Compile Include="Content\scripts\plugins\UEditor\net\App_Code\ConfigHandler.cs" />
@@ -784,6 +785,14 @@
     <Content Include="Areas\GeneratorManage\Views\SingleTable\EditControl.cshtml" />
     <Content Include="Areas\GeneratorManage\Views\SingleTable\EditGrid.cshtml" />
     <Content Include="Areas\GeneratorManage\Views\Template\Index.cshtml" />
+    <Content Include="Areas\SystemManage\Views\RedisMonitor\Index.cshtml" />
+    <Content Include="Areas\SystemManage\Views\RedisMonitor\Details.cshtml" />
+    <Content Include="Areas\SystemManage\Views\RedisMonitor\SimpleDetails.cshtml" />
+    <Content Include="Areas\SystemManage\Views\RedisMonitor\RichDetails.cshtml" />
+    <Content Include="Areas\SystemManage\Views\RedisMonitor\InfoInstructions.cshtml" />
+    <Content Include="Areas\SystemManage\Views\RedisMonitor\Clients.cshtml" />
+    <Content Include="Areas\SystemManage\Views\RedisMonitor\GetClients.cshtml" />
+    <Content Include="Areas\SystemManage\Views\RedisMonitor\BaseRedisStatus.cshtml" />
     <None Include="packages.config" />
     <Content Include="Views\Error\ErrorBrowser.cshtml" />
     <Content Include="Views\Error\ErrorMessage.cshtml" />
@@ -816,6 +825,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="XmlConfig\database.config" />
+    <Content Include="XmlConfig\RedisServiceConfig.json" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -846,6 +856,10 @@
     <ProjectReference Include="..\..\Berry.DataAccess\Berry.Data\Berry.Data.csproj">
       <Project>{b01d7040-aa2f-4642-8454-f13a3b92923a}</Project>
       <Name>Berry.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Berry.Framework\Berry.Cache\Berry.Cache.csproj">
+      <Project>{35a1f58b-c99d-46bf-981f-34af5337f9d1}</Project>
+      <Name>Berry.Cache</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Berry.Framework\Berry.CodeGenerator\Berry.CodeGenerator.csproj">
       <Project>{ee0f1360-7ed4-4ed3-afd6-66a62957b9a5}</Project>

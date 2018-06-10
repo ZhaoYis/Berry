@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Web.Http;
 using Berry.Code;
 using Berry.Log;
+using Berry.SOA.API.Attributes;
 using Berry.SOA.API.Filters;
 
 namespace Berry.SOA.API.Controllers.Base

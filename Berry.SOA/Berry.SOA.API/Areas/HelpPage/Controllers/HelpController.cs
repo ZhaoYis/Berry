@@ -17,8 +17,7 @@ namespace Berry.SOA.API.Areas.HelpPage.Controllers
     {
         private const string ErrorViewName = "Error";
 
-        public HelpController()
-            : this(GlobalConfiguration.Configuration)
+        public HelpController(): this(GlobalConfiguration.Configuration)
         {
         }
 
@@ -29,20 +28,25 @@ namespace Berry.SOA.API.Areas.HelpPage.Controllers
 
         public HttpConfiguration Configuration { get; private set; }
 
+        /// <summary>
+        /// 接口列表
+        /// </summary>
+        /// <returns></returns>
         public ActionResult Index()
         {
             IDocumentationProvider provider = Configuration.Services.GetDocumentationProvider();
             ViewBag.DocumentationProvider = provider;
 
             Collection<ApiDescription> descriptions = Configuration.Services.GetApiExplorer().ApiDescriptions;
-            
-            //NotApiMethodAttribute attr = Attribute.GetCustomAttribute(fieldInfo, typeof(NotApiMethodAttribute), false) as NotApiMethodAttribute;
-            //descriptions[1].ActionDescriptor.ActionName
-            //"Logger"
 
             return View(descriptions);
         }
 
+        /// <summary>
+        /// 接口详细信息
+        /// </summary>
+        /// <param name="apiId"></param>
+        /// <returns></returns>
         public ActionResult Api(string apiId)
         {
             if (!String.IsNullOrEmpty(apiId))
@@ -57,6 +61,11 @@ namespace Berry.SOA.API.Areas.HelpPage.Controllers
             return View(ErrorViewName);
         }
 
+        /// <summary>
+        /// 实体资源
+        /// </summary>
+        /// <param name="modelName"></param>
+        /// <returns></returns>
         public ActionResult ResourceModel(string modelName)
         {
             if (!String.IsNullOrEmpty(modelName))

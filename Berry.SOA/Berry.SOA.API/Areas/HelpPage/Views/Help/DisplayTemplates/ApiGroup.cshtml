@@ -18,13 +18,13 @@
 }
 <table class="help-page-table">
     <thead>
-        <tr><th>API</th><th>Description</th></tr>
+        <tr><th>APIµÿ÷∑</th><th>Ω”ø⁄√Ë ˆ</th></tr>
     </thead>
     <tbody>
     @foreach (var api in Model)
     {
         <tr>
-            <td class="api-name"><a href="@Url.Action("Api", "Help", new { apiId = api.GetFriendlyId() })">@api.HttpMethod.Method @api.RelativePath</a></td>
+            <td class="api-name"><a href="@Url.Action("Api", "Help", new { apiId = api.GetFriendlyId() })"><span style="font-weight: bold">@api.HttpMethod.Method</span> @api.RelativePath</a></td>
             <td class="api-documentation">
             @if (api.Documentation != null)
             {

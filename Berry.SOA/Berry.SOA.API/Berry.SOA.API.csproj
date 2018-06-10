@@ -152,6 +152,7 @@
     <Compile Include="App_Start\Caching\InMemoryThrottleStore.cs" />
     <Compile Include="App_Start\Caching\IThrottleStore.cs" />
     <Compile Include="App_Start\Caching\ThrottleEntry.cs" />
+    <Compile Include="App_Start\Explorer\CustomApiExplorer.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\Filters\ApiSecurityFilter.cs" />
     <Compile Include="App_Start\Filters\RequireHttpsFilter.cs" />
@@ -191,7 +192,8 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\TestController.cs" />
+    <Compile Include="Controllers\V1\TestController.cs" />
+    <Compile Include="Controllers\V2\TestController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
