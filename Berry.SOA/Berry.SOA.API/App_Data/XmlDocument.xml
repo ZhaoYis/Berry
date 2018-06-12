@@ -4,6 +4,11 @@
         <name>Berry.SOA.API</name>
     </assembly>
     <members>
+        <member name="T:Berry.SOA.API.Attributes.IngoreActionAttribute">
+            <summary>
+            忽略特殊Action方法
+            </summary>
+        </member>
         <member name="T:Berry.SOA.API.Attributes.RequestAuthorizeAttribute">
             <summary>
             自定义此特性用于接口的身份验证

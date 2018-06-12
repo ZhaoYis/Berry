@@ -147,6 +147,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\Attributes\IngoreActionAttribute.cs" />
     <Compile Include="App_Start\Attributes\RequestAuthorizeAttribute.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\Caching\InMemoryThrottleStore.cs" />

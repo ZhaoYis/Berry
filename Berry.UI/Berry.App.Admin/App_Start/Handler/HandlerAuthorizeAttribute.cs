@@ -14,6 +14,7 @@ namespace Berry.App.Admin.Handler
     public class HandlerAuthorizeAttribute : ActionFilterAttribute
     {
         private PermissionMode _customMode;
+        private static AuthorizeBLL authorizeBll = new AuthorizeBLL();
 
         /// <summary>默认构造</summary>
         /// <param name="mode">认证模式</param>
@@ -103,7 +104,7 @@ namespace Berry.App.Admin.Handler
             string userId = OperatorProvider.Provider.Current().UserId;
             string currentModuleId = OperatorProvider.CurrentModuleId;
 
-            return new AuthorizeBLL().ActionAuthorize(userId, currentModuleId, currentUrl);
+            return authorizeBll.ActionAuthorize(userId, currentModuleId, currentUrl);
         }
     }
 }

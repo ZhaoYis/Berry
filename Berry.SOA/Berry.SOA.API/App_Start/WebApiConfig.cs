@@ -39,7 +39,7 @@ namespace Berry.SOA.API
             //    defaults: new { id = RouteParameter.Optional }
             //);
 
-            //注册自定义API过滤器
+            //注册自定义API过滤器，接口授权
             //config.Filters.Add(new ApiSecurityFilter());
 
             //添加版本控制
@@ -54,6 +54,9 @@ namespace Berry.SOA.API
             //启用跨域
             //EnableCorsAttribute cors = new EnableCorsAttribute(ConfigHelper.GetValue("Origins"), "*", "GET,POST,OPTIONS,DELETE,PUT");
             //config.EnableCors(cors);
+
+            //解决自定义请求头下的跨域问题
+            config.MessageHandlers.Add(new CrosHandler());
         }
 
         /// <summary>

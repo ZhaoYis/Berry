@@ -26,7 +26,7 @@ namespace Berry.SOA.API.Filters
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
             string isInterfaceSignature = ConfigHelper.GetValue("IsInterfaceSignature");
-            if (isInterfaceSignature == "false")
+            if (isInterfaceSignature.ToLower() == "false")
             {
                 base.OnActionExecuting(actionContext);
                 return;

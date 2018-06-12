@@ -17,7 +17,7 @@ namespace Berry.BLL.BaseManage
         /// <summary>
         /// 缓存key
         /// </summary>
-        public string CacheKey = "JobCache";
+        public string CacheKey = "__JobCache";
 
         #region 获取数据
         /// <summary>

@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Web.Http;
+using System.Web.Http.Controllers;
+using System.Web.Security;
 
 namespace Berry.SOA.API.Attributes
 {
@@ -9,7 +12,7 @@ namespace Berry.SOA.API.Attributes
     public class RequestAuthorizeAttribute : AuthorizeAttribute
     {
 
-        public override void OnAuthorization(System.Web.Http.Controllers.HttpActionContext actionContext)
+        public override void OnAuthorization(HttpActionContext actionContext)
         {
             //从http请求的头里面获取身份验证信息，验证是否是请求发起方的ticket
             var authorization = actionContext.Request.Headers.Authorization;
@@ -24,7 +27,7 @@ namespace Berry.SOA.API.Attributes
                 }
                 else
                 {
-                    base.HandleUnauthorizedRequest(actionContext);
+                    HandleUnauthorizedRequest(actionContext);
                 }
             }
             //如果取不到身份验证信息，并且不允许匿名访问，则返回未验证401
@@ -35,7 +38,7 @@ namespace Berry.SOA.API.Attributes
                 if (isAnonymous)
                     base.OnAuthorization(actionContext);
                 else
-                    base.HandleUnauthorizedRequest(actionContext);
+                    HandleUnauthorizedRequest(actionContext);
             }
         }
 
@@ -46,6 +49,14 @@ namespace Berry.SOA.API.Attributes
         /// <returns></returns>
         private bool ValidateAppKey(string encryptTicket)
         {
+            ////解密Ticket
+            //var strTicket = FormsAuthentication.Decrypt(encryptTicket).UserData;
+
+            ////从Ticket里面获取用户名和密码
+            //var index = strTicket.IndexOf("&", StringComparison.Ordinal);
+            //string strUser = strTicket.Substring(0, index);
+            //string strPwd = strTicket.Substring(index + 1);
+
             return true;
         }
     }

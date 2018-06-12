@@ -4,13 +4,14 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Web.Http.Routing;
+using Berry.SOA.API.Attributes;
 
 namespace Berry.SOA.API.Explorer
 {
     /// <summary>
     /// 自定义API探测器
     /// </summary>
-    public class CustomApiExplorer : ApiExplorer,IApiExplorer
+    public class CustomApiExplorer : ApiExplorer
     {
         public CustomApiExplorer(HttpConfiguration configuration) : base(configuration)
         {
@@ -25,8 +26,9 @@ namespace Berry.SOA.API.Explorer
         /// <returns></returns>
         public override bool ShouldExploreAction(string actionVariableValue, HttpActionDescriptor actionDescriptor, IHttpRoute route)
         {
-            //忽略Logger方法
-            if (actionVariableValue == "Logger") return false;
+            //忽略打了IngoreAction特性的方法
+            var attributes = actionDescriptor.GetCustomAttributes<IngoreActionAttribute>();
+            if (attributes.Count > 0) return false;
 
             return base.ShouldExploreAction(actionVariableValue, actionDescriptor, route);
         }

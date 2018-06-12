@@ -63,7 +63,7 @@ namespace Berry.Cache
             }
             else if (type == typeof(T))
             {
-                res = redisHelper.ListRightPop<T>(cacheKey) as T;
+                res = redisHelper.ListRange<T>(cacheKey) as T;
             }
             return res;
         }
@@ -76,7 +76,7 @@ namespace Berry.Cache
         /// <returns></returns>
         public List<T> GetCache<T>(string cacheKey, out long total) where T : class
         {
-            List<T> res = redisHelper.ListRightPop<T>(cacheKey) as List<T>;
+            List<T> res = redisHelper.ListRange<T>(cacheKey) as List<T>;
             total = redisHelper.ListLength(cacheKey);
 
             return res;

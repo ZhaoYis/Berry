@@ -195,7 +195,6 @@ namespace Berry.Service.AuthorizeManage
             {
                 DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
             };
-            //string sql = strSql.ToString().Replace("@Id", $"'{userId}'");
 
             DataTable data = this.BaseRepository().FindTable(strSql.ToString(), parameter);
             if (data.IsExistRows())

@@ -7,9 +7,20 @@ using System.Threading.Tasks;
 namespace Berry.SOA.API.Handlers
 {
     /// <summary>
-    /// 解决自定义请求头下的跨域问题
+    /// 解决方法一：解决自定义请求头下的跨域问题
     /// <example>调用方式：在Global.asax文件的Application_Start方法添加GlobalConfiguration.Configuration.MessageHandlers.Add(new CrosHandler());</example>
+    /// <example>或者在WebApiConfig下面添加：config.MessageHandlers.Add(new CrosHandler());</example>
     /// </summary>
+    /* 解决方法二：在Web.config下的<system.webServer>节点之间添加一下代码
+     * <httpProtocol>
+          <customHeaders>
+            <add name="Access-Control-Allow-Origin" value="*" />
+            <add name="Access-Control-Allow-Headers" value="Access-Control-Allow-Origin, AppKey, Authorization" />
+            <add name="Access-Control-Allow-Methods" value="GET, POST, OPTIONS" />
+            <add name="Access-Control-Request-Methods" value="GET, POST, OPTIONS" />
+          </customHeaders>
+       </httpProtocol>
+     * **/
     public class CrosHandler : DelegatingHandler
     {
         private const string Origin = "Origin";
@@ -19,7 +30,13 @@ namespace Berry.SOA.API.Handlers
         private const string AccessControlAllowMethods = "Access-Control-Allow-Methods";
         private const string AccessControlAllowHeaders = "Access-Control-Allow-Headers";
         private const string AccessControlAllowCredentials = "Access-Control-Allow-Credentials";
-        
+
+        /// <summary>
+        /// 异步发送 HTTP 请求到要发送到服务器的内部处理程序
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             bool isCrosRequest = request.Headers.Contains(Origin);
