@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Berry.Cache.Model;
 using Berry.Extension;
@@ -534,7 +535,7 @@ namespace Berry.Cache
                 return ConvetList<T>(values);
             });
         }
-
+        
         /// <summary>
         /// 入队
         /// </summary>
@@ -802,6 +803,30 @@ namespace Berry.Cache
         #region Key管理
 
         /// <summary>
+        /// 获取所有Key
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetKeys()
+        {
+            var res = Do(db =>
+            {
+                EndPoint[] endpoints = _conn.GetEndPoints();
+                List<string> keyList = new List<string>();
+                foreach (EndPoint ep in endpoints)
+                {
+                    var server = _conn.GetServer(ep);
+                    var keys = server.Keys(DbNum, "*");
+                    foreach (var item in keys)
+                    {
+                        keyList.Add((string)item);
+                    }
+                }
+                return keyList;
+            });
+            return res;
+        }
+
+        /// <summary>
         /// 删除单个key
         /// </summary>
         /// <param name="key">redis key</param>
@@ -1004,7 +1029,9 @@ namespace Berry.Cache
         private T ConvertObj<T>(RedisValue value)
         {
             if (!value.IsNullOrEmpty)
+            {
                 return JsonConvert.DeserializeObject<T>(value);
+            }
             return default(T);
         }
 
@@ -1017,10 +1044,23 @@ namespace Berry.Cache
         private List<T> ConvetList<T>(RedisValue[] values)
         {
             List<T> result = new List<T>();
-            foreach (var item in values)
+            try
             {
-                var model = ConvertObj<T>(item);
-                result.Add(model);
+                //一个Key下面存了多个相同实体
+                foreach (RedisValue value in values)
+                {
+                    var model = ConvertObj<T>(value);
+                    result.Add(model);
+                }
+            }
+            catch (Exception e)
+            {
+                //一个Key下面存的是一个集合
+                foreach (RedisValue value in values)
+                {
+                    List<T> temp = JsonConvert.DeserializeObject<List<T>>(value);
+                    result = result.Concat(temp).ToList();
+                }
             }
             return result;
         }

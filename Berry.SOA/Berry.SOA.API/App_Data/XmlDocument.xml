@@ -115,9 +115,18 @@
         </member>
         <member name="T:Berry.SOA.API.Handlers.CrosHandler">
             <summary>
-            解决自定义请求头下的跨域问题
+            解决方法一：解决自定义请求头下的跨域问题
             <example>调用方式：在Global.asax文件的Application_Start方法添加GlobalConfiguration.Configuration.MessageHandlers.Add(new CrosHandler());</example>
+            <example>或者在WebApiConfig下面添加：config.MessageHandlers.Add(new CrosHandler());</example>
             </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Handlers.CrosHandler.SendAsync(System.Net.Http.HttpRequestMessage,System.Threading.CancellationToken)">
+            <summary>
+            异步发送 HTTP 请求到要发送到服务器的内部处理程序
+            </summary>
+            <param name="request"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
         </member>
         <member name="T:Berry.SOA.API.Handlers.RequestFrequencyLimitHandlers">
             <summary>

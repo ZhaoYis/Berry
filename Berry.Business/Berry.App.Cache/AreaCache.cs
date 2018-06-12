@@ -19,11 +19,18 @@ namespace Berry.App.Cache
         /// <returns></returns>
         private IEnumerable<AreaEntity> GetList()
         {
-            var cacheList = CacheFactory.GetCacheInstance().GetCache<List<AreaEntity>>(areaBll.CacheKey);
-            if (cacheList == null)
+            var cacheList = CacheFactory.GetCacheInstance().GetListCache<AreaEntity>(areaBll.CacheKey, out long total);
+            if (cacheList == null || cacheList.Count == 0)
             {
                 cacheList = areaBll.GetList().ToList();
-                CacheFactory.GetCacheInstance().WriteCache(cacheList, areaBll.CacheKey);
+                //以集合的方式存在缓存下面
+                //CacheFactory.GetCacheInstance().WriteListCache<AreaEntity>(cacheList, areaBll.CacheKey);
+
+                //以单体的形式存在缓存下面
+                foreach (AreaEntity model in cacheList)
+                {
+                    CacheFactory.GetCacheInstance().WriteCache<AreaEntity>(model, areaBll.CacheKey);
+                }
             }
             return cacheList;
         }

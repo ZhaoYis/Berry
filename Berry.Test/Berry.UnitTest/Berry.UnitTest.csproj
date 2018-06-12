@@ -91,6 +91,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Berry.Business\Berry.App.Cache\Berry.App.Cache.csproj">
+      <Project>{95959003-eeaa-4fb2-a4b6-f4af890a2bdd}</Project>
+      <Name>Berry.App.Cache</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Berry.Business\Berry.BLL\Berry.BLL.csproj">
       <Project>{6697b3a9-4865-42fe-8ecd-beab49a72b1f}</Project>
       <Name>Berry.BLL</Name>
@@ -110,6 +114,10 @@
     <ProjectReference Include="..\..\Berry.DataAccess\Berry.Data\Berry.Data.csproj">
       <Project>{b01d7040-aa2f-4642-8454-f13a3b92923a}</Project>
       <Name>Berry.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Berry.Framework\Berry.Cache\Berry.Cache.csproj">
+      <Project>{35a1f58b-c99d-46bf-981f-34af5337f9d1}</Project>
+      <Name>Berry.Cache</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Berry.Framework\Berry.IOC\Berry.IOC.csproj">
       <Project>{c2756f3c-24a2-4d13-8910-1d59b4cf6382}</Project>

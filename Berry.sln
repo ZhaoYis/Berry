@@ -88,6 +88,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.SOA.API", "Berry.SOA\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "07 任务调度", "07 任务调度", "{FE775C0D-D588-421A-A622-79AFC34E3345}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.App.RefreshCache", "Berry.Business\Berry.App.RefreshCache\Berry.App.RefreshCache.csproj", "{AF2860D2-E743-406C-BD24-245FFB5B5A01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -194,6 +196,10 @@ Global
 		{BB601C02-6B22-4070-B38F-C9C2511BA639}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB601C02-6B22-4070-B38F-C9C2511BA639}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB601C02-6B22-4070-B38F-C9C2511BA639}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF2860D2-E743-406C-BD24-245FFB5B5A01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF2860D2-E743-406C-BD24-245FFB5B5A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF2860D2-E743-406C-BD24-245FFB5B5A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF2860D2-E743-406C-BD24-245FFB5B5A01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -229,6 +235,7 @@ Global
 		{446F095C-0079-4E93-9643-955B42B683CA} = {233E405C-FDAA-4276-B163-FD4F2FA2003F}
 		{EE0F1360-7ED4-4ED3-AFD6-66A62957B9A5} = {628542B5-ACE5-4C35-8384-3EA2349C5B5B}
 		{BB601C02-6B22-4070-B38F-C9C2511BA639} = {DC009827-CA78-467C-AE01-5B3E9199DBDA}
+		{AF2860D2-E743-406C-BD24-245FFB5B5A01} = {3AD86090-AD34-4D1E-A9A3-AB5F959E831C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {402D764C-5259-4C6D-BDA4-DDBAA375944E}

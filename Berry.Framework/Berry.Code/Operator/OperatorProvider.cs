@@ -52,7 +52,7 @@ namespace Berry.Code.Operator
                     CacheFactory.GetCacheInstance().WriteCache(DESEncryptHelper.Encrypt(user.TryToJson()), LoginUserKey, user.LoginTime.AddHours(1));
                 }
 
-                CacheFactory.GetCacheInstance().WriteCache(user.Token, user.UserId, user.LoginTime.AddHours(12));
+                CacheFactory.GetCacheInstance().WriteCache(user.Token, user.UserId, user.LoginTime.AddHours(1));
             }
             catch (Exception ex)
             {

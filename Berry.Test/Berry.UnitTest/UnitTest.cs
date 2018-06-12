@@ -10,6 +10,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using Berry.App.Cache;
+using Berry.Cache;
+using Berry.Entity;
 
 namespace Berry.UnitTest
 {
@@ -30,13 +33,15 @@ namespace Berry.UnitTest
 
             //IocTest();
 
-            InsertTest(2);
+            //InsertTest(2);
 
             //InsertListTest(5000 * 10);
 
-            QueryTest();
+            //QueryTest();
 
             //RsaTest();
+
+            RedisTest();
         }
 
         private void LogTest()
@@ -181,6 +186,34 @@ namespace Berry.UnitTest
                 string d = RSAEncryptHelper.DecryptString(e, key.PrivateKey);
                 Console.WriteLine("解密后：" + d);
             }
+        }
+
+        private void RedisTest()
+        {
+            RedisHelper redis = new RedisHelper();
+            List<string> keys = redis.GetKeys();
+
+            keys.ForEach(k =>
+            {
+                Console.WriteLine(k + "\r\n");
+            });
+            Console.WriteLine("===========================");
+
+            DataItemCache dataItem = new DataItemCache();
+            dataItem.GetDataItemList();
+
+            Console.WriteLine("===========================");
+            BaseEntity cache = CacheFactory.GetCacheInstance().GetCache<BaseEntity>("__TestBaseEntityKey");
+            if (cache == null)
+            {
+                cache = new BaseEntity
+                {
+                    Id = "123",
+                    PK = 1
+                };
+                CacheFactory.GetCacheInstance().WriteCache(cache, "__TestBaseEntityKey");
+            }
+            Console.WriteLine(cache.Id);
         }
     }
 }

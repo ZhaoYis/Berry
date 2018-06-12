@@ -800,7 +800,7 @@ namespace Berry.Data.ADO
             string where = lambda.Where();
 
             //表名
-            string table = EntityAttributeHelper.GetEntityTable<T>();
+            //string table = EntityAttributeHelper.GetEntityTable<T>();
             string strSql = DatabaseCommon.SelectSql<T>(where, true).ToString();
 
             if (!string.IsNullOrEmpty(orderField))
@@ -824,7 +824,7 @@ namespace Berry.Data.ADO
             using (var dbConnection = Connection)
             {
                 IEnumerable<T> data = new List<T>();
-                string selectCountSql = "Select Count(*) From " + table + " WHERE 1 = 1";
+                string selectCountSql = "Select Count(*) From (" + strSql + ") AS t";
                 total = (int)SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, selectCountSql);
 
                 DataSet dataSet = SqlHelper.ExecuteDataset(dbConnection, CommandType.Text, sb.ToString());

@@ -19,37 +19,56 @@ namespace Berry.Cache
         }
 
         /// <summary>
-        /// 写入缓存
+        /// 写入缓存，单体
         /// </summary>
         /// <param name="value">对象数据</param>
         /// <param name="cacheKey">键</param>
         /// <param name="expireTime">到期时间</param>
         public void WriteCache<T>(T value, string cacheKey, DateTime expireTime) where T : class
         {
-            Type type = typeof(T);
             TimeSpan span = expireTime - DateTime.Now;
+
+            Type type = typeof(T);
             if (type == typeof(string))
             {
-                redisHelper.StringSet<T>(cacheKey, value, span);
-            }else if (type == typeof(T))
+                redisHelper.StringSet<T>(cacheKey,value, span);
+            }
+            else if (type == typeof(T))
             {
                 redisHelper.ListRightPush<T>(cacheKey, value);
+
+                redisHelper.KeyExpire(cacheKey, span);
             }
         }
 
         /// <summary>
-        /// 写入缓存
+        /// 写入缓存，集合，默认过期时间10分钟
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="cacheKey"></param>
+        public void WriteListCache<T>(List<T> value, string cacheKey) where T : class
+        {
+            WriteListCache<T>(value, cacheKey, DateTime.Now.AddMinutes(10));
+        }
+
+        /// <summary>
+        /// 写入缓存，集合
         /// </summary>
         /// <param name="value">对象数据</param>
         /// <param name="cacheKey">键</param>
         /// <param name="expireTime">到期时间</param>
-        public void WriteCache<T>(List<T> value, string cacheKey, DateTime expireTime) where T : class
+        public void WriteListCache<T>(List<T> value, string cacheKey, DateTime expireTime) where T : class
         {
+            TimeSpan span = expireTime - DateTime.Now;
+
             redisHelper.ListRightPush<List<T>>(cacheKey, value);
+
+            redisHelper.KeyExpire(cacheKey, span);
         }
 
         /// <summary>
-        /// 读取缓存
+        /// 读取缓存，单体
         /// </summary>
         /// <param name="cacheKey">键</param>
         /// <returns></returns>
@@ -63,18 +82,18 @@ namespace Berry.Cache
             }
             else if (type == typeof(T))
             {
-                res = redisHelper.ListRange<T>(cacheKey) as T;
+                res = redisHelper.StringGet<T>(cacheKey) as T;
             }
             return res;
         }
 
         /// <summary>
-        /// 读取缓存
+        /// 读取缓存，集合
         /// </summary>
         /// <param name="cacheKey">键</param>
-        /// <param name="total">记录数</param>
+        /// <param name="total">当前Key下面缓存记录数</param>
         /// <returns></returns>
-        public List<T> GetCache<T>(string cacheKey, out long total) where T : class
+        public List<T> GetListCache<T>(string cacheKey, out long total) where T : class
         {
             List<T> res = redisHelper.ListRange<T>(cacheKey) as List<T>;
             total = redisHelper.ListLength(cacheKey);
@@ -96,7 +115,11 @@ namespace Berry.Cache
         /// </summary>
         public void RemoveCache()
         {
-            throw new NotImplementedException();
+            List<string> keys = redisHelper.GetKeys();
+            foreach (string key in keys)
+            {
+                redisHelper.KeyDelete(key);
+            }
         }
     }
 }

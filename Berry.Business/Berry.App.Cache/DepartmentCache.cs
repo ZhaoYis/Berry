@@ -20,11 +20,11 @@ namespace Berry.App.Cache
         /// <returns></returns>
         public IEnumerable<DepartmentEntity> GetList()
         {
-            List<DepartmentEntity> cacheList = CacheFactory.GetCacheInstance().GetCache<List<DepartmentEntity>>(busines.CacheKey);
-            if (cacheList == null)
+            List<DepartmentEntity> cacheList = CacheFactory.GetCacheInstance().GetListCache<DepartmentEntity>(busines.CacheKey,out long total);
+            if (cacheList == null || cacheList.Count == 0)
             {
                 cacheList = busines.GetDepartmentList().ToList();
-                CacheFactory.GetCacheInstance().WriteCache(cacheList, busines.CacheKey);
+                CacheFactory.GetCacheInstance().WriteListCache<DepartmentEntity>(cacheList, busines.CacheKey);
             }
             return cacheList;
         }
