@@ -107,5 +107,15 @@ namespace Berry.Cache
                 if (cacheEnum.Key != null) _cache.Remove(cacheEnum.Key.ToString());
             }
         }
+
+        /// <summary>
+        /// 确定当前Key是否过期
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool HasExpire(string key)
+        {
+            return _cache[key] == null;
+        }
     }
 }

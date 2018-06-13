@@ -820,6 +820,7 @@
     <Content Include="XmlConfig\log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="XmlConfig\RedisRefresh.xml" />
     <Content Include="XmlConfig\Redis配置选项.txt" />
     <Content Include="XmlConfig\system.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -833,6 +834,10 @@
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Berry.Business\Berry.App.CacheRefresh\Berry.App.CacheRefresh.csproj">
+      <Project>{bc269fd1-4cdb-46f7-9e2d-60f78966a54d}</Project>
+      <Name>Berry.App.CacheRefresh</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Berry.Business\Berry.App.Cache\Berry.App.Cache.csproj">
       <Project>{95959003-eeaa-4fb2-a4b6-f4af890a2bdd}</Project>
       <Name>Berry.App.Cache</Name>

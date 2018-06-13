@@ -64,5 +64,12 @@ namespace Berry.Cache
         /// 移除全部缓存
         /// </summary>
         void RemoveCache();
+
+        /// <summary>
+        /// 确定当前Key是否过期
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        bool HasExpire(string key);
     }
 }

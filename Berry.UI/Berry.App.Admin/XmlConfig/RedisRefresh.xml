@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<RedisRefresh>
+  <Setting>
+    <Name>行政区域</Name>
+    <JobName>AreaJob</JobName>
+    <JobGroup>group_Area</JobGroup>
+    <JobIdentityName>jb_Area</JobIdentityName>
+    <TriggerIdentityName>trigger_Area</TriggerIdentityName>
+    <CronExpression>0/2 * * * * ? </CronExpression>
+    <TimeSpan>10</TimeSpan>
+  </Setting>
+  <Setting>
+    <Name>岗位</Name>
+    <JobName>PostJob</JobName>
+    <JobGroup>group_Post</JobGroup>
+    <JobIdentityName>jb_Post</JobIdentityName>
+    <TriggerIdentityName>trigger_Post</TriggerIdentityName>
+    <CronExpression>0/5 * * * * ? </CronExpression>
+    <TimeSpan>10</TimeSpan>
+  </Setting>
+  <Setting>
+    <Name>系统字典</Name>
+    <JobName>DataItemJob</JobName>
+    <JobGroup>group_DataItem</JobGroup>
+    <JobIdentityName>jb_DataItem</JobIdentityName>
+    <TriggerIdentityName>trigger_DataItem</TriggerIdentityName>
+    <CronExpression>0/10 * * * * ? </CronExpression>
+    <TimeSpan>10</TimeSpan>
+  </Setting>
+  <Setting>
+    <Name>部门</Name>
+    <JobName>DepartmentJob</JobName>
+    <JobGroup>group_Department</JobGroup>
+    <JobIdentityName>jb_Department</JobIdentityName>
+    <TriggerIdentityName>trigger_Department</TriggerIdentityName>
+    <CronExpression>0/15 * * * * ? </CronExpression>
+    <TimeSpan>10</TimeSpan>
+  </Setting>
+  <Setting>
+    <Name>职位</Name>
+    <JobName>Job</JobName>
+    <JobGroup>group_Job</JobGroup>
+    <JobIdentityName>jb_Job</JobIdentityName>
+    <TriggerIdentityName>trigger_Job</TriggerIdentityName>
+    <CronExpression>0/20 * * * * ? </CronExpression>
+    <TimeSpan>10</TimeSpan>
+  </Setting>
+  <Setting>
+    <Name>机构</Name>
+    <JobName>OrganizeJob</JobName>
+    <JobGroup>group_Organize</JobGroup>
+    <JobIdentityName>jb_Organize</JobIdentityName>
+    <TriggerIdentityName>trigger_Organize</TriggerIdentityName>
+    <CronExpression>0/25 * * * * ? </CronExpression>
+    <TimeSpan>10</TimeSpan>
+  </Setting>
+  <Setting>
+    <Name>角色</Name>
+    <JobName>RoleJob</JobName>
+    <JobGroup>group_Role</JobGroup>
+    <JobIdentityName>jb_Role</JobIdentityName>
+    <TriggerIdentityName>trigger_Role</TriggerIdentityName>
+    <CronExpression>0/30 * * * * ? </CronExpression>
+    <TimeSpan>10</TimeSpan>
+  </Setting>
+  <Setting>
+    <Name>用户组</Name>
+    <JobName>UserGroupJob</JobName>
+    <JobGroup>group_UserGroup</JobGroup>
+    <JobIdentityName>jb_UserGroup</JobIdentityName>
+    <TriggerIdentityName>trigger_UserGroup</TriggerIdentityName>
+    <CronExpression>0/35 * * * * ? </CronExpression>
+    <TimeSpan>10</TimeSpan>
+  </Setting>
+  
+</RedisRefresh>

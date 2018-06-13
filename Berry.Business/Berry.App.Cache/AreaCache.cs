@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Berry.BLL.SystemManage;
 using Berry.Cache;
@@ -33,6 +34,27 @@ namespace Berry.App.Cache
                 }
             }
             return cacheList;
+        }
+
+        /// <summary>
+        /// 刷新缓存
+        /// </summary>
+        /// <returns></returns>
+        public void RefreshCache(DateTime expireTime)
+        {
+            bool hasExpire = CacheFactory.GetCacheInstance().HasExpire(areaBll.CacheKey);
+            if (!hasExpire)
+            {
+                var cacheList = areaBll.GetList().ToList();
+                //以集合的方式存在缓存下面
+                //CacheFactory.GetCacheInstance().WriteListCache<AreaEntity>(cacheList, areaBll.CacheKey);
+
+                //以单体的形式存在缓存下面
+                foreach (AreaEntity model in cacheList)
+                {
+                    CacheFactory.GetCacheInstance().WriteCache<AreaEntity>(model, areaBll.CacheKey, expireTime);
+                }
+            }
         }
 
         /// <summary>

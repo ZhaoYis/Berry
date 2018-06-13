@@ -30,6 +30,20 @@ namespace Berry.App.Cache
         }
 
         /// <summary>
+        /// 刷新缓存
+        /// </summary>
+        /// <returns></returns>
+        public void RefreshCache(DateTime expireTime)
+        {
+            bool hasExpire = CacheFactory.GetCacheInstance().HasExpire(busines.CacheKey);
+            if (!hasExpire)
+            {
+                var cacheList = busines.GetDepartmentList().ToList();
+                CacheFactory.GetCacheInstance().WriteListCache<DepartmentEntity>(cacheList, busines.CacheKey, expireTime);
+            }
+        }
+
+        /// <summary>
         /// 根据机构ID获取部门列表
         /// </summary>
         /// <param name="organizeId">机构Id</param>

@@ -82,7 +82,7 @@ namespace Berry.Cache
             }
             else if (type == typeof(T))
             {
-                res = redisHelper.StringGet<T>(cacheKey) as T;
+                res = redisHelper.ListRange<T>(cacheKey) as T;
             }
             return res;
         }
@@ -120,6 +120,16 @@ namespace Berry.Cache
             {
                 redisHelper.KeyDelete(key);
             }
+        }
+
+        /// <summary>
+        /// 确定当前Key是否过期
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool HasExpire(string key)
+        {
+            return redisHelper.KeyExists(key);
         }
     }
 }

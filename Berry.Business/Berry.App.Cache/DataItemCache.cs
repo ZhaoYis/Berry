@@ -46,6 +46,27 @@ namespace Berry.App.Cache
         }
 
         /// <summary>
+        /// 刷新缓存
+        /// </summary>
+        /// <returns></returns>
+        public void RefreshCache(DateTime expireTime)
+        {
+            bool hasExpire = CacheFactory.GetCacheInstance().HasExpire(_dataItemDetailBll.CacheKey);
+            if (!hasExpire)
+            {
+                var cacheList = _dataItemDetailBll.GetDataItemList().ToList();
+                //以集合的方式存在缓存下面
+                CacheFactory.GetCacheInstance().WriteListCache<DataItemViewModel>(cacheList, _dataItemDetailBll.CacheKey, expireTime);
+
+                //以单体的形式存在缓存下面
+                //foreach (DataItemViewModel model in cacheList)
+                //{
+                //    CacheFactory.GetCacheInstance().WriteCache<DataItemViewModel>(model, _dataItemDetailBll.CacheKey);
+                //}
+            }
+        }
+
+        /// <summary>
         /// 根据编码获取项目
         /// </summary>
         /// <param name="code"></param>

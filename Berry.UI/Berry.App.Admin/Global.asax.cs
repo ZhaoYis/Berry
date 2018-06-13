@@ -2,22 +2,12 @@
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using Berry.BLL.BaseManage;
-using Berry.BLL.SystemManage;
-using Berry.Code;
-using Berry.Code.Operator;
-using Berry.Entity.BaseManage;
-using Berry.Entity.SystemManage;
-using Berry.Extension;
-using Berry.Util;
+using Berry.App.CacheRefresh;
 
 namespace Berry.App.Admin
 {
     public class MvcApplication : System.Web.HttpApplication
     {
-        private static LogBLL logBll = new LogBLL();
-        private static UserBLL userBll = new UserBLL();
-
         void Application_Start()
         {
             //不是每次请求都调用
@@ -30,6 +20,9 @@ namespace Berry.App.Admin
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            //缓存刷新
+            new RedisRefresh().JobStart();
         }
 
         void Application_End(object sender, EventArgs e)

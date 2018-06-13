@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 using Berry.App.Cache;
 using Berry.Cache;
 using Berry.Entity;
@@ -193,14 +194,18 @@ namespace Berry.UnitTest
             RedisHelper redis = new RedisHelper();
             List<string> keys = redis.GetKeys();
 
+            Console.WriteLine("__TestBaseEntityKey是否存储：" + redis.KeyExists("__TestBaseEntityKey") + "\r\n");
+
             keys.ForEach(k =>
             {
-                Console.WriteLine(k + "\r\n");
+                bool e = redis.KeyExists(k);
+                Console.WriteLine(k + "是否存储："+ e + "\r\n");
             });
             Console.WriteLine("===========================");
 
             DataItemCache dataItem = new DataItemCache();
-            dataItem.GetDataItemList();
+            var res = dataItem.GetDataItemList();
+            Console.WriteLine("res:" + res.Count());
 
             Console.WriteLine("===========================");
             BaseEntity cache = CacheFactory.GetCacheInstance().GetCache<BaseEntity>("__TestBaseEntityKey");
@@ -211,7 +216,7 @@ namespace Berry.UnitTest
                     Id = "123",
                     PK = 1
                 };
-                CacheFactory.GetCacheInstance().WriteCache(cache, "__TestBaseEntityKey");
+                CacheFactory.GetCacheInstance().WriteCache<BaseEntity>(cache, "__TestBaseEntityKey");
             }
             Console.WriteLine(cache.Id);
         }
