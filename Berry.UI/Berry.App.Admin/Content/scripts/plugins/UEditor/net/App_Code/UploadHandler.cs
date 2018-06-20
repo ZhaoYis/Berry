@@ -62,7 +62,15 @@ public class UploadHandler : Handler
         Result.OriginFileName = uploadFileName;
 
         var savePath = PathFormatter.Format(uploadFileName, UploadConfig.PathFormat);
-        var localPath = Server.MapPath(savePath);
+        var localPath = "";
+        if (!string.IsNullOrEmpty(UploadConfig.PhysicalPath))
+        {
+            localPath = UploadConfig.PhysicalPath + savePath;
+        }
+        else
+        {
+            localPath = Server.MapPath(savePath);
+        }
         try
         {
             if (!Directory.Exists(Path.GetDirectoryName(localPath)))
@@ -132,6 +140,11 @@ public class UploadConfig
     /// 文件命名规则
     /// </summary>
     public string PathFormat { get; set; }
+
+    /// <summary>
+    /// 物理路径
+    /// </summary>
+    public string PhysicalPath { get; set; }
 
     /// <summary>
     /// 上传表单域名称

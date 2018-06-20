@@ -102,4 +102,22 @@ namespace Berry.Entity
     }
 
     #endregion 标准Json基类 带分页
+
+    #region 微信接口错误信息返回基类
+    /// <summary>
+    /// 微信接口错误信息返回基类
+    /// </summary>
+    public class BaseJsonResult4WeChatErr
+    {
+        /// <summary>
+        /// 状态码
+        /// </summary>
+        public int errcode { get; set; }
+        /// <summary>
+        /// 错误消息
+        /// </summary>
+        public string errmsg { get; set; }
+    }
+
+    #endregion
 }

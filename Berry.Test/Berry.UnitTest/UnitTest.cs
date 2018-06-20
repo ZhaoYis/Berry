@@ -30,6 +30,8 @@ namespace Berry.UnitTest
         {
             Console.WriteLine("==================测试开始==================\r\n");
 
+            bool isConn = CommonHelper.IsConnectedInternet();
+
             //LogTest();
 
             //IocTest();
@@ -45,6 +47,7 @@ namespace Berry.UnitTest
             RedisTest();
         }
 
+        [TestMethod]
         private void LogTest()
         {
             Console.WriteLine("开始测试日志...\r\n");
@@ -52,6 +55,7 @@ namespace Berry.UnitTest
             logHelper.Info("测试日志.");
         }
 
+        [TestMethod]
         private void IocTest()
         {
             try
@@ -77,6 +81,7 @@ namespace Berry.UnitTest
             }
         }
 
+        [TestMethod]
         private void InsertTest(int toatl = 10)
         {
             Console.WriteLine("\r\n开始测试插入数据...\r\n");
@@ -121,6 +126,7 @@ namespace Berry.UnitTest
             Console.WriteLine("执行结束，耗时：" + time);
         }
 
+        [TestMethod]
         private void InsertListTest(int toatl = 10)
         {
             Console.WriteLine("\r\n开始测试批量插入数据...\r\n");
@@ -158,6 +164,7 @@ namespace Berry.UnitTest
             Console.WriteLine("执行结束，耗时：" + time);
         }
 
+        [TestMethod]
         private void QueryTest()
         {
             Console.WriteLine("\r\n开始测试查询数据...\r\n");
@@ -172,6 +179,7 @@ namespace Berry.UnitTest
             Console.WriteLine("执行结束，耗时：" + time);
         }
 
+        [TestMethod]
         private void RsaTest()
         {
             var key = RSAEncryptHelper.GetRSAKey();
@@ -189,6 +197,7 @@ namespace Berry.UnitTest
             }
         }
 
+        [TestMethod]
         private void RedisTest()
         {
             RedisHelper redis = new RedisHelper();
@@ -199,7 +208,7 @@ namespace Berry.UnitTest
             keys.ForEach(k =>
             {
                 bool e = redis.KeyExists(k);
-                Console.WriteLine(k + "是否存储："+ e + "\r\n");
+                Console.WriteLine(k + "是否存储：" + e + "\r\n");
             });
             Console.WriteLine("===========================");
 

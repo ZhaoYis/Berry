@@ -38,8 +38,8 @@ namespace Berry.Service.SystemManage
                 //操作时间
                 if (!queryParam["StartTime"].IsEmpty() && !queryParam["EndTime"].IsEmpty())
                 {
-                    DateTime startTime = queryParam["StartTime"].ToDate();
-                    DateTime endTime = queryParam["EndTime"].ToDate().AddDays(1);
+                    DateTime startTime = queryParam["StartTime"].TryToDateTime();
+                    DateTime endTime = queryParam["EndTime"].TryToDateTime().AddDays(1);
                     expression = expression.And(t => t.OperateTime >= startTime && t.OperateTime <= endTime);
                 }
                 //操作用户Id

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Web.Http;
 using Berry.Code;
+using Berry.Entity;
+using Berry.Extension;
 using Berry.Log;
 using Berry.SOA.API.Attributes;
 using Berry.SOA.API.Filters;
@@ -35,6 +38,48 @@ namespace Berry.SOA.API.Controllers.Base
         public void Logger(Type type, string desc, Action tryHandel, Action<Exception> catchHandel = null, Action finallHandel = null, ErrorHandel errorHandel = ErrorHandel.Throw)
         {
             LogHelper.Logger(type, desc, errorHandel, tryHandel, catchHandel, finallHandel);
+        }
+        #endregion
+
+        #region 调用微信接口返回的数据进行预处理
+        /// <summary>
+        /// 调用微信接口返回的数据进行预处理
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        protected BaseJsonResult<T> PreprocessingWeChatData<T>(string json) where T : class, new()
+        {
+            BaseJsonResult<T> res = new BaseJsonResult<T> { Status = (int)JsonObjectStatus.Fail, Data = null, Message = "未知错误" };
+            if (string.IsNullOrEmpty(json)) return res;
+
+            if (json.Contains("errcode") || json.Contains("errmsg"))
+            {
+                BaseJsonResult4WeChatErr weChatErr = json.JsonToEntity<BaseJsonResult4WeChatErr>();
+                if (weChatErr != null)
+                {
+                    res = new BaseJsonResult<T>
+                    {
+                        Status = (int)JsonObjectStatus.Fail,
+                        Data = null,
+                        Message = JsonObjectStatus.Fail.GetEnumDescription() + ".微信接口返回错误码[详情请参考：https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1433747234]为：" + weChatErr.errcode + "，错误消息为：" + weChatErr.errmsg
+                    };
+                }
+            }
+            else
+            {
+                T t = json.JsonToEntity<T>();
+                if (t != null)
+                {
+                    res = new BaseJsonResult<T>
+                    {
+                        Status = (int)JsonObjectStatus.Success,
+                        Data = t,
+                        Message = JsonObjectStatus.Success.GetEnumDescription()
+                    };
+                }
+            }
+            return res;
         }
         #endregion
     }

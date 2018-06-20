@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Xml;
 
 namespace Berry.Util
@@ -77,7 +78,7 @@ namespace Berry.Util
             return needReplace ? res.ToString(format) : res.ToString();
         }
 
-        [System.Runtime.InteropServices.DllImport("rpcrt4.dll", SetLastError = true)]
+        [DllImport("rpcrt4.dll", SetLastError = true)]
         static extern int UuidCreateSequential(byte[] buffer);
         /// <summary>
         /// 创建有序GUID
@@ -119,6 +120,20 @@ namespace Berry.Util
         }
 
         #endregion 获取全局唯一GUID
+
+        #region 检测本机是否联网
+
+        [DllImport("wininet.dll")]
+        private static extern bool InternetGetConnectedState(out int connectionDescription, int reservedValue);
+        /// <summary> 
+        /// 检测本机是否联网 
+        /// </summary> 
+        /// <returns></returns> 
+        public static bool IsConnectedInternet()
+        {
+            return InternetGetConnectedState(out _, 0);
+        } 
+        #endregion
 
         #region Stopwatch计时器
         /// <summary>

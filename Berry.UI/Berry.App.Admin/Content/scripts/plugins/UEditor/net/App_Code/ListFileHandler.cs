@@ -49,7 +49,18 @@ public class ListFileManager : Handler
         var buildingList = new List<String>();
         try
         {
-            var localPath = Server.MapPath(PathToList);
+            //var localPath = Server.MapPath(PathToList);
+
+            var localPath = "";
+            if (!string.IsNullOrEmpty(Config.GetString("imageManagerListPhysicalPath")))
+            {
+                localPath = Config.GetString("imageManagerListPhysicalPath") + PathToList;
+            }
+            else
+            {
+                localPath = Server.MapPath(PathToList);
+            }
+
             buildingList.AddRange(Directory.GetFiles(localPath, "*", SearchOption.AllDirectories)
                 .Where(x => SearchExtensions.Contains(Path.GetExtension(x).ToLower()))
                 .Select(x => PathToList + x.Substring(localPath.Length).Replace("\\", "/")));

@@ -22,7 +22,8 @@ public class UEditorHandler : IHttpHandler
                     AllowExtensions = Config.GetStringList("imageAllowFiles"),
                     PathFormat = Config.GetString("imagePathFormat"),
                     SizeLimit = Config.GetInt("imageMaxSize"),
-                    UploadFieldName = Config.GetString("imageFieldName")
+                    UploadFieldName = Config.GetString("imageFieldName"),
+                    PhysicalPath = Config.GetString("imagePhysicalPath")
                 });
                 break;
             case "uploadscrawl":
@@ -32,6 +33,7 @@ public class UEditorHandler : IHttpHandler
                     PathFormat = Config.GetString("scrawlPathFormat"),
                     SizeLimit = Config.GetInt("scrawlMaxSize"),
                     UploadFieldName = Config.GetString("scrawlFieldName"),
+                    PhysicalPath = Config.GetString("scrawlPhysicalPath"),
                     Base64 = true,
                     Base64Filename = "scrawl.png"
                 });
@@ -41,6 +43,7 @@ public class UEditorHandler : IHttpHandler
                 {
                     AllowExtensions = Config.GetStringList("videoAllowFiles"),
                     PathFormat = Config.GetString("videoPathFormat"),
+                    PhysicalPath = Config.GetString("videoPhysicalPath"),
                     SizeLimit = Config.GetInt("videoMaxSize"),
                     UploadFieldName = Config.GetString("videoFieldName")
                 });
@@ -50,6 +53,7 @@ public class UEditorHandler : IHttpHandler
                 {
                     AllowExtensions = Config.GetStringList("fileAllowFiles"),
                     PathFormat = Config.GetString("filePathFormat"),
+                    PhysicalPath = Config.GetString("filePhysicalPath"),
                     SizeLimit = Config.GetInt("fileMaxSize"),
                     UploadFieldName = Config.GetString("fileFieldName")
                 });

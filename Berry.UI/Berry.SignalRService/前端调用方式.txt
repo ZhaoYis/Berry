@@ -1,0 +1,90 @@
+﻿<div class="container">
+    <input type="text" id="message" />
+    <input type="button" id="sendmessage" value="发送消息" />
+    <ul id="discussion"></ul>
+</div>
+
+@section scripts
+{
+    <!--引用SignalR库. -->
+    <script src="~/Scripts/jquery.signalR-2.2.3.min.js"></script>
+    <!--引用自动生成的SignalR 集线器(Hub)脚本.在运行的时候在浏览器的Source下可看到 -->
+    <script src="http://localhost:51691/signalr/hubs"></script>
+    <script>
+        $(function () {
+            // 引用自动生成的集线器代理
+            var chat = $.connection.ChatsHub;
+            $.connection.hub.url = 'http://localhost:51691/signalr/hubs';
+            //自定义用户ID
+            $.connection.hub.qs = { "userId": "110" };
+
+            //启用浏览器端输出日志
+            //$.connection.hub.logging = true;
+
+            // 定义服务器端调用的客户端SendMessage来显示新消息
+            chat.client.SendMessage = function (req) {
+                // 向页面添加消息
+                $('#discussion').append('<li><strong>' + htmlEncode(req.SendId) + '</strong>: ' + htmlEncode(req.Content) + '</li>');
+            };
+            // 设置焦点到输入框
+            $('#message').focus();
+
+            // Start the connection.
+            $.connection.hub.starting(function () {
+                console.log('SignalR启动中...')
+            });
+            $.connection.hub.received(function (e) {
+                //console.log(e)
+                console.log('SignalR收到消息：\n')
+                var msgBody = e.A;
+                //console.log(msgBody)
+                if (msgBody)
+                    console.log("用户ID：" + msgBody[0].SendId + "，消息内容：" + msgBody[0].Content)
+            });
+            $.connection.hub.connectionSlow(function () {
+                console.log('connectionSlow.')
+            });
+            $.connection.hub.reconnecting(function () {
+                console.log('SignalR正在重新连接中...')
+            });
+            $.connection.hub.reconnected(function () {
+                console.log('SignalR重新连接成功...')
+            });
+            $.connection.hub.stateChanged(function (o, n) {
+                //console.log(o)
+                console.log('SignalR状态改变，newState：' + o.newState + "，oldState：" + o.oldState + "，" + n)
+            });
+            $.connection.hub.disconnected(function () {
+                console.log('SignalR断开连接...');
+                setTimeout(function () {
+                    $.connection.hub.start();
+                }, 1000); // 1秒后重新连接
+            });
+            //错误
+            $.connection.hub.error(function (err) {
+                console.log("SignalR出现错误. \n" + "Error: " + err.message);
+            });
+
+            // 开始连接服务器
+            $.connection.hub.start().done(function () {
+                $('#sendmessage').click(function () {
+                    var msg = $('#message').val();
+                    // 调用服务器端集线器的Send方法
+                    chat.server.send(msg).fail(function (e) {
+                        if (e.source === 'HubException') {
+                            console.log("异常信息：" + e.message + "，用户名：" + e.data.userName + "，错误描述：" + e.data.message);
+                        }
+                    });
+                    // 清空输入框信息并获取焦点
+                    $('#message').val('').focus();
+                });
+            });
+        });
+
+        // 为显示的消息进行Html编码
+        function htmlEncode(value) {
+            var encodedValue = $('<div />').text(value).html();
+            return encodedValue;
+        }
+    </script>
+}

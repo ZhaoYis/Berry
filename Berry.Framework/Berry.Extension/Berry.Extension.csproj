@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConvertExtension.cs" />
+    <Compile Include="DateTimeExtension.cs" />
     <Compile Include="EnumExtension.cs" />
     <Compile Include="HideSensitiveInfoExtension.cs" />
     <Compile Include="HttpRequestMessageExtension.cs" />

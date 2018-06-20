@@ -63,6 +63,8 @@
     <Compile Include="BaseManage\UserRelationEntity.cs" />
     <Compile Include="CommonEntity\PaginationEntity.cs" />
     <Compile Include="CommonEntity\RedisRefreshEntity.cs" />
+    <Compile Include="CommonEntity\WeChatBaseInfo.cs" />
+    <Compile Include="CommonEntity\WeChatUserInfoEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicInfoManage\NewsEntity.cs" />
     <Compile Include="SystemManage\AreaEntity.cs" />

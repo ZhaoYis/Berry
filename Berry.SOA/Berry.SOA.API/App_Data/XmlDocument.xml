@@ -739,6 +739,14 @@
             <param name="catchHandel">异常处理方式</param>
             <param name="finallHandel">最终处理方式</param>
         </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseApiController.PreprocessingWeChatData``1(System.String)">
+            <summary>
+            调用微信接口返回的数据进行预处理
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="json"></param>
+            <returns></returns>
+        </member>
         <member name="M:Berry.SOA.API.Controllers.HomeController.Index">
             <summary>
             首页
@@ -768,6 +776,18 @@
             </summary>
             <param name="arg">测试参数</param>
             <returns>请求成功则返回成功状态信息</returns>
+        </member>
+        <member name="T:Berry.SOA.API.Controllers.V1.WeChatLoginController">
+            <summary>
+            微信登陆
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.V1.WeChatLoginController.Login(Berry.SOA.API.ParameterModel.WeChatLoginArgEntity)">
+            <summary>
+            微信登陆
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
         </member>
         <member name="T:Berry.SOA.API.Controllers.TestController">
             <summary>
@@ -803,6 +823,41 @@
         <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.StarTime">
             <summary>
             开始时间
+            </summary>
+        </member>
+        <member name="T:Berry.SOA.API.ParameterModel.WeChatLoginArgEntity">
+            <summary>
+            微信登陆传回服务器参数
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.WeChatLoginArgEntity.access_token">
+            <summary>
+             接口调用凭证
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.WeChatLoginArgEntity.expires_in">
+            <summary>
+            access_token接口调用凭证超时时间，单位（秒）
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.WeChatLoginArgEntity.refresh_token">
+            <summary>
+            用户刷新access_token
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.WeChatLoginArgEntity.openid">
+            <summary>
+            授权用户唯一标识
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.WeChatLoginArgEntity.scope">
+            <summary>
+            用户授权的作用域，使用逗号（,）分隔
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.WeChatLoginArgEntity.unionid">
+            <summary>
+            当且仅当该网站应用已获得该用户的userinfo授权时，才会出现该字段。
             </summary>
         </member>
     </members>

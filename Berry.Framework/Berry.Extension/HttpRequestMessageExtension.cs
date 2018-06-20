@@ -16,7 +16,7 @@ namespace Berry.Extension
             Lazy<bool> localFlag = request.Properties["MS_IsLocal"] as Lazy<bool>;
             return localFlag != null && localFlag.Value;
         }
-
+        
         /// <summary>
         /// 获取客户端IP地址
         /// </summary>

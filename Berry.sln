@@ -90,6 +90,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "07 任务调度", "07 任�
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.App.CacheRefresh", "Berry.Business\Berry.App.CacheRefresh\Berry.App.CacheRefresh.csproj", "{BC269FD1-4CDB-46F7-9E2D-60F78966A54D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.Util.SMS", "Berry.Framework\Berry.Util.SMS\Berry.Util.SMS.csproj", "{0DB972F1-54B5-4D30-96BF-F6B470ADD1E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.SignalRService", "Berry.UI\Berry.SignalRService\Berry.SignalRService.csproj", "{3227D1F6-9E94-45AE-9E04-09178152A447}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -200,6 +204,14 @@ Global
 		{BC269FD1-4CDB-46F7-9E2D-60F78966A54D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC269FD1-4CDB-46F7-9E2D-60F78966A54D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC269FD1-4CDB-46F7-9E2D-60F78966A54D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DB972F1-54B5-4D30-96BF-F6B470ADD1E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DB972F1-54B5-4D30-96BF-F6B470ADD1E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DB972F1-54B5-4D30-96BF-F6B470ADD1E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DB972F1-54B5-4D30-96BF-F6B470ADD1E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3227D1F6-9E94-45AE-9E04-09178152A447}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3227D1F6-9E94-45AE-9E04-09178152A447}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3227D1F6-9E94-45AE-9E04-09178152A447}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3227D1F6-9E94-45AE-9E04-09178152A447}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -236,6 +248,8 @@ Global
 		{EE0F1360-7ED4-4ED3-AFD6-66A62957B9A5} = {628542B5-ACE5-4C35-8384-3EA2349C5B5B}
 		{BB601C02-6B22-4070-B38F-C9C2511BA639} = {DC009827-CA78-467C-AE01-5B3E9199DBDA}
 		{BC269FD1-4CDB-46F7-9E2D-60F78966A54D} = {3AD86090-AD34-4D1E-A9A3-AB5F959E831C}
+		{0DB972F1-54B5-4D30-96BF-F6B470ADD1E9} = {E5A2C8A4-B1B3-467C-92B2-792BF367DF5D}
+		{3227D1F6-9E94-45AE-9E04-09178152A447} = {233E405C-FDAA-4276-B163-FD4F2FA2003F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {402D764C-5259-4C6D-BDA4-DDBAA375944E}
