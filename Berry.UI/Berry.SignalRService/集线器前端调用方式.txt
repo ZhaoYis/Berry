@@ -28,6 +28,11 @@
             };
             // 设置焦点到输入框
             $('#message').focus();
+			
+            //接受服务端消息
+            chat.client.BroadcastMessage = function (title, msg) {
+                $('#discussion').append('<span>标题：' + title + '，消息内容：' + msg + '</span>');
+            }
 
             // Start the connection.
             $.connection.hub.starting(function () {

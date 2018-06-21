@@ -20,6 +20,14 @@ namespace Berry.SignalRService.Models
         /// 连接数
         /// </summary>
         private static int _connections = 0;
+        /// <summary>
+        /// 系统主动推送消息到客户端
+        /// </summary>
+        private SignalrServerToClient client = new SignalrServerToClient();
+        /// <summary>
+        /// 用户列表，userId-connId
+        /// </summary>
+        public static readonly Dictionary<string, string> UserIdDict = new Dictionary<string, string>();
 
         /// <summary>
         /// 前端自定义参数集合
@@ -78,6 +86,7 @@ namespace Berry.SignalRService.Models
                     Content = message,
                     CreateDate = DateTime.Now
                 };
+                await client.SendMessageByUserId(connId, $"服务器收到了[{connId}]发送的消息，准备广播给所有在线用户。");
                 await Clients.All.SendMessage(msg);
             }
             catch (Exception e)
@@ -86,10 +95,19 @@ namespace Berry.SignalRService.Models
             }
         }
 
+        /// <summary>
+        /// 发送系统消息，测试方法
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public async Task SendSystemMsg(string message)
+        {
+            await client.SendSystemMessage(message, "系统消息");
+        }
         #endregion
 
         #region 聊天相关方法
-        
+
         /// <summary>
         /// 获取与某用户的消息列表
         /// </summary>
@@ -218,11 +236,25 @@ namespace Berry.SignalRService.Models
         /// <returns></returns>
         public override Task OnConnected()
         {
-            //string userId = ClientQueryString["userId"];
             Interlocked.Increment(ref _connections);
+            //业务系统用户ID
+            string userId = ClientQueryString["userId"];
+            //当前用户连接Id
+            string connId = Context.ConnectionId;
+            if (!UserIdDict.ContainsKey(userId))
+            {
+                UserIdDict.Add(userId, connId);
+            }
+            else
+            {
+                UserIdDict[userId] = connId;
+            }
+
+            //通知该用户
+            client.SendMessageByUserId(connId, "连接成功！您的ID为：" + connId).Wait();
 
             System.Diagnostics.Trace.WriteLine("=====================================");
-            System.Diagnostics.Trace.WriteLine("新的连接加入，连接ID：" + Context.ConnectionId + ",已有连接数：" + _connections);
+            System.Diagnostics.Trace.WriteLine("新的连接加入，连接ID：" + connId + ",已有连接数：" + _connections);
 
             return base.OnConnected();
         }
@@ -234,10 +266,17 @@ namespace Berry.SignalRService.Models
         /// <returns></returns>
         public override Task OnDisconnected(bool stopCalled)
         {
-            System.Diagnostics.Trace.WriteLine(Context.ConnectionId + "退出连接，已有连接数：" + _connections);
-
             Interlocked.Decrement(ref _connections);
+            //业务系统用户ID
+            string userId = ClientQueryString["userId"];
+            //当前用户连接Id
+            string connId = Context.ConnectionId;
+            if (UserIdDict.ContainsKey(userId))
+            {
+                UserIdDict.Remove(userId);
+            }
 
+            System.Diagnostics.Trace.WriteLine(connId + "退出连接，已有连接数：" + _connections);
             return base.OnDisconnected(true);
         }
 

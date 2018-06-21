@@ -147,8 +147,10 @@
     </Compile>
     <Compile Include="Models\ChatsHub.cs" />
     <Compile Include="Models\EchoConnection.cs" />
+    <Compile Include="Models\IBroadcastService.cs" />
     <Compile Include="Models\IChatService.cs" />
     <Compile Include="Models\IChatClient.cs" />
+    <Compile Include="Models\SignalrServerToClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
