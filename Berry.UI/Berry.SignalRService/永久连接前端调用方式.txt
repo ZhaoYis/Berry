@@ -1,0 +1,29 @@
+﻿<div class="container">
+    <input type="text" id="message" />
+    <input type="button" id="sendmessage" value="发送消息" />
+    <ul id="discussion"></ul>
+</div>
+
+<!--引用SignalR库. -->
+    <script src="~/Scripts/jquery.signalR-2.2.3.min.js"></script>
+
+    <script>
+        var connection = $.connection("http://localhost:51691/signalr/echo");
+        connection.logging = true;
+        //客户端接收消息
+        connection.received(function (data) {
+            $(document.body).append(data + "<br/>");
+        });
+        //连接错误处理
+        connection.error(function (err) {
+            console.log('与服务器连接报错:' + err.message);
+        });
+        //连接成功
+        connection.start().done(function () {
+            $('#sendmessage').click(function () {
+                var msg = $('#message').val();
+                //向服务器端发送消息
+                connection.send(msg);
+            });
+        });
+    </script>

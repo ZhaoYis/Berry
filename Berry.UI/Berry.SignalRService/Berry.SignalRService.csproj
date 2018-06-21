@@ -123,7 +123,8 @@
     <Content Include="Global.asax" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <Content Include="前端调用方式.txt" />
+    <Content Include="永久连接前端调用方式.txt" />
+    <Content Include="集线器前端调用方式.txt" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -145,6 +146,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ChatsHub.cs" />
+    <Compile Include="Models\EchoConnection.cs" />
     <Compile Include="Models\IChatService.cs" />
     <Compile Include="Models\IChatClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

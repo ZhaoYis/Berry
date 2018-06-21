@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Berry.SignalRService.DTO;
@@ -15,6 +16,11 @@ namespace Berry.SignalRService.Models
     public class ChatsHub : Hub<IChatClient>, IChatService
     {
         #region 基础信息
+        /// <summary>
+        /// 连接数
+        /// </summary>
+        private static int _connections = 0;
+
         /// <summary>
         /// 前端自定义参数集合
         /// </summary>
@@ -213,8 +219,11 @@ namespace Berry.SignalRService.Models
         public override Task OnConnected()
         {
             //string userId = ClientQueryString["userId"];
-            
-            Trace.WriteLine("客户端连接成功，连接ID是: " + Context.ConnectionId);
+            Interlocked.Increment(ref _connections);
+
+            System.Diagnostics.Trace.WriteLine("=====================================");
+            System.Diagnostics.Trace.WriteLine("新的连接加入，连接ID：" + Context.ConnectionId + ",已有连接数：" + _connections);
+
             return base.OnConnected();
         }
 
@@ -225,7 +234,10 @@ namespace Berry.SignalRService.Models
         /// <returns></returns>
         public override Task OnDisconnected(bool stopCalled)
         {
-            Trace.WriteLine($"客户端[{Context.ConnectionId}]断开连接");
+            System.Diagnostics.Trace.WriteLine(Context.ConnectionId + "退出连接，已有连接数：" + _connections);
+
+            Interlocked.Decrement(ref _connections);
+
             return base.OnDisconnected(true);
         }
 
