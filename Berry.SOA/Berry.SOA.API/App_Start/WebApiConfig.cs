@@ -6,6 +6,7 @@ using System.Web.Routing;
 using Berry.Extension;
 using Berry.SOA.API.Caching;
 using Berry.SOA.API.Explorer;
+using Berry.SOA.API.Filters;
 using Berry.SOA.API.Handlers;
 using Berry.SOA.API.Selector;
 using Berry.Util;
@@ -41,6 +42,9 @@ namespace Berry.SOA.API
 
             //注册自定义API过滤器，接口授权
             //config.Filters.Add(new ApiSecurityFilter());
+
+            //注册自定义Action过滤器
+            config.Filters.Add(new ActionFilter());
 
             //添加版本控制
             config.Services.Replace(typeof(IHttpControllerSelector), new WebApiControllerSelector(config));

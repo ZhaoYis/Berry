@@ -1,6 +1,5 @@
 ﻿using System.Web;
 using System.Web.Mvc;
-
 namespace Berry.SOA.API
 {
     public class FilterConfig

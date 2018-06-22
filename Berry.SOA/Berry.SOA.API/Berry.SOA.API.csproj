@@ -155,6 +155,7 @@
     <Compile Include="App_Start\Caching\ThrottleEntry.cs" />
     <Compile Include="App_Start\Explorer\CustomApiExplorer.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\Filters\ActionFilter.cs" />
     <Compile Include="App_Start\Filters\ApiSecurityFilter.cs" />
     <Compile Include="App_Start\Filters\RequireHttpsFilter.cs" />
     <Compile Include="App_Start\Filters\TimingActionFilter.cs" />

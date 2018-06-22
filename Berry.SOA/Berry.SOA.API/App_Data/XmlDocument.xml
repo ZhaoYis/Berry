@@ -74,6 +74,23 @@
             <param name="route"></param>
             <returns></returns>
         </member>
+        <member name="T:Berry.SOA.API.Filters.ActionFilter">
+            <summary>
+            控制器拦截器
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Filters.ActionFilter.OnActionExecuting(System.Web.Http.Controllers.HttpActionContext)">
+            <summary>
+            输入拦截器
+            </summary>
+            <param name="actionContext"></param>
+        </member>
+        <member name="M:Berry.SOA.API.Filters.ActionFilter.OnActionExecuted(System.Web.Http.Filters.HttpActionExecutedContext)">
+            <summary>
+            输出拦截器
+            </summary>
+            <param name="actionExecutedContext"></param>
+        </member>
         <member name="T:Berry.SOA.API.Filters.ApiSecurityFilter">
             <summary>
             验证
@@ -814,11 +831,27 @@
             ID
             </summary>
         </member>
+        <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.Password">
+            <summary>
+            密码
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.RepeatPassword">
+            <summary>
+            确认密码
+            </summary>
+        </member>
         <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.Code">
             <summary>
             特征码
             <value>A-区域001 B-区域002</value>
             </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.Mobile">
+            <summary>
+            手机号码
+            </summary>
+            <returns></returns>
         </member>
         <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.StarTime">
             <summary>

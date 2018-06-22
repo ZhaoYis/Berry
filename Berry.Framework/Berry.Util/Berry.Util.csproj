@@ -74,6 +74,7 @@
     <Compile Include="Stopwatch\BaseStopwatch.cs" />
     <Compile Include="Stopwatch\StopwatchHelper.cs" />
     <Compile Include="StringHelper.cs" />
+    <Compile Include="ValidateHelper.cs" />
     <Compile Include="VerifyCodeHelper.cs" />
   </ItemGroup>
   <ItemGroup>

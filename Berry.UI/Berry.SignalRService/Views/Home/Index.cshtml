@@ -6,17 +6,51 @@
 <h2>SignalR服务端</h2>
 <hr />
 <div class="container">
-    <input type="text" id="message" />
+    <input type="text" id="message" style="width: 300px" />
     <input type="button" id="send_system_message" value="发送系统消息" />
     <span style="color: red;font-weight: bold" id="err"></span>
-    <ul id="discussion"></ul>
+    <h4>消息列表：</h4>
+    <ul id="discussion" style="max-height: 120px;overflow-y: scroll"></ul>
+</div>
+
+<hr />
+<h2>服务器列表</h2>
+<div class="container">
+    <ul id="system-list"></ul>
 </div>
 
 <hr />
 <h2>用户列表</h2>
-<div class="container">
-    <ul id="user-list"></ul>
+<div class="">
+    <ol id="user-list"></ol>
 </div>
+
+<style type="text/css">
+    #user-list {
+        width: 100%
+    }
+
+    ol {
+        list-style-type: none;
+        counter-reset: sectioncounter;
+        width: 200px;
+    }
+
+        ol li:before {
+            content: counter(sectioncounter) "、";
+            counter-increment: sectioncounter;
+        }
+
+    #user-list li {
+        border-bottom: 1px dotted gray;
+        margin: 5px 0px 5px 0px;
+        padding: 5px;
+        cursor: pointer;
+        width: 50%;
+        float: left;
+        display: block
+    }
+</style>
 
 @section scripts{
     <!--引用SignalR库. -->
@@ -30,6 +64,7 @@
             // 引用自动生成的集线器代理
             var chat = $.connection.ChatsHub;
             $.connection.hub.url = '/signalr/hubs';
+
             var userId = new Date().getTime();
             //自定义用户ID
             $.connection.hub.qs = { "userId": "S_" + userId };
@@ -45,7 +80,7 @@
             //// 设置焦点到输入框
             //$('#message').focus();
 
-            //接受服务端消息，此处做演示，正在使用的时候服务端是不需要接受自己的消息
+            //接受服务端消息，此处做演示，正式使用的时候服务端是不需要接受自己的消息
             chat.client.BroadcastSystemMessage = function (title, msg) {
                 $('#discussion').append('<li><span>' + title + '    ' + msg + '</span></li>');
             }
@@ -75,12 +110,8 @@
 
                         chat.server.sendSystemMsg(msg).fail(function (e) {
                             if (e.source === 'HubException') {
-                                console.log("异常信息：" +
-                                    e.message +
-                                    "，用户名：" +
-                                    e.data.userName +
-                                    "，错误描述：" +
-                                    e.data.message);
+                                //console.log("异常信息：" + e.message + "，用户名：" + e.data.userName + "，错误描述：" + e.data.message);
+                                console.log(e.data.message);
                             }
                         });
                     } else {
@@ -90,10 +121,14 @@
                     // 清空输入框信息并获取焦点
                     $('#message').val('').focus();
                 });
+
+
             });
         });
 
-        setInterval(function () {
+        setInterval(LoadUserList, 1000);
+
+        function LoadUserList() {
             $.ajax({
                 url: "/Home/LoadUserInfo", //请求的url地址
                 dataType: "json", //返回格式为json
@@ -105,11 +140,18 @@
                 success: function (req) {
                     //console.log("刷新用户列表")
                     //请求成功时处理
-                    var html = '';
+                    var html_u = '';
+                    var html_s = '';
                     $.each(req, function (item) {
-                        html += "<li><span>用户Id：" + item + ",连接Id：" + req[item] + "</span></li>"
-                    })
-                    $('#user-list').html(html);
+                        if (item.indexOf("U_") > -1) {
+                            //<input type='checkbox' name='user-check' value='" + req[item] +"'/>
+                            html_u += "<li><span>用户Id：" + item + "，连接Id：" + req[item] + "</span></li>"
+                        } else if (item.indexOf("S_") > -1) {
+                            html_s += "<li><span>服务器用户Id：" + item + "，连接Id：" + req[item] + "</span></li>"
+                        }
+                    });
+                    $('#user-list').html(html_u);
+                    $('#system-list').html(html_s);
                 },
                 complete: function () {
                     //请求完成的处理
@@ -118,8 +160,7 @@
                     //请求出错处理
                 }
             });
-        },
-            1000);
+        }
 
         // 为显示的消息进行Html编码
         function htmlEncode(value) {
