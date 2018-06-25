@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -22,7 +23,7 @@ namespace Berry.SignalRService.Controllers
         [HttpGet]
         public ActionResult LoadUserInfo()
         {
-            Dictionary<string, string> dic = ChatsHub.UserIdDict;
+            ConcurrentDictionary<string, string> dic = ChatsHub.GetAllUserListDict();
 
             return Json(dic, JsonRequestBehavior.AllowGet);
         }

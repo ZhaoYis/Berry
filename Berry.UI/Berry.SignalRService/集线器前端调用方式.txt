@@ -22,7 +22,7 @@
             //$.connection.hub.logging = true;
 
             // 定义服务器端调用的客户端SendMessage来显示新消息
-            chat.client.SendMessage = function (req) {
+            chat.client.BroadcastMessageFormAllOnlineUser = function (req) {
                 // 向页面添加消息
                 $('#discussion').append('<li><strong>' + htmlEncode(req.SendId) + '</strong>: ' + htmlEncode(req.Content) + '</li>');
             };

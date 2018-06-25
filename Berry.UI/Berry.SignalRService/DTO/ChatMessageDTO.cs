@@ -3,7 +3,7 @@
 namespace Berry.SignalRService.DTO
 {
     /// <summary>
-    /// 聊天记录
+    /// 消息体
     /// </summary>
     public class ChatMessageDTO
     {
@@ -16,12 +16,20 @@ namespace Berry.SignalRService.DTO
         /// </summary>
         public string SendUserName { get; set; }
         /// <summary>
+        /// 接收人ID
+        /// </summary>
+        public string ReceiveId { get; set; }
+        /// <summary>
+        /// 接收方姓名
+        /// </summary>
+        public string ReceiveName { get; set; }
+        /// <summary>
         /// 内容
         /// </summary>
         public string Content { get; set; }
         /// <summary>
         /// 创建时间
         /// </summary>
-        public DateTime CreateDate { get; set; }
+        public DateTime CreateDate { get; set; } = DateTime.Now;
     }
 }

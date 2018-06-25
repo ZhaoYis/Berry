@@ -1,0 +1,24 @@
+﻿.user-list {
+    width: 100%
+}
+
+ol {
+    list-style-type: none;
+    counter-reset: sectioncounter;
+    width: 200px;
+}
+
+ol li:before {
+    content: counter(sectioncounter) "、";
+    counter-increment: sectioncounter;
+}
+
+.user-list li {
+    border-bottom: 1px dotted gray;
+    margin: 5px 0px 5px 0px;
+    padding: 5px;
+    cursor: pointer;
+    width: 50%;
+    float: left;
+    display: block
+}

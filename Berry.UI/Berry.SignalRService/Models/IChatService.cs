@@ -29,7 +29,52 @@ namespace Berry.SignalRService.Models
         HttpContext HttpContext { get; }
         #endregion
 
+        #region 公共推送消息方法
+
+        /// <summary>
+        /// 向所有客户端发送消息
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         Task Send(string message);
+        /// <summary>
+        /// 发送系统消息
+        /// </summary>
+        /// <param name="message">消息内容</param>
+        /// <returns></returns>
+        Task SendSystemMsg(string message);
+        /// <summary>
+        /// 向指定用户发送消息
+        /// </summary>
+        /// <param name="connId">用户ID</param>
+        /// <param name="message">消息体</param>
+        /// <returns></returns>
+        Task SendmMsgByUserId(string connId, string message);
+
+        #endregion
+
+        #region 任务控制
+        /// <summary>
+        /// 开启一个或多个任务
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="jobCode">任务编码</param>
+        void OpenJob(string userId, string[] jobCode);
+        /// <summary>
+        /// 关闭一个或多个任务
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="jobCode">任务编码</param>
+        void CloseJob(string userId, string[] jobCode);
+        /// <summary>
+        /// 重置一个或多个任务
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="jobCode">任务编码</param>
+        void ResetJob(string userId, string[] jobCode);
+        #endregion
+
+        #region IM相关，客户端主动获取数据
 
         /// <summary>
         /// 获取与某用户的消息列表
@@ -37,31 +82,31 @@ namespace Berry.SignalRService.Models
         /// <param name="pagination">分页参数</param>
         /// <param name="sendId">发送人Id</param>
         /// <returns></returns>
-        Task<ChatMessageDTO> GetMsgList(PaginationEntity pagination, string sendId);
+        List<ChatMessageDTO> GetMsgList(PaginationEntity pagination, string sendId);
         /// <summary>
         /// 获取未读消息的条数
         /// </summary>
-        /// <param name="code"></param>
+        /// <param name="code">0-未读 1-已读</param>
         /// <returns></returns>
-        Task<ChatMessageDTO> GetMsgNumList(string code);
+        string GetMsgNumList(string code);
         /// <summary>
         /// 主动发起更新最近联系人列表
         /// </summary>
         /// <returns></returns>
-        Task ImSendLastUser();
+        void ImSendLastUser();
         /// <summary>
         /// 给指定用户发生消息
         /// </summary>
         /// <param name="toUser">目标用户ID</param>
         /// <param name="message">消息</param>
         /// <returns></returns>
-        Task ImSendToOne(string toUser, string message);
+        void ImSendToOne(string toUser, string message);
         /// <summary>
         /// 更新消息状态
         /// </summary>
         /// <param name="sendId">用户ID</param>
         /// <returns></returns>
-        Task UpdateMessageStatus(string sendId);
+        void UpdateMessageStatus(string sendId);
 
         /// <summary>
         /// 创建用户组
@@ -69,33 +114,34 @@ namespace Berry.SignalRService.Models
         /// <param name="groupName">群组名称</param>
         /// <param name="userIdList">用户列表</param>
         /// <returns></returns>
-        Task CreateGroup(string groupName, List<UserInfoDTO> userIdList);
+        void CreateGroup(string groupName, List<UserInfoDTO> userIdList);
         /// <summary>
         /// 更新群名称
         /// </summary>
         /// <param name="groupId"></param>
         /// <param name="groupName"></param>
         /// <returns></returns>
-        Task UpdateGroupName(string groupId, string groupName);
+        void UpdateGroupName(string groupId, string groupName);
         /// <summary>
         /// 加群
         /// </summary>
         /// <param name="groupId">群ID</param>
         /// <param name="userId">用户Id</param>
         /// <returns></returns>
-        Task AddGroupUserId(string groupId, string userId);
+        void AddGroupUserId(string groupId, string userId);
         /// <summary>
         /// 移除群
         /// </summary>
         /// <param name="userGroupId">群Id</param>
         /// <returns></returns>
-        Task RemoveGroupUserId(string userGroupId);
+        void RemoveGroupUserId(string userGroupId);
         /// <summary>
         /// 发送群消息
         /// </summary>
         /// <param name="toUser">发送人Id</param>
         /// <param name="message">消息</param>
         /// <returns></returns>
-        Task ImSendToGroup(string toUser, string message);
+        void ImSendToGroup(string toUser, string message);
+        #endregion
     }
 }

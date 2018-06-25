@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Berry.Cache;
 using Berry.SignalRService.DTO;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hosting;
@@ -15,19 +17,44 @@ namespace Berry.SignalRService.Models
     [HubName("ChatsHub")]
     public class ChatsHub : Hub<IChatClient>, IChatService
     {
+        #region 构造
+        private readonly SignalrServerToClient _serverToClient;
+
+        public ChatsHub() : this(SignalrServerToClient.Instance)
+        {
+
+        }
+
+        public ChatsHub(SignalrServerToClient serverToClient)
+        {
+            _serverToClient = serverToClient;
+        }
+        #endregion
+
         #region 基础信息
         /// <summary>
         /// 连接数
         /// </summary>
         private static int _connections = 0;
         /// <summary>
-        /// 系统主动推送消息到客户端
+        /// 系统缓存
         /// </summary>
-        private SignalrServerToClient client = new SignalrServerToClient();
+        private readonly WebCache _cache = new WebCache();
         /// <summary>
-        /// 用户列表，userId-connId
+        /// 用户列表，userId-connId 
+        /// userId带有前缀，其中：S-服务器用户 U-登陆用户 T-访客用户（未登录）
         /// </summary>
-        public static readonly Dictionary<string, string> UserIdDict = new Dictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, string> UserIdDict = new ConcurrentDictionary<string, string>();//TODO 待优化，需要解决服务挂了或者被IIS回收了
+        /// <summary>
+        /// 获取用户列表
+        /// </summary>
+        /// <returns></returns>
+        public static ConcurrentDictionary<string, string> GetAllUserListDict()
+        {
+            return UserIdDict;
+        }
+
+        #region 基础信息
 
         /// <summary>
         /// 前端自定义参数集合
@@ -60,10 +87,11 @@ namespace Berry.SignalRService.Models
         {
             get { return HttpContext.Current; }
         }
+        #endregion
 
         #endregion
 
-        #region 测试代码
+        #region 公共推送消息方法
 
         /// <summary>
         /// 向所有客户端发送消息
@@ -76,18 +104,19 @@ namespace Berry.SignalRService.Models
                 //当前发送消息的用户ID，前端自定义
                 string userId = ClientQueryString["userId"];
                 //当前连接ID
-                string connId = Context.ConnectionId;
+                string connId = "";//Context.ConnectionId;
+                UserIdDict.TryGetValue(userId, out connId);
+                connId = string.IsNullOrEmpty(connId) ? Context.ConnectionId : connId;
 
                 // 调用所有客户端的SendMessage方法
                 ChatMessageDTO msg = new ChatMessageDTO
                 {
                     SendId = connId,
-                    SendUserName = "",
                     Content = message,
                     CreateDate = DateTime.Now
                 };
-                await client.SendMessageByUserId(connId, $"服务器收到了[{connId}]发送的消息，准备广播给所有在线用户。");
-                await Clients.All.SendMessage(msg);
+                await _serverToClient.SendMessageByUserId(connId, $"服务器收到了[{connId}]发送的消息，准备广播给所有在线用户。");
+                await _serverToClient.SendMessageFormAllOnlineUser(msg);
             }
             catch (Exception e)
             {
@@ -96,14 +125,71 @@ namespace Berry.SignalRService.Models
         }
 
         /// <summary>
-        /// 发送系统消息，测试方法
+        /// 发送系统消息
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
         public async Task SendSystemMsg(string message)
         {
-            await client.SendSystemMessage(message, "系统消息");
+            await _serverToClient.SendSystemMessage(message, "系统消息");
         }
+
+        /// <summary>
+        /// 向指定用户发送消息
+        /// </summary>
+        /// <param name="connId">用户ID</param>
+        /// <param name="message">消息体</param>
+        /// <returns></returns>
+        public async Task SendmMsgByUserId(string connId, string message)
+        {
+            await _serverToClient.SendMessageByUserId(connId, $"服务器准备用户[{connId}]广播消息。");
+
+            await _serverToClient.SendMessageByUserId(connId, message);
+        }
+
+        #endregion
+
+        #region 任务控制
+
+        /// <summary>
+        /// 开启一个或多个任务
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="jobCode">任务编码</param>
+        public void OpenJob(string userId, string[] jobCode)
+        {
+            string connId;
+            UserIdDict.TryGetValue(userId, out connId);
+            if (!string.IsNullOrEmpty(connId))
+                _serverToClient.OpenJob(userId, UserIdDict, jobCode);
+        }
+
+        /// <summary>
+        /// 关闭一个或多个任务
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="jobCode">任务编码</param>
+        public void CloseJob(string userId, string[] jobCode)
+        {
+            string connId;
+            UserIdDict.TryGetValue(userId, out connId);
+            if (!string.IsNullOrEmpty(connId))
+                _serverToClient.CloseJob(userId, UserIdDict, jobCode);
+        }
+
+        /// <summary>
+        /// 重置一个或多个任务
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <param name="jobCode">任务编码</param>
+        public void ResetJob(string userId, string[] jobCode)
+        {
+            string connId;
+            UserIdDict.TryGetValue(userId, out connId);
+            if (!string.IsNullOrEmpty(connId))
+                _serverToClient.ResetJob(userId, UserIdDict, jobCode);
+        }
+
         #endregion
 
         #region 聊天相关方法
@@ -114,8 +200,12 @@ namespace Berry.SignalRService.Models
         /// <param name="pagination">分页参数</param>
         /// <param name="sendId">发送人Id</param>
         /// <returns></returns>
-        public Task<ChatMessageDTO> GetMsgList(PaginationEntity pagination, string sendId)
+        public List<ChatMessageDTO> GetMsgList(PaginationEntity pagination, string sendId)
         {
+            //业务系统用户ID
+            string userId = ClientQueryString["userId"];
+            //TODO 查询数据库，获取消息列表并返回，无需推送数据，前端主动获取
+
             throw new NotImplementedException();
         }
 
@@ -124,7 +214,7 @@ namespace Berry.SignalRService.Models
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        public Task<ChatMessageDTO> GetMsgNumList(string code)
+        public string GetMsgNumList(string code)
         {
             throw new NotImplementedException();
         }
@@ -133,7 +223,7 @@ namespace Berry.SignalRService.Models
         /// 主动发起更新最近联系人列表
         /// </summary>
         /// <returns></returns>
-        public Task ImSendLastUser()
+        public void ImSendLastUser()
         {
             throw new NotImplementedException();
         }
@@ -144,7 +234,7 @@ namespace Berry.SignalRService.Models
         /// <param name="toUser">目标用户ID</param>
         /// <param name="message">消息</param>
         /// <returns></returns>
-        public Task ImSendToOne(string toUser, string message)
+        public void ImSendToOne(string toUser, string message)
         {
             throw new NotImplementedException();
         }
@@ -154,7 +244,7 @@ namespace Berry.SignalRService.Models
         /// </summary>
         /// <param name="sendId">用户ID</param>
         /// <returns></returns>
-        public Task UpdateMessageStatus(string sendId)
+        public void UpdateMessageStatus(string sendId)
         {
             throw new NotImplementedException();
         }
@@ -165,7 +255,7 @@ namespace Berry.SignalRService.Models
         /// <param name="groupName">群组名称</param>
         /// <param name="userIdList">用户列表</param>
         /// <returns></returns>
-        public Task CreateGroup(string groupName, List<UserInfoDTO> userIdList)
+        public void CreateGroup(string groupName, List<UserInfoDTO> userIdList)
         {
             throw new NotImplementedException();
         }
@@ -176,7 +266,7 @@ namespace Berry.SignalRService.Models
         /// <param name="groupId"></param>
         /// <param name="groupName"></param>
         /// <returns></returns>
-        public Task UpdateGroupName(string groupId, string groupName)
+        public void UpdateGroupName(string groupId, string groupName)
         {
             throw new NotImplementedException();
         }
@@ -187,7 +277,7 @@ namespace Berry.SignalRService.Models
         /// <param name="groupId">群ID</param>
         /// <param name="userId">用户Id</param>
         /// <returns></returns>
-        public Task AddGroupUserId(string groupId, string userId)
+        public void AddGroupUserId(string groupId, string userId)
         {
             throw new NotImplementedException();
         }
@@ -197,7 +287,7 @@ namespace Berry.SignalRService.Models
         /// </summary>
         /// <param name="userGroupId">群Id</param>
         /// <returns></returns>
-        public Task RemoveGroupUserId(string userGroupId)
+        public void RemoveGroupUserId(string userGroupId)
         {
             throw new NotImplementedException();
         }
@@ -208,22 +298,9 @@ namespace Berry.SignalRService.Models
         /// <param name="toUser">发送人Id</param>
         /// <param name="message">消息</param>
         /// <returns></returns>
-        public Task ImSendToGroup(string toUser, string message)
+        public void ImSendToGroup(string toUser, string message)
         {
             throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// 指定发生给用户
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="message"></param>
-        public void SendByUserId(string userId, string message)
-        {
-            var chatHub = GlobalHost.ConnectionManager.GetHubContext<ChatsHub>();
-            chatHub.Clients.Client(userId).sendMessage(message);
-
-            //Clients.Client(userId).sendMessage(message);
         }
 
         #endregion
@@ -243,18 +320,41 @@ namespace Berry.SignalRService.Models
             string connId = Context.ConnectionId;
             if (!UserIdDict.ContainsKey(userId))
             {
-                UserIdDict.Add(userId, connId);
+                UserIdDict.TryAdd(userId, connId);
             }
             else
             {
-                UserIdDict[userId] = connId;
+                string oldVal;
+                UserIdDict.TryGetValue(userId, out oldVal);
+
+                UserIdDict.TryUpdate(userId, connId, oldVal);
+                //UserIdDict[userId] = connId;
             }
 
-            //通知该用户
-            client.SendMessageByUserId(connId, "连接成功！您的ID为：" + connId).Wait();
+            #region 缓存用户列表
+            //1-获取用户列表
+            List<string> userList = _cache.GetCache<List<string>>("__JobUserCacheKey");
+            if (userList != null && userList.Count != 0)
+            {
+                //判断当前用户是否在集合里面
+                if (!userList.Contains(userId))
+                {
+                    userList.AddRange(new List<string> { userId });
+                }
+                _cache.WriteCache(userList, "__JobUserCacheKey");
+            }
+            else
+            {
+                userList = new List<string> { userId };
+                _cache.WriteCache(userList, "__JobUserCacheKey");
+            }
+            #endregion
 
-            System.Diagnostics.Trace.WriteLine("=====================================");
-            System.Diagnostics.Trace.WriteLine("新的连接加入，连接ID：" + connId + ",已有连接数：" + _connections);
+            //通知该用户
+            _serverToClient.SendMessageByUserId(connId, "连接成功！您的ID为：" + connId).Wait();
+
+            Trace.WriteLine("=====================================");
+            Trace.WriteLine("新的连接加入，连接ID：" + connId + ",已有连接数：" + _connections);
 
             return base.OnConnected();
         }
@@ -273,10 +373,25 @@ namespace Berry.SignalRService.Models
             string connId = Context.ConnectionId;
             if (UserIdDict.ContainsKey(userId))
             {
-                UserIdDict.Remove(userId);
+                string value;
+                UserIdDict.TryRemove(userId, out value);
             }
 
-            System.Diagnostics.Trace.WriteLine(connId + "退出连接，已有连接数：" + _connections);
+            #region 缓存用户列表
+            //1-获取用户列表
+            List<string> userList = _cache.GetCache<List<string>>("__JobUserCacheKey");
+            if (userList != null && userList.Count != 0)
+            {
+                //判断当前用户是否在集合里面
+                if (userList.Contains(userId))
+                {
+                    userList.Remove(userId);
+                }
+                _cache.WriteCache(userList, "__JobUserCacheKey");
+            }
+            #endregion
+
+            Trace.WriteLine(connId + "退出连接，已有连接数：" + _connections);
             return base.OnDisconnected(true);
         }
 
@@ -286,7 +401,43 @@ namespace Berry.SignalRService.Models
         /// <returns></returns>
         public override Task OnReconnected()
         {
-            Trace.WriteLine($"客户端[{Context.ConnectionId}]正在重新连接");
+            //业务系统用户ID
+            string userId = ClientQueryString["userId"];
+            //当前用户连接Id
+            string connId = Context.ConnectionId;
+            if (!UserIdDict.ContainsKey(userId))
+            {
+                UserIdDict.TryAdd(userId, connId);
+            }
+            else
+            {
+                string oldVal;
+                UserIdDict.TryGetValue(userId, out oldVal);
+
+                UserIdDict.TryUpdate(userId, connId, oldVal);
+                //UserIdDict[userId] = connId;
+            }
+
+            #region 缓存用户列表
+            //1-获取用户列表
+            List<string> userList = _cache.GetCache<List<string>>("__JobUserCacheKey");
+            if (userList != null && userList.Count != 0)
+            {
+                //判断当前用户是否在集合里面
+                if (!userList.Contains(userId))
+                {
+                    userList.AddRange(new List<string> { userId });
+                }
+                _cache.WriteCache(userList, "__JobUserCacheKey");
+            }
+            else
+            {
+                userList = new List<string> { userId };
+                _cache.WriteCache(userList, "__JobUserCacheKey");
+            }
+            #endregion
+
+            Trace.WriteLine($"客户端[{connId}]正在重新连接");
 
             return base.OnReconnected();
         }

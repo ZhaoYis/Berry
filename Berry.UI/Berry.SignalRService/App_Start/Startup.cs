@@ -24,6 +24,7 @@ namespace Berry.SignalRService
 
             HubConfiguration hubConfiguration = new HubConfiguration
             {
+                EnableJSONP = true,
                 EnableDetailedErrors = true
             };
 

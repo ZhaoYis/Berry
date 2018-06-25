@@ -30,7 +30,7 @@
     var options = $.extend(defaults, option);
     //Set the hubs URL for the connection
     $.connection.hub.url = options.url;
-    $.connection.hub.qs = { "userId": options.userId };
+    $.connection.hub.qs = { "userId": "U_" + options.userId };
     // Declare a proxy to reference the hub.
     var chat = $.connection.ChatsHub;
     //更新联系人列表
@@ -71,11 +71,11 @@
         options.updateUserStatus(userId, isOnLine);
     }
     //接收消息
-    chat.client.RevMessage = function (formUser, message, dateTime) {
+    chat.client.IMRevMessage = function (formUser, message, dateTime) {
         options.revMessage(formUser, message, dateTime);
     }
     //接收群消息
-    chat.client.RevGroupMessage = function (userId, toGroup, message, dateTime) {
+    chat.client.IMRevGroupMessage = function (userId, toGroup, message, dateTime) {
         options.revGroupMessage(userId, toGroup, message, dateTime);
     }
     // 连接成功后注册服务器方法

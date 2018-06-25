@@ -47,6 +47,7 @@ namespace Berry.SOA.API.ParameterModel
         /// <summary>
         /// 开始时间
         /// </summary>
+        [DataType(DataType.DateTime)]
         public DateTime StarTime { get; set; }
     }
 }
