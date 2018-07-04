@@ -29,19 +29,26 @@ namespace Berry.App.Cache
         /// <returns></returns>
         public IEnumerable<DataItemViewModel> GetDataItemList()
         {
-            List<DataItemViewModel> cacheList = CacheFactory.GetCacheInstance().GetListCache<DataItemViewModel>(_dataItemDetailBll.CacheKey, out long total);
-            if (cacheList == null || cacheList.Count == 0)
-            {
-                cacheList = _dataItemDetailBll.GetDataItemList().ToList();
-                //以集合的方式存在缓存下面
-                CacheFactory.GetCacheInstance().WriteListCache<DataItemViewModel>(cacheList, _dataItemDetailBll.CacheKey);
+            //List<DataItemViewModel> cacheList = CacheFactory.GetCacheInstance().GetListCache<DataItemViewModel>(_dataItemDetailBll.CacheKey, out long total);
+            //if (cacheList == null || cacheList.Count == 0)
+            //{
+            //    cacheList = _dataItemDetailBll.GetDataItemList().ToList();
+            //    //以集合的方式存在缓存下面
+            //    CacheFactory.GetCacheInstance().WriteListCache<DataItemViewModel>(cacheList, _dataItemDetailBll.CacheKey);
 
-                //以单体的形式存在缓存下面
-                //foreach (DataItemViewModel model in cacheList)
-                //{
-                //    CacheFactory.GetCacheInstance().WriteCache<DataItemViewModel>(model, _dataItemDetailBll.CacheKey);
-                //}
-            }
+            //    //以单体的形式存在缓存下面
+            //    //foreach (DataItemViewModel model in cacheList)
+            //    //{
+            //    //    CacheFactory.GetCacheInstance().WriteCache<DataItemViewModel>(model, _dataItemDetailBll.CacheKey);
+            //    //}
+            //}
+            //return cacheList;
+
+            List<DataItemViewModel> cacheList = CacheFactory.GetCacheInstance().GetListCache<DataItemViewModel>(
+                _dataItemDetailBll.CacheKey, () =>
+                {
+                    return _dataItemDetailBll.GetDataItemList().ToList();
+                }, out long total);
             return cacheList;
         }
 

@@ -39,17 +39,17 @@ namespace Berry.SignalRService.Models
         /// <summary>
         /// 系统缓存
         /// </summary>
-        private readonly WebCache _cache = new WebCache();
+        private readonly WebCache _cache = WebCache.WebCacheInstance;
         /// <summary>
         /// 用户列表，userId-connId 
         /// userId带有前缀，其中：S-服务器用户 U-登陆用户 T-访客用户（未登录）
         /// </summary>
-        private static readonly ConcurrentDictionary<string, string> UserIdDict = new ConcurrentDictionary<string, string>();//TODO 待优化，需要解决服务挂了或者被IIS回收了
+        private static readonly Dictionary<string, string> UserIdDict = new Dictionary<string, string>();
         /// <summary>
         /// 获取用户列表
         /// </summary>
         /// <returns></returns>
-        public static ConcurrentDictionary<string, string> GetAllUserListDict()
+        public static Dictionary<string, string> GetAllUserListDict()
         {
             return UserIdDict;
         }
@@ -318,37 +318,8 @@ namespace Berry.SignalRService.Models
             string userId = ClientQueryString["userId"];
             //当前用户连接Id
             string connId = Context.ConnectionId;
-            if (!UserIdDict.ContainsKey(userId))
-            {
-                UserIdDict.TryAdd(userId, connId);
-            }
-            else
-            {
-                string oldVal;
-                UserIdDict.TryGetValue(userId, out oldVal);
 
-                UserIdDict.TryUpdate(userId, connId, oldVal);
-                //UserIdDict[userId] = connId;
-            }
-
-            #region 缓存用户列表
-            //1-获取用户列表
-            List<string> userList = _cache.GetCache<List<string>>("__JobUserCacheKey");
-            if (userList != null && userList.Count != 0)
-            {
-                //判断当前用户是否在集合里面
-                if (!userList.Contains(userId))
-                {
-                    userList.AddRange(new List<string> { userId });
-                }
-                _cache.WriteCache(userList, "__JobUserCacheKey");
-            }
-            else
-            {
-                userList = new List<string> { userId };
-                _cache.WriteCache(userList, "__JobUserCacheKey");
-            }
-            #endregion
+            this.AddOrUpDateUserList(userId, connId, false);
 
             //通知该用户
             _serverToClient.SendMessageByUserId(connId, "连接成功！您的ID为：" + connId).Wait();
@@ -371,25 +342,8 @@ namespace Berry.SignalRService.Models
             string userId = ClientQueryString["userId"];
             //当前用户连接Id
             string connId = Context.ConnectionId;
-            if (UserIdDict.ContainsKey(userId))
-            {
-                string value;
-                UserIdDict.TryRemove(userId, out value);
-            }
 
-            #region 缓存用户列表
-            //1-获取用户列表
-            List<string> userList = _cache.GetCache<List<string>>("__JobUserCacheKey");
-            if (userList != null && userList.Count != 0)
-            {
-                //判断当前用户是否在集合里面
-                if (userList.Contains(userId))
-                {
-                    userList.Remove(userId);
-                }
-                _cache.WriteCache(userList, "__JobUserCacheKey");
-            }
-            #endregion
+            this.AddOrUpDateUserList(userId, connId, true);
 
             Trace.WriteLine(connId + "退出连接，已有连接数：" + _connections);
             return base.OnDisconnected(true);
@@ -405,42 +359,47 @@ namespace Berry.SignalRService.Models
             string userId = ClientQueryString["userId"];
             //当前用户连接Id
             string connId = Context.ConnectionId;
-            if (!UserIdDict.ContainsKey(userId))
-            {
-                UserIdDict.TryAdd(userId, connId);
-            }
-            else
-            {
-                string oldVal;
-                UserIdDict.TryGetValue(userId, out oldVal);
 
-                UserIdDict.TryUpdate(userId, connId, oldVal);
-                //UserIdDict[userId] = connId;
-            }
-
-            #region 缓存用户列表
-            //1-获取用户列表
-            List<string> userList = _cache.GetCache<List<string>>("__JobUserCacheKey");
-            if (userList != null && userList.Count != 0)
-            {
-                //判断当前用户是否在集合里面
-                if (!userList.Contains(userId))
-                {
-                    userList.AddRange(new List<string> { userId });
-                }
-                _cache.WriteCache(userList, "__JobUserCacheKey");
-            }
-            else
-            {
-                userList = new List<string> { userId };
-                _cache.WriteCache(userList, "__JobUserCacheKey");
-            }
-            #endregion
+            this.AddOrUpDateUserList(userId, connId, false);
 
             Trace.WriteLine($"客户端[{connId}]正在重新连接");
 
             return base.OnReconnected();
         }
+
+        /// <summary>
+        /// 新增或者更新用户列表
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="connId"></param>
+        /// <param name="stopCalled"></param>
+        private void AddOrUpDateUserList(string userId, string connId, bool stopCalled = false)
+        {
+            if (!stopCalled)
+            {
+                if (!UserIdDict.ContainsKey(userId))
+                {
+                    UserIdDict.Add(userId, connId);
+                }
+                else
+                {
+                    //string oldVal;
+                    //UserIdDict.TryGetValue(userId, out oldVal);
+                    //UserIdDict.TryUpdate(userId, connId, oldVal);
+                    UserIdDict[userId] = connId;
+                }
+            }
+            else
+            {
+                if (UserIdDict.ContainsKey(userId))
+                {
+                    UserIdDict.Remove(userId);
+                }
+            }
+            
+            _cache.WriteCache(UserIdDict, "__ConnectionUserCacheKey");
+        }
+
         #endregion
     }
 }

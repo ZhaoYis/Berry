@@ -8,6 +8,9 @@ namespace Berry.Cache
     {
         private static RedisHelper redisHelper = new RedisHelper();
 
+        public static RedisCache RedisCacheInstance = new RedisCache();
+        private RedisCache(){}
+
         /// <summary>
         /// 写入缓存，单体，默认过期时间10分钟
         /// </summary>
@@ -31,7 +34,7 @@ namespace Berry.Cache
             Type type = typeof(T);
             if (type == typeof(string))
             {
-                redisHelper.StringSet<T>(cacheKey,value, span);
+                redisHelper.StringSet<T>(cacheKey, value, span);
             }
             else if (type == typeof(T))
             {
@@ -88,6 +91,28 @@ namespace Berry.Cache
         }
 
         /// <summary>
+        /// 封装缓存写入、获取方法
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cacheKey">键</param>
+        /// <param name="func">获取缓存数据方法</param>
+        /// <returns></returns>
+        public T GetCache<T>(string cacheKey, Func<T> func) where T : class
+        {
+            T t = default(T);
+            if (!this.HasExpire(cacheKey))
+            {
+                t = this.GetCache<T>(cacheKey);
+            }
+            else
+            {
+                t = func.Invoke();
+                this.WriteCache<T>(t, cacheKey);
+            }
+            return t;
+        }
+
+        /// <summary>
         /// 读取缓存，集合
         /// </summary>
         /// <param name="cacheKey">键</param>
@@ -102,12 +127,56 @@ namespace Berry.Cache
         }
 
         /// <summary>
+        /// 封装缓存写入、获取方法
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cacheKey">键</param>
+        /// <param name="func">获取缓存数据方法</param>
+        /// <param name="total">记录数</param>
+        /// <returns></returns>
+        public List<T> GetListCache<T>(string cacheKey, Func<List<T>> func, out long total) where T : class
+        {
+            List<T> t = default(List<T>);
+            if (!this.HasExpire(cacheKey))
+            {
+                t = this.GetListCache<T>(cacheKey, out total);
+            }
+            else
+            {
+                t = func.Invoke();
+                this.WriteListCache(t, cacheKey);
+            }
+            total = redisHelper.ListLength(cacheKey);
+            return t;
+        }
+
+        /// <summary>
         /// 移除指定数据缓存
         /// </summary>
         /// <param name="cacheKey">键</param>
         public void RemoveCache(string cacheKey)
         {
             redisHelper.KeyDelete(cacheKey);
+        }
+
+        /// <summary>
+        /// 根据指定条件删除缓存（一般为指定Key的前缀或者后缀）
+        /// </summary>
+        /// <param name="func"></param>
+        /// <example>RemoveCache(key => key.StartsWith("_USER"));</example>
+        public void RemoveCache(Func<string, bool> func)
+        {
+            List<string> keyList = new List<string>();
+            List<string> allKeysList = redisHelper.GetKeys();
+            foreach (string key in allKeysList)
+            {
+                if (func.Invoke(key))
+                {
+                    keyList.Add(key);
+                }
+            }
+
+            keyList.ForEach(this.RemoveCache);
         }
 
         /// <summary>

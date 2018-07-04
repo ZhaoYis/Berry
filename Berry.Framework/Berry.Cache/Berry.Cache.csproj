@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheFactory.cs" />
+    <Compile Include="CustomCache.cs" />
     <Compile Include="ICache.cs" />
     <Compile Include="Model\ClientInfoModel.cs" />
     <Compile Include="Model\RedisServerConfig.cs" />

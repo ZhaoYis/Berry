@@ -42,21 +42,21 @@ namespace Berry.SignalRService.Models
         /// <param name="userId">用户ID</param>
         /// <param name="connId">用户ID-连接ID</param>
         /// <param name="jobCode">任务编码</param>
-        void OpenJob(string userId, ConcurrentDictionary<string, string> connId, string[] jobCode);
+        void OpenJob(string userId, Dictionary<string, string> connId, string[] jobCode);
         /// <summary>
         /// 关闭一个或多个任务
         /// </summary>
         /// <param name="userId">用户ID</param>
         /// <param name="connId">用户ID-连接ID</param>
         /// <param name="jobCode">任务编码</param>
-        void CloseJob(string userId, ConcurrentDictionary<string, string> connId, string[] jobCode);
+        void CloseJob(string userId, Dictionary<string, string> connId, string[] jobCode);
         /// <summary>
         /// 重置一个或多个任务
         /// </summary>
         /// <param name="userId">用户ID</param>
         /// <param name="connId">用户ID-连接ID</param>
         /// <param name="jobCode">任务编码</param>
-        void ResetJob(string userId, ConcurrentDictionary<string, string> connId, string[] jobCode);
+        void ResetJob(string userId, Dictionary<string, string> connId, string[] jobCode);
         #endregion
 
         #region IM相关，服务端主动推送数据

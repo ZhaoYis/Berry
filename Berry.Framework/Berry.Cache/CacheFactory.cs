@@ -23,13 +23,13 @@ namespace Berry.Cache
             switch (CacheType)
             {
                 case "Redis":
-                    return new RedisCache();
-
+                    return RedisCache.RedisCacheInstance;
                 case "WebCache":
-                    return new WebCache();
-
+                    return WebCache.WebCacheInstance;
+                case "CustomCache":
+                    return CustomCache.CustomCacheInstance;
                 default:
-                    return new WebCache();
+                    return WebCache.WebCacheInstance;
             }
         }
     }

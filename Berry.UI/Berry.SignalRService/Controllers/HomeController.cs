@@ -23,7 +23,7 @@ namespace Berry.SignalRService.Controllers
         [HttpGet]
         public ActionResult LoadUserInfo()
         {
-            ConcurrentDictionary<string, string> dic = ChatsHub.GetAllUserListDict();
+            Dictionary<string, string> dic = ChatsHub.GetAllUserListDict();
 
             return Json(dic, JsonRequestBehavior.AllowGet);
         }

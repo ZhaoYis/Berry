@@ -1,24 +1,49 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Web;
+using System.Timers;
 
 namespace Berry.Cache
 {
     /// <summary>
-    /// WebCache
+    /// 自定义缓存
     /// </summary>
-    public class WebCache : ICache
+    public class CustomCache : ICache
     {
-        private readonly System.Web.Caching.Cache _cache = HttpRuntime.Cache;
+        private static Dictionary<string, KeyValuePair<object, DateTime>> dict = new Dictionary<string, KeyValuePair<object, DateTime>>();
         /// <summary>
         /// 缓存Key集合
         /// </summary>
         private static readonly List<string> CacheKeyList = new List<string>();
 
-        public static WebCache WebCacheInstance = new WebCache();
+        public static CustomCache CustomCacheInstance = new CustomCache();
 
-        private WebCache(){}
+        #region 缓存过期检测
+        /// <summary>
+        /// 默认一分钟
+        /// </summary>
+        private static Timer timer = new Timer(1 * 1 * 60 * 60);
+
+        private CustomCache()
+        {
+            timer.AutoReset = true;
+            timer.Enabled = true;
+            timer.Elapsed += Timer_Elapsed;
+
+            timer.Start();
+        }
+        static CustomCache() { }
+
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            foreach (KeyValuePair<string, KeyValuePair<object, DateTime>> pair in dict)
+            {
+                if (dict[pair.Key].Value < DateTime.Now)
+                {
+                    this.RemoveCache(pair.Key);
+                }
+            }
+        } 
+        #endregion
 
         /// <summary>
         /// 写入缓存，单体，默认过期时间10分钟
@@ -27,6 +52,10 @@ namespace Berry.Cache
         /// <param name="cacheKey">键</param>
         public void WriteCache<T>(T value, string cacheKey) where T : class
         {
+            if (!CacheKeyList.Contains(cacheKey))
+            {
+                CacheKeyList.Add(cacheKey);
+            }
             WriteCache<T>(value, cacheKey, DateTime.Now.AddMinutes(10));
         }
 
@@ -38,11 +67,7 @@ namespace Berry.Cache
         /// <param name="expireTime">到期时间</param>
         public void WriteCache<T>(T value, string cacheKey, DateTime expireTime) where T : class
         {
-            if (!CacheKeyList.Contains(cacheKey))
-            {
-                CacheKeyList.Add(cacheKey);
-            }
-            _cache.Insert(cacheKey, value, null, expireTime, System.Web.Caching.Cache.NoSlidingExpiration);
+            dict.Add(cacheKey, new KeyValuePair<object, DateTime>(value, expireTime));
         }
 
         /// <summary>
@@ -68,7 +93,7 @@ namespace Berry.Cache
             {
                 CacheKeyList.Add(cacheKey);
             }
-            _cache.Insert(cacheKey, value, null, expireTime, System.Web.Caching.Cache.NoSlidingExpiration);
+            dict.Add(cacheKey, new KeyValuePair<object, DateTime>(value, expireTime));
         }
 
         /// <summary>
@@ -78,9 +103,9 @@ namespace Berry.Cache
         /// <returns></returns>
         public T GetCache<T>(string cacheKey) where T : class
         {
-            if (_cache[cacheKey] != null)
+            if (!this.HasExpire(cacheKey))
             {
-                return _cache[cacheKey] as T;
+                return (T)dict[cacheKey].Key;
             }
             return default(T);
         }
@@ -115,9 +140,9 @@ namespace Berry.Cache
         /// <returns></returns>
         public List<T> GetListCache<T>(string cacheKey, out long total) where T : class
         {
-            if (_cache[cacheKey] != null)
+            if (!this.HasExpire(cacheKey))
             {
-                List<T> res = (List<T>)_cache[cacheKey];
+                List<T> res = (List<T>)dict[cacheKey].Key;
                 total = res == null ? 0 : res.Count;
                 return res;
             }
@@ -152,10 +177,10 @@ namespace Berry.Cache
         /// <summary>
         /// 移除指定数据缓存
         /// </summary>
-        /// <param name="cacheKey">键，all代表清除所有</param>
+        /// <param name="cacheKey">键</param>
         public void RemoveCache(string cacheKey)
         {
-            _cache.Remove(cacheKey);
+            dict.Remove(cacheKey);
         }
 
         /// <summary>
@@ -182,11 +207,7 @@ namespace Berry.Cache
         /// </summary>
         public void RemoveCache()
         {
-            IDictionaryEnumerator cacheEnum = _cache.GetEnumerator();
-            while (cacheEnum.MoveNext())
-            {
-                if (cacheEnum.Key != null) _cache.Remove(cacheEnum.Key.ToString());
-            }
+            dict.Clear();
         }
 
         /// <summary>
@@ -196,7 +217,22 @@ namespace Berry.Cache
         /// <returns></returns>
         public bool HasExpire(string key)
         {
-            return _cache[key] == null;
+            if (dict.ContainsKey(key))
+            {
+                if (dict[key].Value > DateTime.Now)
+                {
+                    return true;
+                }
+                else
+                {
+                    this.RemoveCache(key);
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

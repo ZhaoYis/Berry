@@ -49,6 +49,16 @@ namespace Berry.SignalRService.Models
         void BroadcastJobReset(string jobCode);
         #endregion
 
+        #region 服务端推送数据
+
+        /// <summary>
+        /// 广播系统数据
+        /// </summary>
+        /// <param name="data"></param>
+        void BroadcastSysData(string data);//TODO 根据实际情况调整返回到前端的数据类型
+
+        #endregion
+
         #region IM相关实时数据，服务端需要自动推送数据
 
         /// <summary>

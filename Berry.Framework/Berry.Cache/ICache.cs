@@ -47,18 +47,44 @@ namespace Berry.Cache
         T GetCache<T>(string cacheKey) where T : class;
 
         /// <summary>
+        /// 封装缓存写入、获取方法
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cacheKey">键</param>
+        /// <param name="func">获取缓存数据方法</param>
+        /// <returns></returns>
+        T GetCache<T>(string cacheKey, Func<T> func) where T : class;
+
+        /// <summary>
         /// 读取缓存
         /// </summary>
         /// <param name="cacheKey">键</param>
         /// <param name="total">记录数</param>
         /// <returns></returns>
-        List<T> GetListCache<T>(string cacheKey,out long total) where T : class;
+        List<T> GetListCache<T>(string cacheKey, out long total) where T : class;
+
+        /// <summary>
+        /// 封装缓存写入、获取方法
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cacheKey">键</param>
+        /// <param name="func">获取缓存数据方法</param>
+        /// <param name="total">记录数</param>
+        /// <returns></returns>
+        List<T> GetListCache<T>(string cacheKey, Func<List<T>> func, out long total) where T : class;
 
         /// <summary>
         /// 移除指定数据缓存
         /// </summary>
         /// <param name="cacheKey">键</param>
         void RemoveCache(string cacheKey);
+
+        /// <summary>
+        /// 根据指定条件删除缓存（一般为指定Key的前缀或者后缀）
+        /// </summary>
+        /// <param name="func"></param>
+        /// <example>RemoveCache(key => key.StartsWith("_USER"));</example>
+        void RemoveCache(Func<string, bool> func);
 
         /// <summary>
         /// 移除全部缓存

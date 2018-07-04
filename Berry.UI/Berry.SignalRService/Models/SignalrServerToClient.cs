@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using Berry.Cache;
 using Berry.SignalRService.DTO;
 using Berry.SignalRService.Schedu;
+using Berry.SignalRService.Schedu.Jobs;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
+using Quartz;
 
 namespace Berry.SignalRService.Models
 {
@@ -60,7 +62,7 @@ namespace Berry.SignalRService.Models
         /// <summary>
         /// 系统缓存
         /// </summary>
-        private readonly WebCache _cache = new WebCache();
+        private readonly WebCache _cache = WebCache.WebCacheInstance;
         /// <summary>
         /// 任务状态 用户ID--任务编码-任务状态
         /// </summary>
@@ -254,27 +256,27 @@ namespace Berry.SignalRService.Models
         /// <param name="userId">用户ID</param>
         /// <param name="connId">用户ID-连接ID</param>
         /// <param name="jobCode">任务编码</param>
-        public void OpenJob(string userId, ConcurrentDictionary<string, string> connId, string[] jobCode)
+        public void OpenJob(string userId, Dictionary<string, string> connId, string[] jobCode)
         {
             lock (_jobStateLock)
             {
                 #region 1-获取用户列表（放在客户端连接时操作）
-                //1-获取用户列表
-                List<string> userList = _cache.GetCache<List<string>>("__JobUserCacheKey");
-                //if (userList != null && userList.Count != 0)
-                //{
-                //    //判断当前用户是否在集合里面
-                //    if (!userList.Contains(userId))
-                //    {
-                //        userList.AddRange(new List<string> { userId });
-                //    }
-                //    _cache.WriteCache(userList, "__JobUserCacheKey");
-                //}
-                //else
-                //{
-                //    userList = new List<string> { userId };
-                //    _cache.WriteCache(userList, "__JobUserCacheKey");
-                //}
+                ////1-获取用户列表
+                List<string> jobUserList = _cache.GetCache<List<string>>("__JobUserCacheKey");
+                if (jobUserList != null && jobUserList.Count != 0)
+                {
+                    //判断当前用户是否在集合里面
+                    if (!jobUserList.Contains(userId))
+                    {
+                        jobUserList.AddRange(new List<string> { userId });
+                    }
+                    _cache.WriteCache(jobUserList, "__JobUserCacheKey");
+                }
+                else
+                {
+                    jobUserList = new List<string> { userId };
+                    _cache.WriteCache(jobUserList, "__JobUserCacheKey");
+                }
                 #endregion
 
                 #region 2-获取此用户已经在使用的任务列表
@@ -343,14 +345,14 @@ namespace Berry.SignalRService.Models
                 #endregion
 
                 #region 4-开启任务并推送消息
-                //4-开启任务并推送消息
-                //准备广播消息的用户ID
-                List<string> connIds = new List<string>();
-                foreach (string id in userList)
-                {
-                    connIds.Add(connId[id]);
-                }
-                this.OpenJob(userId, connId[userId], connIds, doJob);
+                ////4-开启任务并推送消息
+                ////准备广播消息的用户ID
+                //List<string> connIds = new List<string>();
+                //foreach (string id in userList)
+                //{
+                //    connIds.Add(connId[id]);
+                //}
+                this.OpenJob(userId, doJob);
 
                 #endregion
 
@@ -409,7 +411,7 @@ namespace Berry.SignalRService.Models
         /// <param name="userId">用户ID</param>
         /// <param name="connId">用户ID-连接ID</param>
         /// <param name="jobCode">任务编码</param>
-        public void CloseJob(string userId, ConcurrentDictionary<string, string> connId, string[] jobCode)
+        public void CloseJob(string userId, Dictionary<string, string> connId, string[] jobCode)
         {
             lock (_jobStateLock)
             {
@@ -456,9 +458,22 @@ namespace Berry.SignalRService.Models
                     });
 
                     //TODO 调用关闭任务的方法
-                    this.CloseJob(connId[userId], newJobStatedict);
+                    this.CloseJob(userId, newJobStatedict);
                 }
                 #endregion
+
+                Dictionary<string, JobState> jobStateDict = new Dictionary<string, JobState>();
+                List<string> temp = intersect.Except(realDealJobList).ToList();
+                foreach (string s in temp)
+                {
+                    jobStateDict.Add(s, JobState.Open);
+                }
+                foreach (string s in realDealJobList)
+                {
+                    if (!jobStateDict.ContainsKey(s))
+                        jobStateDict.Add(s, JobState.Closed);
+                }
+                _cache.WriteCache(jobStateDict, "__JobStateCacheKey");
 
                 #region 弃用代码
                 ////已有任务
@@ -497,7 +512,7 @@ namespace Berry.SignalRService.Models
         /// <param name="userId">用户ID</param>
         /// <param name="connId">用户ID-连接ID</param>
         /// <param name="jobCode">任务编码</param>
-        public void ResetJob(string userId, ConcurrentDictionary<string, string> connId, string[] jobCode)
+        public void ResetJob(string userId, Dictionary<string, string> connId, string[] jobCode)
         {
             throw new NotImplementedException();
         }
@@ -506,24 +521,42 @@ namespace Berry.SignalRService.Models
         /// 开启或者关闭任务
         /// </summary>
         /// <param name="userId">用户ID</param>
-        /// <param name="connIds"></param>
-        /// <param name="connId"></param>
         /// <param name="newJobStatedict"></param>
-        private void OpenJob(string userId, string connId, List<string> connIds, Dictionary<string, JobState> newJobStatedict)
+        private void OpenJob(string userId, Dictionary<string, JobState> newJobStatedict)
         {
-            foreach (KeyValuePair<string, JobState> pair in newJobStatedict)
+            Dictionary<string, string> dict = _cache.GetCache<Dictionary<string, string>>("__ConnectionUserCacheKey");
+            if (dict.Count > 0)
             {
-                string jobClde = pair.Key;
-                switch (pair.Value)
+                foreach (KeyValuePair<string, JobState> pair in newJobStatedict)
                 {
-                    case JobState.Open:
-                        //TODO 开启任务，操作数据，然后将数据广播给指定用户
+                    string jobCode = pair.Key;
+                    switch (pair.Value)
+                    {
+                        case JobState.Open:
+                            //开启任务，操作数据，然后将数据广播给指定用户
+                            //Cron表达式 ：秒  分钟  小时  日的日  月  某一天的周  年
+                            //每分钟执行
+                            string CronTime = "0/5 * * * * ? ";
+                            //附带参数
+                            JobDataMap map;
 
-                        //向客户端广播消息
-                        Clients.Client(connId).BroadcastJobOpened(jobClde);
-                        break;
-                    case JobState.Closed:
-                        break;
+                            switch (jobCode)
+                            {
+                                case "SysJob":
+                                    map = new JobDataMap { { "Clients", Clients } };
+                                    DateTimeOffset time = QuartzUtil.AddJob<SysJob>(jobCode, CronTime, map);
+                                    break;
+                            }
+                            //向客户端广播消息
+                            if (dict.ContainsKey(userId))
+                            {
+                                string connId = dict[userId];
+                                Clients.Client(connId).BroadcastJobOpened(jobCode + "已开启");
+                            }
+                            break;
+                        case JobState.Closed:
+                            break;
+                    }
                 }
             }
         }
@@ -535,19 +568,27 @@ namespace Berry.SignalRService.Models
         /// <param name="newJobStatedict">要关闭的任务</param>
         private void CloseJob(string userId, Dictionary<string, JobState> newJobStatedict)
         {
-            foreach (KeyValuePair<string, JobState> pair in newJobStatedict)
+            Dictionary<string, string> dict = _cache.GetCache<Dictionary<string, string>>("__ConnectionUserCacheKey");
+            if (dict.Count > 0)
             {
-                string jobClde = pair.Key;
-                switch (pair.Value)
+                foreach (KeyValuePair<string, JobState> pair in newJobStatedict)
                 {
-                    case JobState.Open:
-                        break;
-                    case JobState.Closed:
-                        //TODO 关闭任务
-
-                        //向客户端广播消息
-                        Clients.Client(userId).BroadcastJobClosed(jobClde);
-                        break;
+                    string jobClde = pair.Key;
+                    switch (pair.Value)
+                    {
+                        case JobState.Open:
+                            break;
+                        case JobState.Closed:
+                            // 关闭任务
+                            QuartzUtil.DeleteJob(jobClde);
+                            //向客户端广播消息
+                            if (dict.ContainsKey(userId))
+                            {
+                                string connId = dict[userId];
+                                Clients.Client(connId).BroadcastJobClosed(jobClde + "已关闭");
+                            }
+                            break;
+                    }
                 }
             }
         }

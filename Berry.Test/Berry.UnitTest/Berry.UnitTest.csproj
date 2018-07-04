@@ -70,8 +70,10 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\UserInfoDTO.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="UnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -118,6 +120,10 @@
     <ProjectReference Include="..\..\Berry.Framework\Berry.Cache\Berry.Cache.csproj">
       <Project>{35a1f58b-c99d-46bf-981f-34af5337f9d1}</Project>
       <Name>Berry.Cache</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Berry.Framework\Berry.Extension\Berry.Extension.csproj">
+      <Project>{7a95fd4d-8c13-401b-a1d5-cbc4e391b4dc}</Project>
+      <Name>Berry.Extension</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Berry.Framework\Berry.IOC\Berry.IOC.csproj">
       <Project>{c2756f3c-24a2-4d13-8910-1d59b4cf6382}</Project>

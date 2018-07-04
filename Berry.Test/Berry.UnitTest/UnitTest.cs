@@ -8,12 +8,16 @@ using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Linq;
 using Berry.App.Cache;
 using Berry.Cache;
 using Berry.Entity;
+using Berry.Extension;
+using Berry.UnitTest.Model;
 
 namespace Berry.UnitTest
 {
@@ -44,7 +48,9 @@ namespace Berry.UnitTest
 
             //RsaTest();
 
-            RedisTest();
+            //RedisTest();
+
+            MapToTest();
         }
 
         [TestMethod]
@@ -228,6 +234,68 @@ namespace Berry.UnitTest
                 CacheFactory.GetCacheInstance().WriteCache<BaseEntity>(cache, "__TestBaseEntityKey");
             }
             Console.WriteLine(cache.Id);
+        }
+
+        [TestMethod]
+        private void MapToTest()
+        {
+            UserInfo userInfo = new UserInfo
+            {
+                PK = 1,
+                UserId = "2018001",
+                RealName = "MrZhaoYi",
+                DepartmentId = "001",
+                DepartmentName = "技术部",
+                Sex = 1,
+                UserOnLine = 1,
+                CreateTime = DateTime.Now
+            };
+
+            IEnumerable<UserInfo> userInfos = new List<UserInfo>
+            {
+                new UserInfo
+                {
+                    PK = 1,
+                    UserId = "2018001",
+                    RealName = "MrZhaoYi",
+                    DepartmentId = "001",
+                    DepartmentName = "技术部",
+                    Sex = 1,
+                    UserOnLine = 1,
+                    CreateTime = DateTime.Now
+                },
+                new UserInfo
+                {
+                    PK = 2,
+                    UserId = "2018002",
+                    RealName = "MrZhaoYi2",
+                    DepartmentId = "002",
+                    DepartmentName = "技术部",
+                    Sex = 1,
+                    UserOnLine = 1,
+                    CreateTime = DateTime.Now
+                }
+            };
+
+            DataTable dataTable = new DataTable("MyTable");
+            DataColumn column = new DataColumn("UserId", typeof(string));
+            dataTable.Columns.Add(column);
+
+            DataRow dr = dataTable.NewRow();
+            dr["UserId"] = "003";
+            dataTable.Rows.Add(dr);
+
+            UserInfoDTO dto1 = userInfo.MapTo<UserInfoDTO>();
+
+            UserInfoDTO dto2 = userInfo.MapTo<UserInfoDTO, UserInfo>();
+
+            List<UserInfoDTO> userInfoDtos1 = userInfos.MapTo<UserInfo, UserInfoDTO>();
+
+            List<UserInfoDTO> userInfoDtos2 = userInfos.MapTo<UserInfoDTO>();
+
+            List<UserInfoDTO> userInfoDtos3 = dataTable.MapTo<UserInfoDTO>();
+
+            Console.WriteLine(dto1.RealName);
         }
     }
 }
