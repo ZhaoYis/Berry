@@ -5,6 +5,7 @@ namespace Berry.UnitTest.Model
     public class UserInfo
     {
         public int PK { get; set; }
+        public int Age { get; set; }
 
         /// <summary>
         /// 用户ID
@@ -31,10 +32,14 @@ namespace Berry.UnitTest.Model
 
         public int Sex { get; set; }
     }
-
-
+    
     public class UserInfoDTO
     {
+        //public int UID { get; set; }
+        //public int Age { get; set; }
+        //public string Ex { get; set; }
+        //public DateTime AddTime { get; set; }
+
         /// <summary>
         /// 用户ID
         /// </summary>

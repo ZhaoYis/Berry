@@ -24,7 +24,7 @@ namespace Berry.Cache
         void WriteCache<T>(T value, string cacheKey, DateTime expireTime) where T : class;
 
         /// <summary>
-        /// 写入缓存，集合，默认过期时间10分钟
+        /// 写入缓存，集合，默认过期时间60分钟
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value">对象数据</param>

@@ -18,6 +18,7 @@ namespace Berry.App.Admin.Controllers
     /// 系统登录
     /// </summary>
     [HandlerLogin(LoginMode.Ignore)]
+    [AllowAnonymous]
     public class LoginController : BaseController
     {
         private LogBLL logBll = new LogBLL();

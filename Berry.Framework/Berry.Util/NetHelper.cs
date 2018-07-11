@@ -1,5 +1,6 @@
 ﻿using Berry.Extension;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
@@ -129,6 +130,13 @@ namespace Berry.Util
             string res = String.Empty;
             try
             {
+                bool isLocal = HasContains(s =>
+                {
+                    return ip.StartsWith("127.") || ip.StartsWith("192.");
+                }, ip);
+
+                if (isLocal) return "本地地址";
+
                 string url = "http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json&ip=" + ip;
 
                 HttpItem item = new HttpItem
@@ -171,6 +179,11 @@ namespace Berry.Util
             {
                 return ((char)Convert.ToInt32(m.Groups[1].Value, 16)).ToString();
             });
+        }
+
+        private static bool HasContains(Predicate<string> handler, string str)
+        {
+            return handler.Invoke(str);
         }
 
         #endregion 通过IP得到IP所在地省市

@@ -8,17 +8,23 @@ namespace Berry.Cache
     {
         private static RedisHelper redisHelper = new RedisHelper();
 
-        public static RedisCache RedisCacheInstance = new RedisCache();
+        private static RedisCache RedisCacheInstance = new RedisCache();
+
+        public static RedisCache GetRedisCacheInstance()
+        {
+            return RedisCacheInstance;
+        }
+
         private RedisCache(){}
 
         /// <summary>
-        /// 写入缓存，单体，默认过期时间10分钟
+        /// 写入缓存，单体，默认过期时间60分钟
         /// </summary>
         /// <param name="value">对象数据</param>
         /// <param name="cacheKey">键</param>
         public void WriteCache<T>(T value, string cacheKey) where T : class
         {
-            WriteCache<T>(value, cacheKey, DateTime.Now.AddMinutes(10));
+            WriteCache<T>(value, cacheKey, DateTime.Now.AddMinutes(60));
         }
 
         /// <summary>
@@ -45,14 +51,14 @@ namespace Berry.Cache
         }
 
         /// <summary>
-        /// 写入缓存，集合，默认过期时间10分钟
+        /// 写入缓存，集合，默认过期时间60分钟
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <param name="cacheKey"></param>
         public void WriteListCache<T>(List<T> value, string cacheKey) where T : class
         {
-            WriteListCache<T>(value, cacheKey, DateTime.Now.AddMinutes(10));
+            WriteListCache<T>(value, cacheKey, DateTime.Now.AddMinutes(60));
         }
 
         /// <summary>
@@ -100,7 +106,7 @@ namespace Berry.Cache
         public T GetCache<T>(string cacheKey, Func<T> func) where T : class
         {
             T t = default(T);
-            if (!this.HasExpire(cacheKey))
+            if (this.HasExpire(cacheKey))
             {
                 t = this.GetCache<T>(cacheKey);
             }

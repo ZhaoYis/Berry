@@ -22,7 +22,7 @@ namespace Berry.App.Admin
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             //缓存刷新
-            new RedisRefresh().JobStart();
+            //new RedisRefresh().JobStart();
         }
 
         void Application_End(object sender, EventArgs e)
@@ -63,6 +63,9 @@ namespace Berry.App.Admin
         {
             //不是每次请求都调用
             //所有没有处理的错误都会导致这个方法的执行
+            var error = Server.GetLastError();
+            
+            Server.ClearError();
         }
 
 

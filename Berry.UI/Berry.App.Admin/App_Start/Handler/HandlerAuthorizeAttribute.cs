@@ -39,6 +39,16 @@ namespace Berry.App.Admin.Handler
             {
                 return;
             }
+            //忽略匿名操作
+            if (filterContext.ActionDescriptor.IsDefined(typeof(AllowAnonymousAttribute), true))
+            {
+                return;
+            }
+            if (filterContext.ActionDescriptor.ControllerDescriptor.IsDefined(typeof(AllowAnonymousAttribute), true))
+            {
+                return;
+            }
+
             //IP过滤
             if (!this.FilterIP())
             {

@@ -41,6 +41,29 @@ namespace Berry.SOA.API.Controllers.Base
         }
         #endregion
 
+        #region 公共方法
+        /// <summary>
+        /// 获取公共返回消息
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data">数据</param>
+        /// <param name="status">状态</param>
+        /// <param name="message">消息</param>
+        /// <returns></returns>
+        protected BaseJsonResult<T> GetBaseJsonResult<T>(T data = default(T), JsonObjectStatus status = JsonObjectStatus.Error, string message = "") where T : class
+        {
+            BaseJsonResult<T> resultMsg = new BaseJsonResult<T>
+            {
+                Status = (int)status,
+                Message = status.GetEnumDescription() + message,
+                Data = data,
+                BackUrl = ""
+            };
+            return resultMsg;
+        }
+
+        #endregion
+
         #region 调用微信接口返回的数据进行预处理
         /// <summary>
         /// 调用微信接口返回的数据进行预处理

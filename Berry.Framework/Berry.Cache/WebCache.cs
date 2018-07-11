@@ -16,18 +16,23 @@ namespace Berry.Cache
         /// </summary>
         private static readonly List<string> CacheKeyList = new List<string>();
 
-        public static WebCache WebCacheInstance = new WebCache();
+        private static WebCache WebCacheInstance = new WebCache();
+
+        public static WebCache GetWebCacheInstance()
+        {
+            return WebCacheInstance;
+        }
 
         private WebCache(){}
 
         /// <summary>
-        /// 写入缓存，单体，默认过期时间10分钟
+        /// 写入缓存，单体，默认过期时间60分钟
         /// </summary>
         /// <param name="value">对象数据</param>
         /// <param name="cacheKey">键</param>
         public void WriteCache<T>(T value, string cacheKey) where T : class
         {
-            WriteCache<T>(value, cacheKey, DateTime.Now.AddMinutes(10));
+            WriteCache<T>(value, cacheKey, DateTime.Now.AddMinutes(60));
         }
 
         /// <summary>
@@ -46,14 +51,14 @@ namespace Berry.Cache
         }
 
         /// <summary>
-        /// 写入缓存，集合，默认过期时间10分钟
+        /// 写入缓存，集合，默认过期时间60分钟
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value">对象数据</param>
         /// <param name="cacheKey">键</param>
         public void WriteListCache<T>(List<T> value, string cacheKey) where T : class
         {
-            WriteListCache<T>(value, cacheKey, DateTime.Now.AddMinutes(10));
+            WriteListCache<T>(value, cacheKey, DateTime.Now.AddMinutes(60));
         }
 
         /// <summary>

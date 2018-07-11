@@ -147,6 +147,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\Attributes\CustomHandlerError.cs" />
     <Compile Include="App_Start\Attributes\IngoreActionAttribute.cs" />
     <Compile Include="App_Start\Attributes\RequestAuthorizeAttribute.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
@@ -157,6 +158,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\Filters\ActionFilter.cs" />
     <Compile Include="App_Start\Filters\ApiSecurityFilter.cs" />
+    <Compile Include="App_Start\Filters\CustomActionFilterAttribute.cs" />
     <Compile Include="App_Start\Filters\RequireHttpsFilter.cs" />
     <Compile Include="App_Start\Filters\TimingActionFilter.cs" />
     <Compile Include="App_Start\Handlers\CrosHandler.cs" />
@@ -193,14 +195,17 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\CommonController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\V1\TestController.cs" />
-    <Compile Include="Controllers\V1\WeChatLoginController.cs" />
-    <Compile Include="Controllers\V2\TestController.cs" />
+    <Compile Include="Controllers\Interface\ICommon.cs" />
+    <Compile Include="Controllers\Interface\IWeChatLogin.cs" />
+    <Compile Include="Controllers\TestController.cs" />
+    <Compile Include="Controllers\WeChatLoginController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="ParameterModel\BaseParameterEntity.cs" />
+    <Compile Include="ParameterModel\GetTokenArgEntity.cs" />
     <Compile Include="ParameterModel\TestApiArgEntity.cs" />
     <Compile Include="ParameterModel\WeChatLoginArgEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -357,6 +362,10 @@
     <ProjectReference Include="..\..\Berry.Framework\Berry.Log\Berry.Log.csproj">
       <Project>{c84e6c4a-81f9-4da6-aaaf-ced2efac706e}</Project>
       <Name>Berry.Log</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Berry.Framework\Berry.Util.JWT\Berry.Util.JWT.csproj">
+      <Project>{95dd2b8f-a8de-4842-b4e8-c05b1d40e212}</Project>
+      <Name>Berry.Util.JWT</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Berry.Framework\Berry.Util\Berry.Util.csproj">
       <Project>{8f155456-2d24-4fec-bbb4-2a232f3f4aae}</Project>

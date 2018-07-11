@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using Berry.Code;
@@ -9,15 +6,16 @@ using Berry.Entity;
 using Berry.Entity.CommonEntity;
 using Berry.Extension;
 using Berry.SOA.API.Controllers.Base;
+using Berry.SOA.API.Controllers.Interface;
 using Berry.SOA.API.ParameterModel;
 using Berry.Util;
 
-namespace Berry.SOA.API.Controllers.V1
+namespace Berry.SOA.API.Controllers
 {
     /// <summary>
     /// 微信登陆
     /// </summary>
-    public class WeChatLoginController : BaseApiController
+    public class WeChatLoginController : BaseApiController, IWeChatLogin
     {
         private static HttpHelper httpHelper = new HttpHelper();
 
@@ -29,9 +27,9 @@ namespace Berry.SOA.API.Controllers.V1
         [HttpPost]
         public virtual HttpResponseMessage Login(WeChatLoginArgEntity arg)
         {
-            BaseJsonResult<WeChatUserInfoEntity> resultMsg = new BaseJsonResult<WeChatUserInfoEntity> { Status = (int)JsonObjectStatus.Error, Message = "服务器未知错误。", Data = null };
+            BaseJsonResult<WeChatUserInfoEntity> resultMsg = this.GetBaseJsonResult<WeChatUserInfoEntity>();
 
-            Logger(typeof(WeChatLoginController), "微信登陆-Login", () =>
+            Logger(this.GetType(), "微信登陆-Login", () =>
             {
                 if (!string.IsNullOrEmpty(arg.t) && arg.t.CheckTimeStamp())
                 {
@@ -52,13 +50,7 @@ namespace Berry.SOA.API.Controllers.V1
                                 if (jsonResult.Status == (int)JsonObjectStatus.Success && jsonResult.Data != null)
                                 {
                                     WeChatUserInfoEntity userInfo = jsonResult.Data;
-                                    resultMsg = new BaseJsonResult<WeChatUserInfoEntity>
-                                    {
-                                        Status = (int)JsonObjectStatus.Success,
-                                        Data = userInfo,
-                                        Message = JsonObjectStatus.Success.GetEnumDescription(),
-                                        BackUrl = null
-                                    };
+                                    resultMsg = this.GetBaseJsonResult<WeChatUserInfoEntity>(userInfo, JsonObjectStatus.Success);
                                 }
                                 else
                                 {
@@ -69,37 +61,19 @@ namespace Berry.SOA.API.Controllers.V1
                     }
                     else
                     {
-                        resultMsg = new BaseJsonResult<WeChatUserInfoEntity>
-                        {
-                            Status = (int)JsonObjectStatus.Fail,
-                            Data = null,
-                            Message = JsonObjectStatus.Fail.GetEnumDescription() + "，请求参数[access_token]不能为空。",
-                            BackUrl = null
-                        };
+                        resultMsg = this.GetBaseJsonResult<WeChatUserInfoEntity>(null, JsonObjectStatus.Fail, "，请求参数[access_token]不能为空。");
                     }
                 }
                 else
                 {
-                    resultMsg = new BaseJsonResult<WeChatUserInfoEntity>
-                    {
-                        Status = (int)JsonObjectStatus.Fail,
-                        Data = null,
-                        Message = JsonObjectStatus.Fail.GetEnumDescription() + "，请求参数有误。",
-                        BackUrl = null
-                    };
+                    resultMsg = this.GetBaseJsonResult<WeChatUserInfoEntity>(null, JsonObjectStatus.Fail, "，请求参数有误。");
                 }
             }, e =>
             {
-                resultMsg = new BaseJsonResult<WeChatUserInfoEntity>
-                {
-                    Status = (int)JsonObjectStatus.Exception,
-                    Data = null,
-                    Message = JsonObjectStatus.Exception.GetEnumDescription() + "，异常信息：" + e.Message,
-                    BackUrl = null
-                };
+                resultMsg = this.GetBaseJsonResult<WeChatUserInfoEntity>(null, JsonObjectStatus.Exception, "，异常信息：" + e.Message);
             });
 
-            return resultMsg.TryToJson().ToHttpResponseMessage();
+            return resultMsg.ToHttpResponseMessage();
         }
     }
 }

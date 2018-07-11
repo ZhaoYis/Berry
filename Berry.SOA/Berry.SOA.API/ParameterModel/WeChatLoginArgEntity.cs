@@ -1,4 +1,6 @@
-﻿namespace Berry.SOA.API.ParameterModel
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Berry.SOA.API.ParameterModel
 {
     /// <summary>
     /// 微信登陆传回服务器参数
@@ -8,6 +10,7 @@
         /// <summary>
         ///  接口调用凭证
         /// </summary>
+        [Required(ErrorMessage = "接口调用凭证不能为空")]
         public string access_token { get; set; }
         /// <summary>
         /// access_token接口调用凭证超时时间，单位（秒）

@@ -6,8 +6,8 @@
     <JobGroup>group_Area</JobGroup>
     <JobIdentityName>jb_Area</JobIdentityName>
     <TriggerIdentityName>trigger_Area</TriggerIdentityName>
-    <CronExpression>0/2 * * * * ? </CronExpression>
-    <TimeSpan>10</TimeSpan>
+    <CronExpression>0 0/8 * * * ? *</CronExpression>
+    <TimeSpan>21600</TimeSpan>
   </Setting>
   <Setting>
     <Name>岗位</Name>
@@ -15,8 +15,8 @@
     <JobGroup>group_Post</JobGroup>
     <JobIdentityName>jb_Post</JobIdentityName>
     <TriggerIdentityName>trigger_Post</TriggerIdentityName>
-    <CronExpression>0/5 * * * * ? </CronExpression>
-    <TimeSpan>10</TimeSpan>
+    <CronExpression>3 0/8 * * * ? *</CronExpression>
+    <TimeSpan>60</TimeSpan>
   </Setting>
   <Setting>
     <Name>系统字典</Name>
@@ -24,7 +24,7 @@
     <JobGroup>group_DataItem</JobGroup>
     <JobIdentityName>jb_DataItem</JobIdentityName>
     <TriggerIdentityName>trigger_DataItem</TriggerIdentityName>
-    <CronExpression>0/10 * * * * ? </CronExpression>
+    <CronExpression>6 0/8 * * * ? *</CronExpression>
     <TimeSpan>10</TimeSpan>
   </Setting>
   <Setting>
@@ -33,8 +33,8 @@
     <JobGroup>group_Department</JobGroup>
     <JobIdentityName>jb_Department</JobIdentityName>
     <TriggerIdentityName>trigger_Department</TriggerIdentityName>
-    <CronExpression>0/15 * * * * ? </CronExpression>
-    <TimeSpan>10</TimeSpan>
+    <CronExpression>9 0/8 * * * ? *</CronExpression>
+    <TimeSpan>60</TimeSpan>
   </Setting>
   <Setting>
     <Name>职位</Name>
@@ -42,8 +42,8 @@
     <JobGroup>group_Job</JobGroup>
     <JobIdentityName>jb_Job</JobIdentityName>
     <TriggerIdentityName>trigger_Job</TriggerIdentityName>
-    <CronExpression>0/20 * * * * ? </CronExpression>
-    <TimeSpan>10</TimeSpan>
+    <CronExpression>12 0/8 * * * ? * </CronExpression>
+    <TimeSpan>60</TimeSpan>
   </Setting>
   <Setting>
     <Name>机构</Name>
@@ -51,8 +51,8 @@
     <JobGroup>group_Organize</JobGroup>
     <JobIdentityName>jb_Organize</JobIdentityName>
     <TriggerIdentityName>trigger_Organize</TriggerIdentityName>
-    <CronExpression>0/25 * * * * ? </CronExpression>
-    <TimeSpan>10</TimeSpan>
+    <CronExpression>15 0/8 * * * ? * </CronExpression>
+    <TimeSpan>60</TimeSpan>
   </Setting>
   <Setting>
     <Name>角色</Name>
@@ -60,8 +60,8 @@
     <JobGroup>group_Role</JobGroup>
     <JobIdentityName>jb_Role</JobIdentityName>
     <TriggerIdentityName>trigger_Role</TriggerIdentityName>
-    <CronExpression>0/30 * * * * ? </CronExpression>
-    <TimeSpan>10</TimeSpan>
+    <CronExpression>18 0/8 * * * ? * </CronExpression>
+    <TimeSpan>60</TimeSpan>
   </Setting>
   <Setting>
     <Name>用户组</Name>
@@ -69,8 +69,7 @@
     <JobGroup>group_UserGroup</JobGroup>
     <JobIdentityName>jb_UserGroup</JobIdentityName>
     <TriggerIdentityName>trigger_UserGroup</TriggerIdentityName>
-    <CronExpression>0/35 * * * * ? </CronExpression>
-    <TimeSpan>10</TimeSpan>
+    <CronExpression>21 0/8 * * * ? * </CronExpression>
+    <TimeSpan>60</TimeSpan>
   </Setting>
-  
 </RedisRefresh>

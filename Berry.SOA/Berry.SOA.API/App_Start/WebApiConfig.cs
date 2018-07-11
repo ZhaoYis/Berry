@@ -27,21 +27,23 @@ namespace Berry.SOA.API
             // Web API 路由
             config.MapHttpAttributeRoutes();
 
+            //config.Routes.MapHttpRoute(
+            //    name: "DefaultVersionApi",
+            //    routeTemplate: "api/{version}/{controller}/{action}/{id}",
+            //    defaults: new { id = RouteParameter.Optional, version = "v1" },
+            //    constraints: new { HttpMethod = new HttpMethodConstraint("GET", "POST", "OPTIONS") }
+            //);
+
             config.Routes.MapHttpRoute(
-                name: "DefaultVersionApi",
-                routeTemplate: "api/{version}/{controller}/{action}/{id}",
-                defaults: new { id = RouteParameter.Optional, version = "v1" },
+                name: "DefaultApi",
+                routeTemplate: "api/{controller}/{action}/{id}",
+                defaults: new { id = RouteParameter.Optional },
                 constraints: new { HttpMethod = new HttpMethodConstraint("GET", "POST", "OPTIONS") }
             );
 
-            //config.Routes.MapHttpRoute(
-            //    name: "DefaultApi",
-            //    routeTemplate: "api/{controller}/{action}/{id}",
-            //    defaults: new { id = RouteParameter.Optional }
-            //);
-
             //注册自定义API过滤器，接口授权
             //config.Filters.Add(new ApiSecurityFilter());
+            config.Filters.Add(new CustomActionFilterAttribute());
 
             //注册自定义Action过滤器
             config.Filters.Add(new ActionFilter());

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using AutoMapper;
 using Berry.App.Cache;
 using Berry.Cache;
 using Berry.Entity;
@@ -243,12 +244,13 @@ namespace Berry.UnitTest
             {
                 PK = 1,
                 UserId = "2018001",
-                RealName = "MrZhaoYi",
+                RealName = "大师兄",
                 DepartmentId = "001",
                 DepartmentName = "技术部",
                 Sex = 1,
                 UserOnLine = 1,
-                CreateTime = DateTime.Now
+                CreateTime = DateTime.Now,
+                Age = 10
             };
 
             IEnumerable<UserInfo> userInfos = new List<UserInfo>
@@ -287,7 +289,7 @@ namespace Berry.UnitTest
 
             UserInfoDTO dto1 = userInfo.MapTo<UserInfoDTO>();
 
-            UserInfoDTO dto2 = userInfo.MapTo<UserInfoDTO, UserInfo>();
+            UserInfoDTO dto2 = userInfo.MapTo<UserInfo, UserInfoDTO>();
 
             List<UserInfoDTO> userInfoDtos1 = userInfos.MapTo<UserInfo, UserInfoDTO>();
 
@@ -295,7 +297,19 @@ namespace Berry.UnitTest
 
             List<UserInfoDTO> userInfoDtos3 = dataTable.MapTo<UserInfoDTO>();
 
-            Console.WriteLine(dto1.RealName);
+            //viewmodel与实体字段名字没有全部对应，只有几个字段的名字和源实体中的字段名字是一样的，其他的字段是通过实体中的几个字段组合或者是格式或者是类型转化而来的
+            //var config2 = new MapperConfiguration(
+            //    cfg => cfg.CreateMap<UserInfo, UserInfoDTO>()
+            //        .ForMember(d => d.UID, opt => opt.MapFrom(s => s.PK))  //指定字段一一对应
+            //        .ForMember(d => d.AddTime, opt => opt.MapFrom(src => src.CreateTime.ToString("yy-MM-dd")))//指定字段，并转化指定的格式
+            //        .ForMember(d => d.Age, opt => opt.Condition(src => src.Age > 5))//条件赋值
+            //        .ForMember(d => d.DepartmentName, opt => opt.Ignore())//忽略该字段，不给该字段赋值
+            //        .ForMember(d => d.RealName, opt => opt.NullSubstitute("Default Value"))//如果源字段值为空，则赋值为 Default Value
+            //        .ForMember(d => d.Ex, opt => opt.MapFrom(src => src.PK + "_" + src.UserId + "_" + src.RealName)));//可以自己随意组合赋值
+            //var mapper2 = config2.CreateMapper();
+            //UserInfoDTO dto1 = mapper2.Map<UserInfoDTO>(userInfo);
+
+            //Console.WriteLine(dto1.RealName);
         }
     }
 }

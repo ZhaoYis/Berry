@@ -4,6 +4,17 @@
         <name>Berry.SOA.API</name>
     </assembly>
     <members>
+        <member name="T:Berry.SOA.API.Attributes.CustomHandlerError">
+            <summary>
+            自定义全局异常处理
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Attributes.CustomHandlerError.OnException(System.Web.Mvc.ExceptionContext)">
+            <summary>在发生异常时调用。</summary>
+            <param name="filterContext">操作筛选器上下文。</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="filterContext" /> 参数为 null。</exception>
+        </member>
         <member name="T:Berry.SOA.API.Attributes.IngoreActionAttribute">
             <summary>
             忽略特殊Action方法
@@ -107,6 +118,10 @@
             请求完成时
             </summary>
             <param name="actionExecutedContext"></param>
+        </member>
+        <member name="M:Berry.SOA.API.Filters.CustomActionFilterAttribute.OnActionExecuting(System.Web.Http.Controllers.HttpActionContext)">
+            <summary>在调用操作方法之前发生。</summary>
+            <param name="actionContext">操作上下文。</param>
         </member>
         <member name="T:Berry.SOA.API.Filters.RequireHttpsFilter">
             <summary>
@@ -756,12 +771,34 @@
             <param name="catchHandel">异常处理方式</param>
             <param name="finallHandel">最终处理方式</param>
         </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseApiController.GetBaseJsonResult``1(``0,Berry.Code.JsonObjectStatus,System.String)">
+            <summary>
+            获取公共返回消息
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="data">数据</param>
+            <param name="status">状态</param>
+            <param name="message">消息</param>
+            <returns></returns>
+        </member>
         <member name="M:Berry.SOA.API.Controllers.Base.BaseApiController.PreprocessingWeChatData``1(System.String)">
             <summary>
             调用微信接口返回的数据进行预处理
             </summary>
             <typeparam name="T"></typeparam>
             <param name="json"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Berry.SOA.API.Controllers.CommonController">
+            <summary>
+            公共接口
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.CommonController.GetJWTToken(Berry.SOA.API.ParameterModel.GetTokenArgEntity)">
+            <summary>
+            获取授权Token
+            </summary>
+            <param name="arg"></param>
             <returns></returns>
         </member>
         <member name="M:Berry.SOA.API.Controllers.HomeController.Index">
@@ -782,24 +819,24 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Berry.SOA.API.Controllers.V1.TestController">
+        <member name="T:Berry.SOA.API.Controllers.Interface.ICommon">
             <summary>
-            API测试控制器，版本：V1.0
+            公共接口
             </summary>
         </member>
-        <member name="M:Berry.SOA.API.Controllers.V1.TestController.HelloWorld(Berry.SOA.API.ParameterModel.TestApiArgEntity)">
+        <member name="M:Berry.SOA.API.Controllers.Interface.ICommon.GetJWTToken(Berry.SOA.API.ParameterModel.GetTokenArgEntity)">
             <summary>
-            测试是否连接成功
+            获取授权Token
             </summary>
-            <param name="arg">测试参数</param>
-            <returns>请求成功则返回成功状态信息</returns>
+            <param name="arg"></param>
+            <returns></returns>
         </member>
-        <member name="T:Berry.SOA.API.Controllers.V1.WeChatLoginController">
+        <member name="T:Berry.SOA.API.Controllers.Interface.IWeChatLogin">
             <summary>
             微信登陆
             </summary>
         </member>
-        <member name="M:Berry.SOA.API.Controllers.V1.WeChatLoginController.Login(Berry.SOA.API.ParameterModel.WeChatLoginArgEntity)">
+        <member name="M:Berry.SOA.API.Controllers.Interface.IWeChatLogin.Login(Berry.SOA.API.ParameterModel.WeChatLoginArgEntity)">
             <summary>
             微信登陆
             </summary>
@@ -808,8 +845,27 @@
         </member>
         <member name="T:Berry.SOA.API.Controllers.TestController">
             <summary>
-            API测试控制器，版本：V2.0
+            API测试控制器，版本：V1.0
             </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.TestController.HelloWorld(Berry.SOA.API.ParameterModel.TestApiArgEntity)">
+            <summary>
+            测试是否连接成功
+            </summary>
+            <param name="arg">测试参数</param>
+            <returns>请求成功则返回成功状态信息</returns>
+        </member>
+        <member name="T:Berry.SOA.API.Controllers.WeChatLoginController">
+            <summary>
+            微信登陆
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.WeChatLoginController.Login(Berry.SOA.API.ParameterModel.WeChatLoginArgEntity)">
+            <summary>
+            微信登陆
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
         </member>
         <member name="T:Berry.SOA.API.ParameterModel.BaseParameterEntity">
             <summary>
@@ -819,6 +875,16 @@
         <member name="P:Berry.SOA.API.ParameterModel.BaseParameterEntity.t">
             <summary>
             校验值，一般为时间戳
+            </summary>
+        </member>
+        <member name="T:Berry.SOA.API.ParameterModel.GetTokenArgEntity">
+            <summary>
+            获取Token参数
+            </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.GetTokenArgEntity.UserId">
+            <summary>
+            用户ID
             </summary>
         </member>
         <member name="T:Berry.SOA.API.ParameterModel.TestApiArgEntity">

@@ -32,6 +32,10 @@ namespace Berry.Log
         /// </summary>
         public string Browser { get; set; } = "[缺省项]";
         /// <summary>
+        /// UserAgent
+        /// </summary>
+        public string UserAgent { get; set; } = "[缺省项]";
+        /// <summary>
         /// 操作人
         /// </summary>
         public string UserName { get; set; } = "[缺省项]";

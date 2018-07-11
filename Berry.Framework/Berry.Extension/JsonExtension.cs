@@ -21,6 +21,8 @@ namespace Berry.Extension
         public static string TryToJson(this object obj, bool isIgnoreNullValue = false)
         {
             string res;
+            if (typeof(object) == typeof(string)) return obj.ToString();
+
             if (isIgnoreNullValue)
             {
                 JsonSerializerSettings jsetting = new JsonSerializerSettings();
@@ -120,7 +122,7 @@ namespace Berry.Extension
                 return JsonConvert.DeserializeObject<T>(json);
             return default(T);
         }
-        
+
         /// <summary>
         /// Json字符串反序列化成对象
         /// </summary>

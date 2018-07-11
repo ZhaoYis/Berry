@@ -36,23 +36,19 @@ namespace Berry.Code.Operator
             {
                 if (_loginProvider == "Cookie")
                 {
-                    //#region 解决cookie时，设置数据权限较多时无法登陆的bug
-                    //CacheFactory.GetCacheInstance().WriteCache(user.DataAuthorize, LoginUserKey, user.LoginTime.AddHours(12));
-                    //user.DataAuthorize = null;
-                    //#endregion
-
-                    CookieHelper.WriteCookie(LoginUserKey, DESEncryptHelper.Encrypt(user.TryToJson()));
+                    CookieHelper.WriteCookie(LoginUserKey, DESEncryptHelper.Encrypt(user.TryToJson()), 60);
                 }
                 else if (_loginProvider == "Session")
                 {
-                    SessionHelper.AddSession(LoginUserKey, DESEncryptHelper.Encrypt(user.TryToJson()));
+                    SessionHelper.AddSession(LoginUserKey, DESEncryptHelper.Encrypt(user.TryToJson()), 60, 0);
                 }
                 else if (_loginProvider == "Cache")
                 {
-                    CacheFactory.GetCacheInstance().WriteCache(DESEncryptHelper.Encrypt(user.TryToJson()), LoginUserKey, user.LoginTime.AddHours(1));
+                    CacheFactory.GetCacheInstance().WriteCache(DESEncryptHelper.Encrypt(user.TryToJson()), LoginUserKey, user.LoginTime.AddMinutes(60));
                 }
 
-                CacheFactory.GetCacheInstance().WriteCache(user.Token, user.UserId, user.LoginTime.AddHours(1));
+                //添加当前登陆用户Token
+                CacheFactory.GetCacheInstance().WriteCache(user.Token, user.UserId, user.LoginTime.AddMinutes(60));
             }
             catch (Exception ex)
             {
@@ -68,24 +64,13 @@ namespace Berry.Code.Operator
         {
             try
             {
-                OperatorEntity user = new OperatorEntity
-                {
-                    UserId = "",
-                    UserName = ""
-                };
+                OperatorEntity user = new OperatorEntity();
                 if (_loginProvider == "Cookie")
                 {
                     string json = CookieHelper.GetCookie(LoginUserKey).ToString();
                     if (!string.IsNullOrEmpty(json))
                     {
                         user = DESEncryptHelper.Decrypt(json).JsonToEntity<OperatorEntity>();
-
-                        #region 解决cookie时，设置数据权限较多时无法登陆的bug
-
-                        AuthorizeDataModel dataAuthorize = CacheFactory.GetCacheInstance().GetCache<AuthorizeDataModel>(LoginUserKey);
-                        user.DataAuthorize = dataAuthorize;
-
-                        #endregion 解决cookie时，设置数据权限较多时无法登陆的bug
                     }
                 }
                 else if (_loginProvider == "Session")
@@ -111,7 +96,7 @@ namespace Berry.Code.Operator
                 throw new Exception(ex.Message);
             }
         }
-        
+
         /// <summary>
         /// 删除登录信息
         /// </summary>
@@ -119,13 +104,7 @@ namespace Berry.Code.Operator
         {
             if (_loginProvider == "Cookie")
             {
-                CookieHelper.DelCookie(LoginUserKey.Trim());
-
-                #region 解决cookie时，设置数据权限较多时无法登陆的bug
-
-                CacheFactory.GetCacheInstance().RemoveCache(LoginUserKey);
-
-                #endregion 解决cookie时，设置数据权限较多时无法登陆的bug
+                CookieHelper.DelCookie(LoginUserKey);
             }
             else if (_loginProvider == "Session")
             {
@@ -149,17 +128,6 @@ namespace Berry.Code.Operator
                 if (_loginProvider == "Cookie")
                 {
                     str = CookieHelper.GetCookie(LoginUserKey);
-
-                    #region 解决cookie时，设置数据权限较多时无法登陆的bug
-
-                    AuthorizeDataModel dataAuthorize = CacheFactory.GetCacheInstance().GetCache<AuthorizeDataModel>(LoginUserKey);
-
-                    if (dataAuthorize == null)
-                    {
-                        return true;
-                    }
-
-                    #endregion 解决cookie时，设置数据权限较多时无法登陆的bug
                 }
                 else if (_loginProvider == "Session")
                 {
@@ -188,13 +156,6 @@ namespace Berry.Code.Operator
             if (_loginProvider == "Cookie")
             {
                 user = DESEncryptHelper.Decrypt(CookieHelper.GetCookie(LoginUserKey).ToString()).JsonToEntity<OperatorEntity>();
-
-                #region 解决cookie时，设置数据权限较多时无法登陆的bug
-
-                AuthorizeDataModel dataAuthorize = CacheFactory.GetCacheInstance().GetCache<AuthorizeDataModel>(LoginUserKey);
-                user.DataAuthorize = dataAuthorize;
-
-                #endregion 解决cookie时，设置数据权限较多时无法登陆的bug
             }
             else if (_loginProvider == "Session")
             {
@@ -209,8 +170,8 @@ namespace Berry.Code.Operator
                 }
             }
 
-            object token = CacheFactory.GetCacheInstance().GetCache<string>(user.UserId);
-            if (token == null)
+            string token = CacheFactory.GetCacheInstance().GetCache<string>(user.UserId);
+            if (string.IsNullOrEmpty(token))
             {
                 return -1;//过期
             }

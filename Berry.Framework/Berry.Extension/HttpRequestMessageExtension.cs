@@ -16,7 +16,7 @@ namespace Berry.Extension
             Lazy<bool> localFlag = request.Properties["MS_IsLocal"] as Lazy<bool>;
             return localFlag != null && localFlag.Value;
         }
-        
+
         /// <summary>
         /// 获取客户端IP地址
         /// </summary>
@@ -70,19 +70,11 @@ namespace Berry.Extension
         /// <returns></returns>
         public static HttpResponseMessage ToHttpResponseMessage(this object obj)
         {
-            String str;
-            if (obj is String || obj is Char)
-            {
-                str = obj.ToString();
-            }
-            else
-            {
-                str = obj.TryToJson();
-            }
+            string json = obj.TryToJson();
 
             HttpResponseMessage result = new HttpResponseMessage
             {
-                Content = new StringContent(str, Encoding.GetEncoding("UTF-8"), "application/json")
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
             };
             return result;
         }

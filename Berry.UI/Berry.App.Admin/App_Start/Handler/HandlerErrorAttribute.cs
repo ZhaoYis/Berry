@@ -6,6 +6,7 @@ using Berry.Extension;
 using Berry.Log;
 using Berry.Util;
 using System;
+using System.Collections.Generic;
 using System.Web;
 using System.Web.Mvc;
 
@@ -22,11 +23,41 @@ namespace Berry.App.Admin.Handler
         /// <param name="context">提供使用</param>
         public override void OnException(ExceptionContext context)
         {
+            if (!context.ExceptionHandled)
+            {
+                if (!context.HttpContext.Request.IsAjaxRequest())
+                {
+                    context.Result = new ViewResult()
+                    {
+                        ViewName = "~/Views/Shared/Error.cshtml",
+                        ViewData = new ViewDataDictionary
+                        {
+                            new KeyValuePair<string, object>("msg",context.Exception.Message),
+                            new KeyValuePair<string, object>("code",(int)JsonObjectStatus.Exception),
+                            new KeyValuePair<string, object>("url",context.HttpContext.Request.RawUrl)
+                        }
+                    };
+                }
+                else
+                {
+                    context.Result = new JsonResult
+                    {
+                        Data = new BaseJsonResult<string>
+                        {
+                            Data = null,
+                            Status = (int)JsonObjectStatus.Exception,
+                            Message = context.Exception.Message
+                        }
+                    };
+                }
+            }
+
             WriteLog(context);
-            base.OnException(context);
             context.ExceptionHandled = true;
-            context.HttpContext.Response.StatusCode = 200;
-            context.Result = new ContentResult { Content = new BaseJsonResult<string> { Status = (int)JsonObjectStatus.Error, Message = context.Exception.Message }.TryToJson() };
+
+            //context.HttpContext.Response.StatusCode = 200;
+            //context.Result = new ContentResult { Content = new BaseJsonResult<string> { Status = (int)JsonObjectStatus.Error, Message = context.Exception.Message }.TryToJson() };
+            //base.OnException(context);
         }
 
         /// <summary>

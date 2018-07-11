@@ -94,6 +94,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.Util.SMS", "Berry.Fra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.SignalRService", "Berry.UI\Berry.SignalRService\Berry.SignalRService.csproj", "{3227D1F6-9E94-45AE-9E04-09178152A447}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Berry.Util.JWT", "Berry.Framework\Berry.Util.JWT\Berry.Util.JWT.csproj", "{95DD2B8F-A8DE-4842-B4E8-C05B1D40E212}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -212,6 +214,10 @@ Global
 		{3227D1F6-9E94-45AE-9E04-09178152A447}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3227D1F6-9E94-45AE-9E04-09178152A447}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3227D1F6-9E94-45AE-9E04-09178152A447}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95DD2B8F-A8DE-4842-B4E8-C05B1D40E212}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95DD2B8F-A8DE-4842-B4E8-C05B1D40E212}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95DD2B8F-A8DE-4842-B4E8-C05B1D40E212}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95DD2B8F-A8DE-4842-B4E8-C05B1D40E212}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -250,6 +256,7 @@ Global
 		{BC269FD1-4CDB-46F7-9E2D-60F78966A54D} = {3AD86090-AD34-4D1E-A9A3-AB5F959E831C}
 		{0DB972F1-54B5-4D30-96BF-F6B470ADD1E9} = {E5A2C8A4-B1B3-467C-92B2-792BF367DF5D}
 		{3227D1F6-9E94-45AE-9E04-09178152A447} = {233E405C-FDAA-4276-B163-FD4F2FA2003F}
+		{95DD2B8F-A8DE-4842-B4E8-C05B1D40E212} = {E5A2C8A4-B1B3-467C-92B2-792BF367DF5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {402D764C-5259-4C6D-BDA4-DDBAA375944E}

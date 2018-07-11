@@ -15,7 +15,12 @@ namespace Berry.Cache
         /// </summary>
         private static readonly List<string> CacheKeyList = new List<string>();
 
-        public static CustomCache CustomCacheInstance = new CustomCache();
+        private static CustomCache CustomCacheInstance = new CustomCache();
+
+        public static CustomCache GetCustomCacheInstance()
+        {
+            return CustomCacheInstance;
+        }
 
         #region 缓存过期检测
         /// <summary>
@@ -42,11 +47,11 @@ namespace Berry.Cache
                     this.RemoveCache(pair.Key);
                 }
             }
-        } 
+        }
         #endregion
 
         /// <summary>
-        /// 写入缓存，单体，默认过期时间10分钟
+        /// 写入缓存，单体，默认过期时间60分钟
         /// </summary>
         /// <param name="value">对象数据</param>
         /// <param name="cacheKey">键</param>
@@ -56,7 +61,7 @@ namespace Berry.Cache
             {
                 CacheKeyList.Add(cacheKey);
             }
-            WriteCache<T>(value, cacheKey, DateTime.Now.AddMinutes(10));
+            WriteCache<T>(value, cacheKey, DateTime.Now.AddMinutes(60));
         }
 
         /// <summary>
@@ -71,14 +76,14 @@ namespace Berry.Cache
         }
 
         /// <summary>
-        /// 写入缓存，集合，默认过期时间10分钟
+        /// 写入缓存，集合，默认过期时间60分钟
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value">对象数据</param>
         /// <param name="cacheKey">键</param>
         public void WriteListCache<T>(List<T> value, string cacheKey) where T : class
         {
-            WriteListCache<T>(value, cacheKey, DateTime.Now.AddMinutes(10));
+            WriteListCache<T>(value, cacheKey, DateTime.Now.AddMinutes(60));
         }
 
         /// <summary>
