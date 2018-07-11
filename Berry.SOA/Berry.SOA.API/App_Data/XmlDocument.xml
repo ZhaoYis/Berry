@@ -845,7 +845,7 @@
         </member>
         <member name="T:Berry.SOA.API.Controllers.TestController">
             <summary>
-            API测试控制器，版本：V1.0
+            API测试控制器
             </summary>
         </member>
         <member name="M:Berry.SOA.API.Controllers.TestController.HelloWorld(Berry.SOA.API.ParameterModel.TestApiArgEntity)">

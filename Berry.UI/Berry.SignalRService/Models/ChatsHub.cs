@@ -39,7 +39,7 @@ namespace Berry.SignalRService.Models
         /// <summary>
         /// 系统缓存
         /// </summary>
-        private readonly WebCache _cache = WebCache.WebCacheInstance;
+        private readonly WebCache _cache = WebCache.GetWebCacheInstance();
         /// <summary>
         /// 用户列表，userId-connId 
         /// userId带有前缀，其中：S-服务器用户 U-登陆用户 T-访客用户（未登录）

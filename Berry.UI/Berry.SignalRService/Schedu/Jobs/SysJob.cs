@@ -15,7 +15,7 @@ namespace Berry.SignalRService.Schedu.Jobs
         /// <summary>
         /// 系统缓存
         /// </summary>
-        private readonly WebCache _cache = WebCache.WebCacheInstance;
+        private readonly WebCache _cache = WebCache.GetWebCacheInstance();
 
         private IHubConnectionContext<dynamic> _clients;
 

@@ -62,7 +62,7 @@ namespace Berry.SignalRService.Models
         /// <summary>
         /// 系统缓存
         /// </summary>
-        private readonly WebCache _cache = WebCache.WebCacheInstance;
+        private readonly WebCache _cache = WebCache.GetWebCacheInstance();
         /// <summary>
         /// 任务状态 用户ID--任务编码-任务状态
         /// </summary>
