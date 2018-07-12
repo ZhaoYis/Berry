@@ -42,7 +42,7 @@ namespace Berry.SOA.API.Controllers
                         JWTPlayloadInfo playload = new JWTPlayloadInfo
                         {
                             iss = "Berry.Service",
-                            sub = arg.UserId,
+                            sub = arg.Account,
                             aud = arg.UserId
                         };
                         string token = JWTHelper.GetToken(playload);

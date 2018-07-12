@@ -66,7 +66,7 @@ namespace Berry.SignalRService.Models
         /// <summary>
         /// 任务状态 用户ID--任务编码-任务状态
         /// </summary>
-        private readonly ConcurrentDictionary<string, Dictionary<string, JobState>> _jobStateDict = new ConcurrentDictionary<string, Dictionary<string, JobState>>();//TODO 待优化，需要解决服务挂了、被IIS回收了或者用户刷新页面
+        //private readonly ConcurrentDictionary<string, Dictionary<string, JobState>> _jobStateDict = new ConcurrentDictionary<string, Dictionary<string, JobState>>();//TODO 待优化，需要解决服务挂了、被IIS回收了或者用户刷新页面
 
         #endregion
 

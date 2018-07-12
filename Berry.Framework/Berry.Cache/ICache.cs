@@ -52,8 +52,9 @@ namespace Berry.Cache
         /// <typeparam name="T"></typeparam>
         /// <param name="cacheKey">键</param>
         /// <param name="func">获取缓存数据方法</param>
+        /// <param name="expireTime">到期时间</param>
         /// <returns></returns>
-        T GetCache<T>(string cacheKey, Func<T> func) where T : class;
+        T GetCache<T>(string cacheKey, Func<T> func, DateTime expireTime) where T : class;
 
         /// <summary>
         /// 读取缓存

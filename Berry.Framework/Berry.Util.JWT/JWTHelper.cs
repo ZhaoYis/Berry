@@ -27,7 +27,7 @@ namespace Berry.Util.JWT
             IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
             IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
             //设置过期时间
-            DateTime time = DateTime.Now.AddMinutes(60);
+            DateTime time = DateTime.Now.AddMinutes(120);
             playload.exp = DateTimeHelper.GetTimeStamp(time).ToString();
             Dictionary<string, object> dict = playload.Object2Dictionary();
             //获取私钥
@@ -39,7 +39,7 @@ namespace Berry.Util.JWT
                 token = CacheFactory.GetCacheInstance().GetCache("JWT_TokenCacheKey:Guest", () =>
                 {
                     return encoder.Encode(dict, secret);
-                });
+                }, time);
             }
             else
             {
@@ -47,7 +47,7 @@ namespace Berry.Util.JWT
                 token = CacheFactory.GetCacheInstance().GetCache($"JWT_TokenCacheKey:{playload.aud}", () =>
                 {
                     return encoder.Encode(dict, secret);
-                });
+                }, time);
             }
             return token;
         }

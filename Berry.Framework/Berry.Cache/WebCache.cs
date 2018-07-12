@@ -96,8 +96,9 @@ namespace Berry.Cache
         /// <typeparam name="T"></typeparam>
         /// <param name="cacheKey">键</param>
         /// <param name="func">获取缓存数据方法</param>
+        /// <param name="expireTime">到期时间</param>
         /// <returns></returns>
-        public T GetCache<T>(string cacheKey, Func<T> func) where T : class
+        public T GetCache<T>(string cacheKey, Func<T> func, DateTime expireTime) where T : class
         {
             T t = default(T);
             if (!this.HasExpire(cacheKey))
@@ -107,7 +108,7 @@ namespace Berry.Cache
             else
             {
                 t = func.Invoke();
-                this.WriteCache<T>(t, cacheKey);
+                this.WriteCache<T>(t, cacheKey, expireTime);
             }
             return t;
         }

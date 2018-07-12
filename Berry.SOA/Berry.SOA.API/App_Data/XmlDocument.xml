@@ -887,6 +887,11 @@
             用户ID
             </summary>
         </member>
+        <member name="P:Berry.SOA.API.ParameterModel.GetTokenArgEntity.Account">
+            <summary>
+            帐号
+            </summary>
+        </member>
         <member name="T:Berry.SOA.API.ParameterModel.TestApiArgEntity">
             <summary>
             用于测试API的实体
