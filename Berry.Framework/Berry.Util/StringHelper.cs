@@ -83,6 +83,50 @@ namespace Berry.Util
 
         #endregion FirstUpper(将值的首字母大写)
 
+        #region 将字符串大写转小写，小写转大写，数字保留，其他除外
+        /// <summary>
+        /// 将字符串大写转小写，小写转大写，数字保留，其他除外
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string CapitalizeAndLowercase(string value)
+        {
+            //0~9数字对应十进制48－57
+            //a~z字母对应的十进制97－122，十六进制61－7A
+            //A~Z字母对应的十进制65－90，十六进制41－5A
+
+            string newStr = string.Empty;//用于存放新字符串
+
+            //字符串-->byte[]
+            ASCIIEncoding ascii = new ASCIIEncoding();
+            byte[] bytes = ascii.GetBytes(value);
+
+            //循环byte[]
+            foreach (byte item in bytes)
+            {
+                //临时存放
+                byte[] temp = new byte[] { item };
+
+                if (item >= 97 && item <= 122)
+                {
+                    //小写字母转大写
+                    newStr += ascii.GetString(temp).ToUpper();
+                }
+                else if (item >= 65 && item <= 90)
+                {
+                    //大写字母转小写
+                    newStr += ascii.GetString(temp).ToLower();
+                }
+                else if (item >= 48 && item <= 57)
+                {
+                    //数字不变
+                    newStr += ascii.GetString(temp);
+                }
+            }
+            return newStr;
+        }
+        #endregion
+
         #region ToCamel(将字符串转成驼峰形式)
 
         /// <summary>
@@ -271,7 +315,7 @@ namespace Berry.Util
         }
 
         #endregion 去除Html标签
-        
+
         #region HtmlEncode(对html字符串进行编码)
 
         /// <summary>

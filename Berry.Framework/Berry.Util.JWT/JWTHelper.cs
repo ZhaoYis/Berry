@@ -118,7 +118,7 @@ namespace Berry.Util.JWT
         private static string GetSecret()
         {
             //TODO 从文件中去读真正的私钥
-            return "{5E094D22-1849-46A9-A253-41DAAD244252}";
+            return "eyJpc3MiOiJCZXJyeS5TZXJ2aWNlIiwic3ViIjoiMTgyODQ1OTQ2MTkiLCJhdWQiOiJndWVzdCIsImlhdCI6IjE1MzEzODE5OTgiLCJleHAiOiIxNTMxMzg5MTk4IiwibmJmIjowLCJqdGkiOiI1YzdmN2ZhM2E4ODVlODExYTEzNTQ4ZDIyNGMwMWQwNSIsInVzZXJpZCI6bnVsbCwiZXh0ZW5kIjpudWxsfQ";
         }
     }
 }
