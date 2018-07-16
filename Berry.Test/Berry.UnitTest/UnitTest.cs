@@ -12,13 +12,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 using AutoMapper;
 using Berry.App.Cache;
 using Berry.Cache;
+using Berry.Data.Dapper;
+using Berry.Data.Extension;
 using Berry.Entity;
 using Berry.Extension;
 using Berry.UnitTest.Model;
+using Dapper;
 
 namespace Berry.UnitTest
 {
@@ -41,17 +46,19 @@ namespace Berry.UnitTest
 
             //IocTest();
 
-            //InsertTest(2);
+            //InsertTest(2000);
 
-            //InsertListTest(5000 * 10);
+            //InsertListTest(10);
 
             //QueryTest();
+
+            QueryTestByProc();
 
             //RsaTest();
 
             //RedisTest();
 
-            MapToTest();
+            //MapToTest();
         }
 
         [TestMethod]
@@ -185,6 +192,27 @@ namespace Berry.UnitTest
 
             Console.WriteLine("执行结束，耗时：" + time);
         }
+
+        [TestMethod]
+        private void QueryTestByProc()
+        {
+            MsSqlDatabase database = new MsSqlDatabase("MsSqlBaseDbConnectionString");
+            DbParameter[] parameter =
+            {
+                DbParameters.CreateDbParameter("@FEILDS","*",DbType.String),
+                DbParameters.CreateDbParameter("@TABLE_NAME","Base_User",DbType.String),
+                DbParameters.CreateDbParameter("@PAGE_INDEX",1,DbType.Int16),
+                DbParameters.CreateDbParameter("@PAGE_SIZE",10,DbType.Int16),
+                DbParameters.CreateDbParameter("@ORDERTYPE",1,DbType.Int16),
+                DbParameters.CreateDbParameter("@ANDWHERE","DeleteMark=0",DbType.String),
+                DbParameters.CreateDbParameter("@ORDERFEILD","CreateDate",DbType.String),
+                DbParameters.CreateDbParameter("@ORDERFEILD","CreateDate",DbType.String),
+            };
+
+            List<UserEntity> res = database.ExecuteByProc<UserEntity>("PROC_PAGINATIONBY_SINGLE_TABLE", parameter).ToList();
+            Console.WriteLine("QueryTestByProc=>记录数：" + res.Count);
+        }
+
 
         [TestMethod]
         private void RsaTest()

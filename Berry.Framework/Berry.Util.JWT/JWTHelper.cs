@@ -88,7 +88,7 @@ namespace Berry.Util.JWT
             return null;
         }
 
-        private static bool Check(JWTPlayloadInfo info, string cacheToken,string token)
+        private static bool Check(JWTPlayloadInfo info, string cacheToken, string token)
         {
             if (string.IsNullOrEmpty(cacheToken)) return false;
             if (string.IsNullOrEmpty(token)) return false;
@@ -104,7 +104,7 @@ namespace Berry.Util.JWT
                 }
                 else
                 {
-                    CacheFactory.GetCacheInstance().RemoveCache($"_JWT_TokenCacheKey:{info.aud}");
+                    CacheFactory.GetCacheInstance().RemoveCache($"JWT_TokenCacheKey:{info.aud}");
                 }
                 return false;
             }

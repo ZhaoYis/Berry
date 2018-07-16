@@ -3,7 +3,6 @@ using Berry.Data.Extension;
 using Berry.Log;
 using Berry.Util;
 using Berry.Util.CustomException;
-using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,6 +12,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using Dapper;
 
 namespace Berry.Data.Dapper
 {
@@ -220,6 +220,32 @@ namespace Berry.Data.Dapper
             {
                 DbTransaction.Connection.Execute(procName, dbParameter, DbTransaction);
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// 执行存储过程，返回集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="procName">存储过程名称</param>
+        /// <returns></returns>
+        public IEnumerable<T> ExecuteByProc<T>(string procName)
+        {
+            return ExecuteByProc<T>(procName, null);
+        }
+
+        /// <summary>
+        /// 执行存储过程，返回集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="procName">存储过程名称</param>
+        /// <param name="dbParameter">DbCommand参数</param>
+        /// <returns></returns>
+        public IEnumerable<T> ExecuteByProc<T>(string procName, DbParameter[] dbParameter)
+        {
+            using (var dbConnection = Connection)
+            {
+                return dbConnection.Query<T>(procName, dbParameter, null, true, 100, CommandType.StoredProcedure).ToList();
             }
         }
 

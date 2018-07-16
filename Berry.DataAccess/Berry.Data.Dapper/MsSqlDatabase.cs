@@ -3,7 +3,6 @@ using Berry.Data.Extension;
 using Berry.Log;
 using Berry.Util;
 using Berry.Util.CustomException;
-using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,6 +13,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Berry.Util.LambdaToSQL;
+using Dapper;
 
 namespace Berry.Data.Dapper
 {
@@ -223,12 +223,12 @@ namespace Berry.Data.Dapper
             {
                 using (var connection = Connection)
                 {
-                    return connection.Execute(procName);
+                    return connection.Execute(procName, null, null, 100, CommandType.StoredProcedure);
                 }
             }
             else
             {
-                DbTransaction.Connection.Execute(procName, null, DbTransaction);
+                DbTransaction.Connection.Execute(procName, null, DbTransaction, 100, CommandType.StoredProcedure);
                 return 0;
             }
         }
@@ -245,13 +245,45 @@ namespace Berry.Data.Dapper
             {
                 using (var connection = Connection)
                 {
-                    return connection.Execute(procName, dbParameter);
+                    return connection.Execute(procName, dbParameter, null, 100, CommandType.StoredProcedure);
                 }
             }
             else
             {
-                DbTransaction.Connection.Execute(procName, dbParameter, DbTransaction);
+                DbTransaction.Connection.Execute(procName, dbParameter, DbTransaction, 100, CommandType.StoredProcedure);
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// 执行存储过程，返回集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="procName">存储过程名称</param>
+        /// <returns></returns>
+        public IEnumerable<T> ExecuteByProc<T>(string procName)
+        {
+            return new List<T>();//ExecuteByProc<T>(procName, null);
+        }
+
+        /// <summary>
+        /// 执行存储过程，返回集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="procName">存储过程名称</param>
+        /// <param name="dbParameter">DbCommand参数</param>
+        /// <returns></returns>
+        public IEnumerable<T> ExecuteByProc<T>(string procName, DbParameter[] dbParameter)
+        {
+            using (var dbConnection = Connection)
+            {
+                DynamicParameters parameters = new DynamicParameters();
+                foreach (DbParameter par in dbParameter)
+                {
+                    parameters.Add(par.ParameterName, par.Value, par.DbType, par.Direction, par.Size);
+                }
+
+                return dbConnection.Query<T>(procName, parameters, null, true, 100, CommandType.StoredProcedure).ToList();
             }
         }
 
