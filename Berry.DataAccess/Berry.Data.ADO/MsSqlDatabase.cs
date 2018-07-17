@@ -199,7 +199,7 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public IEnumerable<T> ExecuteByProc<T>(string procName)
         {
-            throw new NotImplementedException();
+            return ExecuteByProc<T>(procName, null);
         }
 
         /// <summary>
@@ -211,7 +211,12 @@ namespace Berry.Data.ADO
         /// <returns></returns>
         public IEnumerable<T> ExecuteByProc<T>(string procName, DbParameter[] dbParameter)
         {
-            throw new NotImplementedException();
+            using (var connection = Connection)
+            {
+                var data = SqlHelper.ExecuteDataReader(connection, CommandType.StoredProcedure, procName, dbParameter);
+                List<T> res = data.IDataReaderToList<T>();
+                return res;
+            }
         }
 
         #endregion 执行 SQL 语句

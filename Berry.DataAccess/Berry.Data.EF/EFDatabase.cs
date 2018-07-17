@@ -228,7 +228,7 @@ namespace Berry.Data.EF
         /// <returns></returns>
         public IEnumerable<T> ExecuteByProc<T>(string procName)
         {
-            throw new NotImplementedException();
+            return ExecuteByProc<T>(procName, null);
         }
 
         /// <summary>
@@ -240,7 +240,16 @@ namespace Berry.Data.EF
         /// <returns></returns>
         public IEnumerable<T> ExecuteByProc<T>(string procName, DbParameter[] dbParameter)
         {
-            throw new NotImplementedException();
+            string parStr = String.Empty;
+            foreach (DbParameter par in dbParameter)
+            {
+                parStr += DbParameters.CreateDbParmCharacter() + par.ParameterName + ",";
+            }
+
+            parStr = parStr.Substring(0, parStr.Length - 1);
+            string execCmd = $"exec {procName}  {parStr}";
+            var data = Dbcontext.Database.SqlQuery<T>(execCmd, dbParameter);
+            return data.ToList();
         }
 
         #endregion 执行 SQL 语句
@@ -784,7 +793,7 @@ namespace Berry.Data.EF
         {
             using (var dbConnection = Dbcontext.Database.Connection)
             {
-                var dataReader = SqlHelper.ExecuteReader(dbConnection,CommandType.Text, strSql, dbParameter);
+                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, strSql, dbParameter);
                 return ConvertExtension.IDataReaderToDataTable(dataReader);
             }
         }
@@ -846,8 +855,8 @@ namespace Berry.Data.EF
                 sb.Append("Select * From (Select ROW_NUMBER() Over (" + OrderBy + ")");
                 sb.Append(" As rowNum, * From (" + strSql + ") As T ) As N Where rowNum > " + num + " And rowNum <= " + num1 + "");
 
-                total = Convert.ToInt32(SqlHelper.ExecuteScalar(dbConnection,CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
-                var dataReader = SqlHelper.ExecuteReader(dbConnection,CommandType.Text, sb.ToString(), dbParameter);
+                total = Convert.ToInt32(SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, "Select Count(1) From (" + strSql + ") As t", dbParameter));
+                var dataReader = SqlHelper.ExecuteReader(dbConnection, CommandType.Text, sb.ToString(), dbParameter);
 
                 DataTable resultTable = ConvertExtension.IDataReaderToDataTable(dataReader);
                 resultTable.Columns.Remove("rowNum");
@@ -875,7 +884,7 @@ namespace Berry.Data.EF
         {
             using (var dbConnection = Dbcontext.Database.Connection)
             {
-                return SqlHelper.ExecuteScalar(dbConnection,CommandType.Text, strSql, dbParameter);
+                return SqlHelper.ExecuteScalar(dbConnection, CommandType.Text, strSql, dbParameter);
             }
         }
 
@@ -883,7 +892,7 @@ namespace Berry.Data.EF
         {
             using (var dbConnection = Dbcontext.Database.Connection)
             {
-                return SqlHelper.ExecuteDataReader(dbConnection,commandType, strSql, dbParameter);
+                return SqlHelper.ExecuteDataReader(dbConnection, commandType, strSql, dbParameter);
             }
         }
 

@@ -263,7 +263,7 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public IEnumerable<T> ExecuteByProc<T>(string procName)
         {
-            return new List<T>();//ExecuteByProc<T>(procName, null);
+            return ExecuteByProc<T>(procName, null);
         }
 
         /// <summary>
