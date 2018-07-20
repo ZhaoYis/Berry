@@ -30,11 +30,11 @@ namespace Berry.SOA.API.Controllers
         [IgnoreToken(true)]
         public HttpResponseMessage GetJWTToken(GetTokenArgEntity arg)
         {
-            BaseJsonResult<string> resultMsg = this.GetBaseJsonResult<string>();
+            BaseJsonResult<string> resultMsg = null;
 
             Logger(this.GetType(), "获取授权Token-GetJWTToken", () =>
             {
-                if (!string.IsNullOrEmpty(arg.t))
+                if (this.CheckBaseArgument(arg, out resultMsg))
                 {
                     //TODO 根据UserID校验用户是否存在
                     if (true)
@@ -51,16 +51,12 @@ namespace Berry.SOA.API.Controllers
                     }
                     else
                     {
-                        resultMsg = this.GetBaseJsonResult<string>("", JsonObjectStatus.UserNotExist);
+                        resultMsg = this.GetBaseJsonResult<string>(JsonObjectStatus.UserNotExist);
                     }
-                }
-                else
-                {
-                    resultMsg = this.GetBaseJsonResult<string>("", JsonObjectStatus.Fail, "，请求参数有误。");
                 }
             }, e =>
             {
-                resultMsg = this.GetBaseJsonResult<string>("", JsonObjectStatus.Exception, "，异常信息：" + e.Message);
+                resultMsg = this.GetBaseJsonResult<string>(JsonObjectStatus.Exception, "，异常信息：" + e.Message);
             });
 
             return resultMsg.ToHttpResponseMessage();

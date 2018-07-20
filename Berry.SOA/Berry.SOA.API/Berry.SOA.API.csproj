@@ -149,7 +149,6 @@
   <ItemGroup>
     <Compile Include="App_Start\Attributes\CustomHandlerError.cs" />
     <Compile Include="App_Start\Attributes\IngoreActionAttribute.cs" />
-    <Compile Include="App_Start\Attributes\RequestAuthorizeAttribute.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\Caching\InMemoryThrottleStore.cs" />
     <Compile Include="App_Start\Caching\IThrottleStore.cs" />
@@ -216,6 +215,7 @@
     <Content Include="Areas\HelpPage\TestClient.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\images\step.jpg" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />

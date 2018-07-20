@@ -20,18 +20,6 @@
             忽略特殊Action方法
             </summary>
         </member>
-        <member name="T:Berry.SOA.API.Attributes.RequestAuthorizeAttribute">
-            <summary>
-            自定义此特性用于接口的身份验证
-            </summary>
-        </member>
-        <member name="M:Berry.SOA.API.Attributes.RequestAuthorizeAttribute.ValidateAppKey(System.String)">
-            <summary>
-            校验授权信息
-            </summary>
-            <param name="encryptTicket"></param>
-            <returns></returns>
-        </member>
         <member name="M:Berry.SOA.API.Caching.IThrottleStore.TryGetValue(System.String,Berry.SOA.API.Caching.ThrottleEntry@)">
             <summary>
             获取字典的值
@@ -118,6 +106,11 @@
             请求完成时
             </summary>
             <param name="actionExecutedContext"></param>
+        </member>
+        <member name="T:Berry.SOA.API.Filters.CustomActionFilterAttribute">
+            <summary>
+            接口授权验证
+            </summary>
         </member>
         <member name="M:Berry.SOA.API.Filters.CustomActionFilterAttribute.OnActionExecuting(System.Web.Http.Controllers.HttpActionContext)">
             <summary>在调用操作方法之前发生。</summary>
@@ -755,7 +748,7 @@
             基控Api制器
             </summary>
         </member>
-        <member name="F:Berry.SOA.API.Controllers.Base.BaseApiController._logHelper">
+        <member name="F:Berry.SOA.API.Controllers.Base.BaseApiController.LogHelper">
             <summary>
             系统日志 主动调用
             </summary>
@@ -779,6 +772,24 @@
             <param name="data">数据</param>
             <param name="status">状态</param>
             <param name="message">消息</param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseApiController.GetBaseJsonResult``1(Berry.Code.JsonObjectStatus,System.String)">
+            <summary>
+            获取公共返回消息
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="status">状态</param>
+            <param name="message">消息</param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseApiController.CheckBaseArgument``1(Berry.SOA.API.ParameterModel.BaseParameterEntity,Berry.Entity.BaseJsonResult{``0}@)">
+            <summary>
+            校验接口基类参数
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="parameter"></param>
+            <param name="result"></param>
             <returns></returns>
         </member>
         <member name="M:Berry.SOA.API.Controllers.Base.BaseApiController.PreprocessingWeChatData``1(System.String)">

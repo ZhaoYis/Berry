@@ -14,13 +14,58 @@ namespace Berry.Util
         /// 压缩
         /// </summary>
         /// <param name="text">文本</param>
-        public static string Compress(string text)
+        public static string GZipCompress(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return "";
 
             byte[] buffer = Encoding.UTF8.GetBytes(text);
-            return Convert.ToBase64String(Compress(buffer));
+            return Convert.ToBase64String(GZipCompress(buffer));
+        }
+
+        /// <summary>
+        /// 压缩
+        /// </summary>
+        /// <param name="stream">流</param>
+        public static byte[] GZipCompress(Stream stream)
+        {
+            if (stream == null || stream.Length == 0)
+                return null;
+            return GZipCompress(StreamToBytes(stream));
+        }
+
+        /// <summary>
+        /// GZip压缩
+        /// </summary>
+        /// <param name="buffer">字节流</param>
+        public static byte[] GZipCompress(byte[] buffer)
+        {
+            if (buffer == null) return null;
+            using (var ms = new MemoryStream())
+            {
+                using (var zip = new GZipStream(ms, CompressionMode.Compress, true))
+                {
+                    zip.Write(buffer, 0, buffer.Length);
+                }
+                return ms.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Deflate压缩
+        /// </summary>
+        /// <param name="buffer">字节流</param>
+        public static byte[] DeflateCompress(byte[] buffer)
+        {
+            if (buffer == null) return null;
+            using (var ms = new MemoryStream())
+            {
+                using (var deflate = new DeflateStream(ms, CompressionMode.Compress, true))
+                {
+                    deflate.Write(buffer, 0, buffer.Length);
+                }
+                return ms.ToArray();
+            }
         }
 
         /// <summary>
@@ -56,36 +101,7 @@ namespace Berry.Util
             return Decompress(new MemoryStream(buffer));
         }
 
-        /// <summary>
-        /// 压缩
-        /// </summary>
-        /// <param name="stream">流</param>
-        public static byte[] Compress(Stream stream)
-        {
-            if (stream == null || stream.Length == 0)
-                return null;
-            return Compress(StreamToBytes(stream));
-        }
-
         #region 私有方法
-
-        /// <summary>
-        /// 压缩
-        /// </summary>
-        /// <param name="buffer">字节流</param>
-        private static byte[] Compress(byte[] buffer)
-        {
-            if (buffer == null)
-                return null;
-            using (var ms = new MemoryStream())
-            {
-                using (var zip = new GZipStream(ms, CompressionMode.Compress, true))
-                {
-                    zip.Write(buffer, 0, buffer.Length);
-                }
-                return ms.ToArray();
-            }
-        }
 
         /// <summary>
         /// 解压缩
@@ -113,7 +129,7 @@ namespace Berry.Util
             var buffer = new byte[stream.Length];
             stream.Read(buffer, 0, buffer.Length);
             return buffer;
-        } 
+        }
         #endregion
     }
 }

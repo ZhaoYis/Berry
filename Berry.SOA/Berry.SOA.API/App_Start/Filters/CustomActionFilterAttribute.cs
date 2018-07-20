@@ -12,6 +12,9 @@ using Berry.Util.JWT;
 
 namespace Berry.SOA.API.Filters
 {
+    /// <summary>
+    /// 接口授权验证
+    /// </summary>
     public class CustomActionFilterAttribute : ActionFilterAttribute
     {
         /// <summary>在调用操作方法之前发生。</summary>
@@ -41,7 +44,7 @@ namespace Berry.SOA.API.Filters
 
             //忽略不需要授权的方法
             var attributes = actionContext.ActionDescriptor.GetCustomAttributes<IgnoreTokenAttribute>();
-            if (attributes.Count > 0 && attributes[0].Ignore) return;
+            if (attributes.Count == 0 || (attributes.Count > 0 && attributes[0].Ignore)) return;
 
             //判断请求头是否包含以下参数
             if (string.IsNullOrEmpty(accessToken))

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -7,6 +9,7 @@ using System.Web.Http.ModelBinding;
 using Berry.Code;
 using Berry.Entity;
 using Berry.Extension;
+using Berry.Util;
 
 namespace Berry.SOA.API.Filters
 {
@@ -38,18 +41,16 @@ namespace Berry.SOA.API.Filters
                     sb.Append(err);
                 }
 
-                HttpResponseMessage response = actionContext.Response = actionContext.Response ?? new HttpResponseMessage();
-                response.StatusCode = actionContext.Response.StatusCode;
+                HttpResponseMessage response = actionContext.Response ?? new HttpResponseMessage(HttpStatusCode.OK);
+                response.StatusCode = response.StatusCode;
                 response.Content = new StringContent(
                     new BaseJsonResult<string>
                     {
                         Status = (int)JsonObjectStatus.Fail,
-                        Data = null,
                         Message = sb.ToString().Substring(0, sb.ToString().Length - 1),
-                        BackUrl = null
                     }.TryToJson(), Encoding.UTF8, "application/json");
             }
-            base.OnActionExecuting(actionContext);
+            //base.OnActionExecuting(actionContext);
         }
 
         /// <summary>
@@ -60,39 +61,78 @@ namespace Berry.SOA.API.Filters
         {
             if (actionExecutedContext.Exception != null)
             {
-                actionExecutedContext.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+                actionExecutedContext.Response = new HttpResponseMessage(HttpStatusCode.OK);
                 actionExecutedContext.Response.Content = new StringContent(
                          new BaseJsonResult<string>
                          {
                              Status = (int)JsonObjectStatus.Exception,
-                             Data = null,
                              Message = actionExecutedContext.Exception.Message,
-                             BackUrl = null
                          }.TryToJson(), Encoding.UTF8, "application/json");
             }
             else
             {
                 if (actionExecutedContext.Response.Content == null)
                 {
-                    //actionExecutedContext.Response.Content = new StringContent(
-                    // JsonConvert.SerializeObject(new ResultPacket()
-                    // {
-                    //     IsError = false,
-                    //     ResponseData = null
-                    // }));
+                    actionExecutedContext.Response.Content = new StringContent(
+                        new BaseJsonResult<string>
+                        {
+                            Status = (int)JsonObjectStatus.Error,
+                            Message = "HTTP响应消息内容为空",
+                        }.TryToJson(), Encoding.UTF8, "application/json");
                 }
                 else
                 {
                     object result;
+                    long resultLength = 0;
                     if (actionExecutedContext.Response.Content is ObjectContent)
-                        result = (actionExecutedContext.Response.Content as ObjectContent).Value;
+                    {
+                        result = ((ObjectContent)actionExecutedContext.Response.Content).Value;
+                    }
                     else
-                        result = System.Text.Encoding.UTF8.GetString(actionExecutedContext.Response.Content.ReadAsByteArrayAsync().Result);
+                    {
+                        var ctx = actionExecutedContext.Response.Content.ReadAsByteArrayAsync().Result;
+                        resultLength = ctx.LongLength;
+                        result = Encoding.UTF8.GetString(ctx);
+                    }
 
-                    actionExecutedContext.Response.Content = new StringContent(result.TryToJson(), Encoding.UTF8, "application/json");
+                    var Headers = actionExecutedContext.ActionContext.Request.Headers;
+                    var AcceptEncoding = Headers.AcceptEncoding;
+                    if (AcceptEncoding != null && AcceptEncoding.Contains(new StringWithQualityHeaderValue("gzip")))
+                    {
+                        byte[] body = Encoding.UTF8.GetBytes(result.TryToJson());
+                        byte[] compressedData = GZipHelper.GZipCompress(body);
+
+                        actionExecutedContext.Response.Content = new ByteArrayContent(compressedData);
+                        actionExecutedContext.Response.Content.Headers.Remove("Content-Type");
+                        actionExecutedContext.Response.Content.Headers.Add("Content-Encoding", "gzip");
+                        actionExecutedContext.Response.Content.Headers.Add("Content-Type", "application/json; charset=utf-8");
+                    }
+                    else if (AcceptEncoding != null && AcceptEncoding.Contains(new StringWithQualityHeaderValue("deflate")))
+                    {
+                        byte[] body = Encoding.UTF8.GetBytes(result.TryToJson());
+                        byte[] compressedData = GZipHelper.DeflateCompress(body);
+
+                        actionExecutedContext.Response.Content = new ByteArrayContent(compressedData);
+                        actionExecutedContext.Response.Content.Headers.Remove("Content-Type");
+                        actionExecutedContext.Response.Content.Headers.Add("Content-Encoding", "deflate");
+                        actionExecutedContext.Response.Content.Headers.Add("Content-Type", "application/json; charset=utf-8");
+                    }
+                    else
+                    {
+                        actionExecutedContext.Response.Content = new StringContent(result.TryToJson(), Encoding.UTF8, "application/json");
+                    }
+
+                    //if (resultLength > 1024)
+                    //{
+
+                    //}
+                    //else
+                    //{
+                    //    actionExecutedContext.Response.Content = new StringContent(result.TryToJson(), Encoding.UTF8, "application/json");
+                    //}
                 }
             }
-            base.OnActionExecuted(actionExecutedContext);
+            //base.OnActionExecuted(actionExecutedContext);
         }
     }
 }

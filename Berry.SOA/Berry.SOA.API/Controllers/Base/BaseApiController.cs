@@ -8,6 +8,8 @@ using Berry.Extension;
 using Berry.Log;
 using Berry.SOA.API.Attributes;
 using Berry.SOA.API.Filters;
+using Berry.SOA.API.ParameterModel;
+using Berry.Util;
 
 namespace Berry.SOA.API.Controllers.Base
 {
@@ -15,7 +17,6 @@ namespace Berry.SOA.API.Controllers.Base
     /// 基控Api制器
     /// </summary>
     //[RequireHttps]
-    //[RequestAuthorize]
     [TimingActionFilter]
     public abstract class BaseApiController : ApiController, ILogger
     {
@@ -23,7 +24,7 @@ namespace Berry.SOA.API.Controllers.Base
         /// <summary>
         /// 系统日志 主动调用
         /// </summary>
-        protected readonly LogHelper _logHelper = new LogHelper(MethodBase.GetCurrentMethod().DeclaringType);
+        protected readonly LogHelper LogHelper = new LogHelper(MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// 利用Action委托封装Log4net对日志的处理
@@ -55,11 +56,56 @@ namespace Berry.SOA.API.Controllers.Base
             BaseJsonResult<T> resultMsg = new BaseJsonResult<T>
             {
                 Status = (int)status,
-                Message = status.GetEnumDescription() + message,
-                Data = data,
-                BackUrl = ""
+                Message = $"{status.GetEnumDescription()}{message}",
+                Data = data
             };
             return resultMsg;
+        }
+
+        /// <summary>
+        /// 获取公共返回消息
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="status">状态</param>
+        /// <param name="message">消息</param>
+        /// <returns></returns>
+        protected BaseJsonResult<T> GetBaseJsonResult<T>(JsonObjectStatus status = JsonObjectStatus.Error, string message = "") where T : class
+        {
+            BaseJsonResult<T> resultMsg = new BaseJsonResult<T>
+            {
+                Status = (int)status,
+                Message = $"{status.GetEnumDescription()}{message}",
+            };
+            return resultMsg;
+        }
+
+        /// <summary>
+        /// 校验接口基类参数
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="parameter"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        protected bool CheckBaseArgument<T>(BaseParameterEntity parameter, out BaseJsonResult<T> result)
+        {
+            if (string.IsNullOrEmpty(parameter.t))
+            {
+                result = new BaseJsonResult<T> { Status = (int)JsonObjectStatus.Fail, Message = "时间戳不能为空。" };
+                return false;
+            }
+            else
+            {
+                if (!parameter.t.CheckTimeStamp())
+                {
+                    result = new BaseJsonResult<T> { Status = (int)JsonObjectStatus.Fail, Message = "时间戳有误。" };
+                    return false;
+                }
+                else
+                {
+                    result = new BaseJsonResult<T> { Status = (int)JsonObjectStatus.Success };
+                    return true;
+                }
+            }
         }
 
         #endregion
