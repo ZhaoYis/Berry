@@ -62,7 +62,7 @@ namespace Berry.SOA.API.Controllers
                 resultMsg = this.GetBaseJsonResult<WeChatUserInfoEntity>(JsonObjectStatus.Exception, "，异常信息：" + e.Message);
             });
 
-            return resultMsg.ToHttpResponseMessage();
+            return resultMsg.TryToHttpResponseMessage();
         }
     }
 }

@@ -935,10 +935,25 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.IdCard">
+            <summary>
+            身份证号码
+            </summary>
+        </member>
         <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.StarTime">
             <summary>
             开始时间
             </summary>
+        </member>
+        <member name="P:Berry.SOA.API.ParameterModel.TestApiArgEntity.EndTime">
+            <summary>
+            结束时间
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.ParameterModel.TestApiArgEntity.Validate(System.ComponentModel.DataAnnotations.ValidationContext)">
+            <summary>确定指定的对象是否有效。</summary>
+            <param name="validationContext">验证上下文中。</param>
+            <returns>保存失败验证的信息集合。</returns>
         </member>
         <member name="T:Berry.SOA.API.ParameterModel.WeChatLoginArgEntity">
             <summary>

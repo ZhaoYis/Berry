@@ -102,6 +102,29 @@ namespace Berry.Data.Repository
             return _db.ExecuteByProc(procName, dbParameter);
         }
 
+        /// <summary>
+        /// 执行存储过程，返回集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="procName">存储过程名称</param>
+        /// <returns></returns>
+        public IEnumerable<T> ExecuteByProc<T>(string procName) where T : class, new()
+        {
+            return _db.ExecuteByProc<T>(procName);
+        }
+
+        /// <summary>
+        /// 执行存储过程，返回集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="procName">存储过程名称</param>
+        /// <param name="dbParameter">DbCommand参数</param>
+        /// <returns></returns>
+        public IEnumerable<T> ExecuteByProc<T>(string procName, DbParameter[] dbParameter) where T : class, new()
+        {
+            return _db.ExecuteByProc<T>(procName, dbParameter);
+        }
+
         #endregion 执行 SQL 语句
 
         #region 对象实体 添加、修改、删除

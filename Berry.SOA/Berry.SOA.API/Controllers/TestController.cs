@@ -24,7 +24,7 @@ namespace Berry.SOA.API.Controllers
         [IgnoreToken(false)]
         public virtual HttpResponseMessage HelloWorld(TestApiArgEntity arg)
         {
-            BaseJsonResult<string> resultMsg = null;
+            BaseJsonResult<TestApiArgEntity> resultMsg = null;
 
             Logger(this.GetType(), "测试是否连接成功-HelloWorld", () =>
             {
@@ -32,14 +32,14 @@ namespace Berry.SOA.API.Controllers
                 {
                     //TODO DoSomething
 
-                    resultMsg = this.GetBaseJsonResult<string>(arg.TryToJson(), JsonObjectStatus.Success);
+                    resultMsg = this.GetBaseJsonResult<TestApiArgEntity>(arg, JsonObjectStatus.Success);
                 }
             }, e =>
             {
-                resultMsg = this.GetBaseJsonResult<string>(JsonObjectStatus.Exception, "，异常信息：" + e.Message);
+                resultMsg = this.GetBaseJsonResult<TestApiArgEntity>(JsonObjectStatus.Exception, "，异常信息：" + e.Message);
             });
 
-            return resultMsg.ToHttpResponseMessage();
+            return resultMsg.TryToHttpResponseMessage();
         }
     }
 }

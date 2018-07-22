@@ -59,7 +59,7 @@ namespace Berry.Data.Repository
         /// <param name="dbParameter">DbCommand参数</param>
         /// <returns></returns>
         int ExecuteByProc(string procName, params DbParameter[] dbParameter);
-
+        
         /// <summary>
         /// 插入一条数据
         /// </summary>

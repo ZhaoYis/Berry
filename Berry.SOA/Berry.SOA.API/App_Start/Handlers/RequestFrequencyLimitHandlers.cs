@@ -110,7 +110,7 @@ namespace Berry.SOA.API.Handlers
 
             TaskCompletionSource<HttpResponseMessage> tsc = new TaskCompletionSource<HttpResponseMessage>();
 
-            HttpResponseMessage response = resultMsg.TryToJson().ToHttpResponseMessage();
+            HttpResponseMessage response = resultMsg.TryToJson().TryToHttpResponseMessage();
             //request.CreateResponse(statusCode);
             //response.ReasonPhrase = message;
 

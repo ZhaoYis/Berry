@@ -94,7 +94,7 @@ namespace Berry.SOA.API.Filters
                         Message = JsonObjectStatus.ParameterError.GetEnumDescription(),
                         Data = ""
                     };
-                    actionContext.Response = resultMsg.TryToJson().ToHttpResponseMessage();
+                    actionContext.Response = resultMsg.TryToHttpResponseMessage();
                     base.OnActionExecuting(actionContext);
                     return;
                 }
@@ -118,7 +118,7 @@ namespace Berry.SOA.API.Filters
                     Message = JsonObjectStatus.ParameterError.GetEnumDescription(),
                     Data = ""
                 };
-                actionContext.Response = resultMsg.TryToJson().ToHttpResponseMessage();
+                actionContext.Response = resultMsg.TryToHttpResponseMessage();
                 base.OnActionExecuting(actionContext);
                 return;
             }
@@ -139,7 +139,7 @@ namespace Berry.SOA.API.Filters
                     Message = JsonObjectStatus.UrlExpireError.GetEnumDescription(),
                     Data = ""
                 };
-                actionContext.Response = resultMsg.TryToJson().ToHttpResponseMessage();
+                actionContext.Response = resultMsg.TryToHttpResponseMessage();
                 base.OnActionExecuting(actionContext);
                 return;
             }
@@ -155,7 +155,7 @@ namespace Berry.SOA.API.Filters
                     Message = JsonObjectStatus.TokenInvalid.GetEnumDescription(),
                     Data = ""
                 };
-                actionContext.Response = resultMsg.TryToJson().ToHttpResponseMessage();
+                actionContext.Response = resultMsg.TryToHttpResponseMessage();
                 base.OnActionExecuting(actionContext);
                 return;
             }
@@ -226,7 +226,7 @@ namespace Berry.SOA.API.Filters
                     Message = JsonObjectStatus.HttpRequestError.GetEnumDescription(),
                     Data = ""
                 };
-                actionContext.Response = resultMsg.TryToJson().ToHttpResponseMessage();
+                actionContext.Response = resultMsg.TryToHttpResponseMessage();
                 base.OnActionExecuting(actionContext);
             }
             else

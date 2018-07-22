@@ -41,16 +41,15 @@ namespace Berry.SOA.API.Filters
                     sb.Append(err);
                 }
 
-                HttpResponseMessage response = actionContext.Response ?? new HttpResponseMessage(HttpStatusCode.OK);
-                response.StatusCode = response.StatusCode;
-                response.Content = new StringContent(
-                    new BaseJsonResult<string>
-                    {
-                        Status = (int)JsonObjectStatus.Fail,
-                        Message = sb.ToString().Substring(0, sb.ToString().Length - 1),
-                    }.TryToJson(), Encoding.UTF8, "application/json");
+                var resultMsg = new BaseJsonResult<string>
+                {
+                    Status = (int) JsonObjectStatus.ParameterError,
+                    Message = sb.ToString().Substring(0, sb.ToString().Length - 1),
+                };
+                
+                actionContext.Response = resultMsg.TryToHttpResponseMessage();
             }
-            //base.OnActionExecuting(actionContext);
+            base.OnActionExecuting(actionContext);
         }
 
         /// <summary>
@@ -61,24 +60,24 @@ namespace Berry.SOA.API.Filters
         {
             if (actionExecutedContext.Exception != null)
             {
-                actionExecutedContext.Response = new HttpResponseMessage(HttpStatusCode.OK);
-                actionExecutedContext.Response.Content = new StringContent(
-                         new BaseJsonResult<string>
-                         {
-                             Status = (int)JsonObjectStatus.Exception,
-                             Message = actionExecutedContext.Exception.Message,
-                         }.TryToJson(), Encoding.UTF8, "application/json");
+                var resultMsg = new BaseJsonResult<string>
+                {
+                    Status = (int) JsonObjectStatus.Exception,
+                    Message = actionExecutedContext.Exception.Message,
+                };
+
+                actionExecutedContext.Response = resultMsg.TryToHttpResponseMessage();
             }
             else
             {
                 if (actionExecutedContext.Response.Content == null)
                 {
-                    actionExecutedContext.Response.Content = new StringContent(
-                        new BaseJsonResult<string>
-                        {
-                            Status = (int)JsonObjectStatus.Error,
-                            Message = "HTTP响应消息内容为空",
-                        }.TryToJson(), Encoding.UTF8, "application/json");
+                    var resultMsg = new BaseJsonResult<string>
+                    {
+                        Status = (int) JsonObjectStatus.Error,
+                        Message = "HTTP响应消息内容为空",
+                    };
+                    actionExecutedContext.Response = resultMsg.TryToHttpResponseMessage();
                 }
                 else
                 {
@@ -119,7 +118,7 @@ namespace Berry.SOA.API.Filters
                     }
                     else
                     {
-                        actionExecutedContext.Response.Content = new StringContent(result.TryToJson(), Encoding.UTF8, "application/json");
+                        actionExecutedContext.Response = result.TryToHttpResponseMessage();
                     }
 
                     //if (resultLength > 1024)
@@ -132,7 +131,7 @@ namespace Berry.SOA.API.Filters
                     //}
                 }
             }
-            //base.OnActionExecuted(actionExecutedContext);
+            base.OnActionExecuted(actionExecutedContext);
         }
     }
 }

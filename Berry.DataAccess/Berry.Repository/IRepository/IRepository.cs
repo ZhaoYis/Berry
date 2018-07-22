@@ -60,6 +60,23 @@ namespace Berry.Data.Repository
         int ExecuteByProc(string procName, params DbParameter[] dbParameter);
 
         /// <summary>
+        /// 执行存储过程，返回集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="procName">存储过程名称</param>
+        /// <returns></returns>
+        IEnumerable<T> ExecuteByProc<T>(string procName) where T : class, new();
+
+        /// <summary>
+        /// 执行存储过程，返回集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="procName">存储过程名称</param>
+        /// <param name="dbParameter">DbCommand参数</param>
+        /// <returns></returns>
+        IEnumerable<T> ExecuteByProc<T>(string procName, DbParameter[] dbParameter) where T : class, new();
+
+        /// <summary>
         /// 插入一条数据
         /// </summary>
         /// <param name="entity">对象实体</param>

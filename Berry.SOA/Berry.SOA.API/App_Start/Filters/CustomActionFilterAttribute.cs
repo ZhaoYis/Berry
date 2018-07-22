@@ -54,7 +54,7 @@ namespace Berry.SOA.API.Filters
                     Status = (int)JsonObjectStatus.ParameterError,
                     Message = JsonObjectStatus.ParameterError.GetEnumDescription()
                 };
-                actionContext.Response = resultMsg.ToHttpResponseMessage();
+                actionContext.Response = resultMsg.TryToHttpResponseMessage();
                 return;
             }
 
@@ -67,7 +67,7 @@ namespace Berry.SOA.API.Filters
                     Status = (int)JsonObjectStatus.TokenInvalid,
                     Message = JsonObjectStatus.TokenInvalid.GetEnumDescription()
                 };
-                actionContext.Response = resultMsg.ToHttpResponseMessage();
+                actionContext.Response = resultMsg.TryToHttpResponseMessage();
                 return;
             }
             else
@@ -82,7 +82,7 @@ namespace Berry.SOA.API.Filters
                             Status = (int)JsonObjectStatus.Unauthorized,
                             Message = JsonObjectStatus.Unauthorized.GetEnumDescription()
                         };
-                        actionContext.Response = resultMsg.ToHttpResponseMessage();
+                        actionContext.Response = resultMsg.TryToHttpResponseMessage();
                         return;
                     }
                 }

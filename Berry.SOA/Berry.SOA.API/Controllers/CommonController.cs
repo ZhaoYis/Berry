@@ -59,7 +59,7 @@ namespace Berry.SOA.API.Controllers
                 resultMsg = this.GetBaseJsonResult<string>(JsonObjectStatus.Exception, "，异常信息：" + e.Message);
             });
 
-            return resultMsg.ToHttpResponseMessage();
+            return resultMsg.TryToHttpResponseMessage();
         }
 
         #endregion

@@ -204,5 +204,16 @@ namespace Berry.Extension
                 return false;
             }
         }
+
+        /// <summary>
+        /// 校验时间
+        /// </summary>
+        /// <param name="t">日期</param>
+        /// <returns></returns>
+        public static bool CheckDateTime(this DateTime t)
+        {
+            bool isSucc = t.Ticks > 0 && t.Year >= 1970;
+            return isSucc;
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace Berry.SOA.API.Filters
                     Data = ""
                 };
 
-                actionContext.Response = resultMsg.TryToJson().ToHttpResponseMessage();
+                actionContext.Response = resultMsg.TryToJson().TryToHttpResponseMessage();
                 base.OnAuthorization(actionContext);
             }
             else

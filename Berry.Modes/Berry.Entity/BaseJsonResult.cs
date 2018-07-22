@@ -32,10 +32,10 @@ namespace Berry.Entity
         /// </summary>
         public string BackUrl { get; set; }
 
-        /// <summary>
-        /// 执行时间
-        /// </summary>
-        public string ExecutionTime { get; set; }
+        ///// <summary>
+        ///// 执行时间
+        ///// </summary>
+        //public string ExecutionTime { get; set; }
     }
 
     #endregion 标准Json基类 不带分页

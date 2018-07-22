@@ -70,20 +70,27 @@ namespace Berry.Util.JWT
 
             //获取私钥
             string secret = GetSecret();
-            JWTPlayloadInfo playloadInfo = decoder.DecodeToObject<JWTPlayloadInfo>(token, secret, true);
-            if (playloadInfo != null)
+            try
             {
-                if (!string.IsNullOrEmpty(playloadInfo.aud) && playloadInfo.aud.Equals("guest"))
+                JWTPlayloadInfo playloadInfo = decoder.DecodeToObject<JWTPlayloadInfo>(token, secret, true);
+                if (playloadInfo != null)
                 {
-                    string cacheToken = CacheFactory.GetCacheInstance().GetCache<string>("JWT_TokenCacheKey:Guest");
+                    if (!string.IsNullOrEmpty(playloadInfo.aud) && playloadInfo.aud.Equals("guest"))
+                    {
+                        string cacheToken = CacheFactory.GetCacheInstance().GetCache<string>("JWT_TokenCacheKey:Guest");
 
-                    return Check(playloadInfo, cacheToken, token) ? playloadInfo : null;
+                        return Check(playloadInfo, cacheToken, token) ? playloadInfo : null;
+                    }
+                    else
+                    {
+                        string cacheToken = CacheFactory.GetCacheInstance().GetCache<string>($"JWT_TokenCacheKey:{playloadInfo.aud}");
+                        return Check(playloadInfo, cacheToken, token) ? playloadInfo : null;
+                    }
                 }
-                else
-                {
-                    string cacheToken = CacheFactory.GetCacheInstance().GetCache<string>($"JWT_TokenCacheKey:{playloadInfo.aud}");
-                    return Check(playloadInfo, cacheToken, token) ? playloadInfo : null;
-                }
+            }
+            catch (Exception e)
+            {
+                return null;
             }
             return null;
         }

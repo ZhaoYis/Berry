@@ -50,9 +50,9 @@ namespace Berry.UnitTest
 
             //InsertListTest(10);
 
-            //QueryTest();
+            QueryTest();
 
-            QueryTestByProc();
+            //QueryTestByProc();
 
             //RsaTest();
 

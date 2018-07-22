@@ -62,9 +62,9 @@ namespace Berry.Code
         #region Http请求
 
         /// <summary>
-        /// 请求授权信息参数不完整或不正确
+        /// 请求参数不完整或不正确
         /// </summary>
-        [Description("请求授权信息参数不完整或不正确")]
+        [Description("请求参数不完整或不正确")]
         ParameterError = 3001,
 
         /// <summary>
@@ -80,9 +80,9 @@ namespace Berry.Code
         ParameterStaffIdNotExist = 3003,
 
         /// <summary>
-        /// 请求TOKEN失效
+        /// TOKEN失效
         /// </summary>
-        [Description("请求TOKEN失效")]
+        [Description("TOKEN失效")]
         TokenInvalid = 3004,
 
         /// <summary>

@@ -30,19 +30,29 @@ namespace Berry.Extension
                 JsonConvert.DefaultSettings = () =>
                 {
                     //日期类型默认格式化处理
-                    //jsetting.DateFormatHandling = DateFormatHandling.MicrosoftDateFormat;
-                    //jsetting.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                    jsetting.DateFormatHandling = DateFormatHandling.MicrosoftDateFormat;
+                    jsetting.DateFormatString = "yyyy-MM-dd HH:mm:ss";
 
                     //空值处理,忽略值为NULL的属性
                     jsetting.NullValueHandling = NullValueHandling.Ignore;
 
                     return jsetting;
                 };
-                res = JsonConvert.SerializeObject(obj, Formatting.Indented, jsetting);
+                res = JsonConvert.SerializeObject(obj, Formatting.None, jsetting);
             }
             else
             {
-                res = JsonConvert.SerializeObject(obj);
+                JsonSerializerSettings jsetting = new JsonSerializerSettings();
+
+                JsonConvert.DefaultSettings = () =>
+                {
+                    //日期类型默认格式化处理
+                    jsetting.DateFormatHandling = DateFormatHandling.MicrosoftDateFormat;
+                    jsetting.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+
+                    return jsetting;
+                };
+                res = JsonConvert.SerializeObject(obj, Formatting.None, jsetting);
             }
             return res;
         }
