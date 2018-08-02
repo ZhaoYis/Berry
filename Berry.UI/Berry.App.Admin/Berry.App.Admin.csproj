@@ -813,6 +813,7 @@
     <Content Include="Views\Shared\_FlowIndex.cshtml" />
     <Content Include="Views\Shared\_FlowForm.cshtml" />
     <Content Include="Views\Shared\_Index.cshtml" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

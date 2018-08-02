@@ -74,6 +74,7 @@
     <Compile Include="SystemManage\DataItemDetailEntity.cs" />
     <Compile Include="SystemManage\DataItemEntity.cs" />
     <Compile Include="SystemManage\LogEntity.cs" />
+    <Compile Include="ViewModel\AccessTokenDto.cs" />
     <Compile Include="ViewModel\DataItemViewModel.cs" />
     <Compile Include="ViewModel\TokenViewModel.cs" />
   </ItemGroup>

@@ -112,9 +112,46 @@
             接口授权验证
             </summary>
         </member>
+        <member name="F:Berry.SOA.API.Filters.CustomActionFilterAttribute._logHelper">
+            <summary>
+            日志
+            </summary>
+        </member>
+        <member name="F:Berry.SOA.API.Filters.CustomActionFilterAttribute.PrivateKey">
+            <summary>
+            私钥
+            </summary>
+        </member>
+        <member name="F:Berry.SOA.API.Filters.CustomActionFilterAttribute.PublicKey">
+            <summary>
+            公钥
+            </summary>
+        </member>
         <member name="M:Berry.SOA.API.Filters.CustomActionFilterAttribute.OnActionExecuting(System.Web.Http.Controllers.HttpActionContext)">
             <summary>在调用操作方法之前发生。</summary>
             <param name="actionContext">操作上下文。</param>
+        </member>
+        <member name="M:Berry.SOA.API.Filters.CustomActionFilterAttribute.CheckSignature(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            指纹校验
+            </summary>
+            <param name="signature">客户端传回的指纹</param>
+            <param name="actionArguments">请求参数</param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Filters.CustomActionFilterAttribute.GetArgumentString(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            获取参数字符串，并按参数名升序排序，形如：a1b2c3
+            </summary>
+            <param name="actionArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Filters.CustomActionFilterAttribute.GetSignature(System.String)">
+            <summary>
+            计算指纹
+            </summary>
+            <param name="signature">客户端传回的指纹</param>
+            <returns></returns>
         </member>
         <member name="T:Berry.SOA.API.Filters.RequireHttpsFilter">
             <summary>
@@ -805,7 +842,7 @@
             公共接口
             </summary>
         </member>
-        <member name="M:Berry.SOA.API.Controllers.CommonController.GetJWTToken(Berry.SOA.API.ParameterModel.GetTokenArgEntity)">
+        <member name="M:Berry.SOA.API.Controllers.CommonController.GetAuthorizationToken(Berry.SOA.API.ParameterModel.GetTokenArgEntity)">
             <summary>
             获取授权Token
             </summary>
@@ -835,7 +872,7 @@
             公共接口
             </summary>
         </member>
-        <member name="M:Berry.SOA.API.Controllers.Interface.ICommon.GetJWTToken(Berry.SOA.API.ParameterModel.GetTokenArgEntity)">
+        <member name="M:Berry.SOA.API.Controllers.Interface.ICommon.GetAuthorizationToken(Berry.SOA.API.ParameterModel.GetTokenArgEntity)">
             <summary>
             获取授权Token
             </summary>

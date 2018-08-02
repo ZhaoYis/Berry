@@ -58,7 +58,7 @@ namespace Berry.UnitTest
 
             //RedisTest();
 
-            //MapToTest();
+            MapToTest();
         }
 
         [TestMethod]

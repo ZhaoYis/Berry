@@ -177,14 +177,33 @@ namespace Berry.Extension
         /// <returns></returns>
         public static bool CheckTimeStamp(this string t)
         {
-            //System.DateTime time = DateTime.Now;
-            //System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1));
-            //long now = (int)(time - startTime).TotalSeconds;
-            //long arg = long.Parse(t);
+            if (string.IsNullOrEmpty(t)) return false;
 
-            //return Math.Abs(now - arg) <= 100;
+            //DateTime time = DateTime.Now;
+            //DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            //long now = (long)(time - startTime).TotalSeconds;
+            //long arg = 0;
+            //long.TryParse(t, out arg);
+
+            //return Math.Abs(now - arg) <= 10;
 
             return true;
+        }
+
+        /// <summary>
+        /// 时间戳转为C#格式时间
+        /// </summary>
+        /// <param name="timeStamp">Unix时间戳格式</param>
+        /// <returns>C#格式时间</returns>
+        public static DateTime TimeStampToDateTime(this string timeStamp)
+        {
+            DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
+            long lTime = Convert.ToInt64(timeStamp + "0000000");
+            TimeSpan toNow = new TimeSpan(lTime);
+
+            DateTime time = dtStart.Add(toNow);
+
+            return time;
         }
 
         /// <summary>
@@ -196,7 +215,8 @@ namespace Berry.Extension
         {
             try
             {
-                bool isSucc = DateTime.TryParse(t, out DateTime time);
+                DateTime time;
+                bool isSucc = DateTime.TryParse(t, out time);
                 return isSucc;
             }
             catch (Exception)

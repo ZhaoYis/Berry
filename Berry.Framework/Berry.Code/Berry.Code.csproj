@@ -50,6 +50,7 @@
     <Compile Include="GlobalConstCode.cs" />
     <Compile Include="JsonObjectStatus.cs" />
     <Compile Include="LoginMode.cs" />
+    <Compile Include="NumberRangeOfValueType.cs" />
     <Compile Include="OperationType.cs" />
     <Compile Include="Operator\AuthorizeDataModel.cs" />
     <Compile Include="Operator\IOperatorProvider.cs" />

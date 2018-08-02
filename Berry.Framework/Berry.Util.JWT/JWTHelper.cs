@@ -14,6 +14,17 @@ namespace Berry.Util.JWT
     public sealed class JWTHelper
     {
         /// <summary>
+        /// 私钥
+        /// </summary>
+        private static string TokenPrivateKey;
+        static JWTHelper()
+        {
+            string path = DirFileHelper.MapPath("SecretKey\\token.privateKey.key");
+            string key = DirFileHelper.ReadAllText(path);
+            TokenPrivateKey = key;
+        }
+
+        /// <summary>
         /// 签发Token
         /// </summary>
         /// <param name="playload">载荷</param>
@@ -44,12 +55,53 @@ namespace Berry.Util.JWT
             else
             {
                 //计算Token
-                token = CacheFactory.GetCacheInstance().GetCache($"JWT_TokenCacheKey:{playload.aud}", () =>
+                token = CacheFactory.GetCacheInstance().GetCache(string.Format("JWT_TokenCacheKey:{0}", playload.aud), () =>
                 {
                     return encoder.Encode(dict, secret);
                 }, time);
             }
             return token;
+        }
+
+        /// <summary>
+        /// 如果Token过期，则马上重新计算
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="account"></param>
+        public static void CheckTokenHasExpiry(string userId, string account)
+        {
+            if (!string.IsNullOrEmpty(userId) && userId.Equals("guest"))
+            {
+                bool has = CacheFactory.GetCacheInstance().HasExpire("JWT_TokenCacheKey:Guest");
+                if (has)
+                {
+                    JWTPlayloadInfo playload = new JWTPlayloadInfo
+                    {
+                        iss = "S_COMMON_TOKTN",
+                        sub = account,
+                        aud = userId,
+                        userid = CommonHelper.GetGuid(),
+                        extend = "PUBLIC_TOKTN"
+                    };
+                    GetToken(playload);
+                }
+            }
+            else
+            {
+                bool has = CacheFactory.GetCacheInstance().HasExpire(string.Format("JWT_TokenCacheKey:{0}", userId));
+                if (has)
+                {
+                    JWTPlayloadInfo playload = new JWTPlayloadInfo
+                    {
+                        iss = "S_USER_TOKTN",
+                        sub = account,
+                        aud = userId,
+                        userid = CommonHelper.GetGuid(),
+                        extend = "USER_TOKTN"
+                    };
+                    GetToken(playload);
+                }
+            }
         }
 
         /// <summary>
@@ -72,19 +124,19 @@ namespace Berry.Util.JWT
             string secret = GetSecret();
             try
             {
-                JWTPlayloadInfo playloadInfo = decoder.DecodeToObject<JWTPlayloadInfo>(token, secret, true);
-                if (playloadInfo != null)
+                JWTPlayloadInfo playload = decoder.DecodeToObject<JWTPlayloadInfo>(token, secret, true);
+                if (playload != null)
                 {
-                    if (!string.IsNullOrEmpty(playloadInfo.aud) && playloadInfo.aud.Equals("guest"))
+                    if (!string.IsNullOrEmpty(playload.aud) && playload.aud.Equals("guest"))
                     {
                         string cacheToken = CacheFactory.GetCacheInstance().GetCache<string>("JWT_TokenCacheKey:Guest");
 
-                        return Check(playloadInfo, cacheToken, token) ? playloadInfo : null;
+                        return Check(playload, cacheToken, token) ? playload : null;
                     }
                     else
                     {
-                        string cacheToken = CacheFactory.GetCacheInstance().GetCache<string>($"JWT_TokenCacheKey:{playloadInfo.aud}");
-                        return Check(playloadInfo, cacheToken, token) ? playloadInfo : null;
+                        string cacheToken = CacheFactory.GetCacheInstance().GetCache<string>(string.Format("JWT_TokenCacheKey:{0}", playload.aud));
+                        return Check(playload, cacheToken, token) ? playload : null;
                     }
                 }
             }
@@ -95,23 +147,23 @@ namespace Berry.Util.JWT
             return null;
         }
 
-        private static bool Check(JWTPlayloadInfo info, string cacheToken, string token)
+        private static bool Check(JWTPlayloadInfo playload, string cacheToken, string token)
         {
             if (string.IsNullOrEmpty(cacheToken)) return false;
             if (string.IsNullOrEmpty(token)) return false;
             if (!cacheToken.Equals(token)) return false;
 
             //Token过期
-            DateTime exp = DateTimeHelper.GetDateTime(info.exp);
+            DateTime exp = DateTimeHelper.GetDateTime(playload.exp);
             if (DateTime.Now > exp)
             {
-                if (!string.IsNullOrEmpty(info.aud) && info.aud.Equals("guest"))
+                if (!string.IsNullOrEmpty(playload.aud) && playload.aud.Equals("guest"))
                 {
                     CacheFactory.GetCacheInstance().RemoveCache("JWT_TokenCacheKey:Guest");
                 }
                 else
                 {
-                    CacheFactory.GetCacheInstance().RemoveCache($"JWT_TokenCacheKey:{info.aud}");
+                    CacheFactory.GetCacheInstance().RemoveCache(string.Format("JWT_TokenCacheKey:{0}", playload.aud));
                 }
                 return false;
             }
@@ -124,8 +176,7 @@ namespace Berry.Util.JWT
         /// <returns></returns>
         private static string GetSecret()
         {
-            //TODO 从文件中去读真正的私钥
-            return "eyJpc3MiOiJCZXJyeS5TZXJ2aWNlIiwic3ViIjoiMTgyODQ1OTQ2MTkiLCJhdWQiOiJndWVzdCIsImlhdCI6IjE1MzEzODE5OTgiLCJleHAiOiIxNTMxMzg5MTk4IiwibmJmIjowLCJqdGkiOiI1YzdmN2ZhM2E4ODVlODExYTEzNTQ4ZDIyNGMwMWQwNSIsInVzZXJpZCI6bnVsbCwiZXh0ZW5kIjpudWxsfQ";
+            return TokenPrivateKey;
         }
     }
 }

@@ -345,6 +345,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Views\Home\ApiOAuth.cshtml" />
+    <Content Include="SecretKey\api.privateKey.key" />
+    <Content Include="SecretKey\api.publicKey.key" />
+    <Content Include="SecretKey\token.privateKey.key" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Berry.Framework\Berry.Cache\Berry.Cache.csproj">

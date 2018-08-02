@@ -68,9 +68,17 @@ namespace Berry.Extension
         /// </summary>
         /// <param name="obj">对象或者Json字符串</param>
         /// <returns></returns>
-        public static HttpResponseMessage TryToHttpResponseMessage(this object obj)
+        public static HttpResponseMessage TryToHttpResponseMessage<T>(this T obj)
         {
-            string json = obj.TryToJson();
+            string json = string.Empty;
+            if (typeof(T) == typeof(string))
+            {
+                json = obj.ToString();
+            }
+            else
+            {
+                json = obj.TryToJson();
+            }
 
             HttpResponseMessage result = new HttpResponseMessage
             {

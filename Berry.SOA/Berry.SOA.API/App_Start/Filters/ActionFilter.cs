@@ -16,6 +16,7 @@ namespace Berry.SOA.API.Filters
     /// <summary>
     /// 控制器拦截器
     /// </summary>
+
     public class ActionFilter : ActionFilterAttribute
     {
         /// <summary>
@@ -43,10 +44,10 @@ namespace Berry.SOA.API.Filters
 
                 var resultMsg = new BaseJsonResult<string>
                 {
-                    Status = (int) JsonObjectStatus.ParameterError,
+                    Status = (int)JsonObjectStatus.ParameterError,
                     Message = sb.ToString().Substring(0, sb.ToString().Length - 1),
                 };
-                
+
                 actionContext.Response = resultMsg.TryToHttpResponseMessage();
             }
             base.OnActionExecuting(actionContext);
@@ -62,7 +63,7 @@ namespace Berry.SOA.API.Filters
             {
                 var resultMsg = new BaseJsonResult<string>
                 {
-                    Status = (int) JsonObjectStatus.Exception,
+                    Status = (int)JsonObjectStatus.Exception,
                     Message = actionExecutedContext.Exception.Message,
                 };
 
@@ -74,23 +75,23 @@ namespace Berry.SOA.API.Filters
                 {
                     var resultMsg = new BaseJsonResult<string>
                     {
-                        Status = (int) JsonObjectStatus.Error,
+                        Status = (int)JsonObjectStatus.Error,
                         Message = "HTTP响应消息内容为空",
                     };
                     actionExecutedContext.Response = resultMsg.TryToHttpResponseMessage();
                 }
                 else
                 {
-                    object result;
+                    string result;
                     long resultLength = 0;
                     if (actionExecutedContext.Response.Content is ObjectContent)
                     {
-                        result = ((ObjectContent)actionExecutedContext.Response.Content).Value;
+                        result = ((ObjectContent)actionExecutedContext.Response.Content).Value.ToString();
                     }
                     else
                     {
-                        var ctx = actionExecutedContext.Response.Content.ReadAsByteArrayAsync().Result;
-                        resultLength = ctx.LongLength;
+                        byte[] ctx = actionExecutedContext.Response.Content.ReadAsByteArrayAsync().Result;
+                        //resultLength = ctx.LongLength;
                         result = Encoding.UTF8.GetString(ctx);
                     }
 
@@ -98,7 +99,7 @@ namespace Berry.SOA.API.Filters
                     var AcceptEncoding = Headers.AcceptEncoding;
                     if (AcceptEncoding != null && AcceptEncoding.Contains(new StringWithQualityHeaderValue("gzip")))
                     {
-                        byte[] body = Encoding.UTF8.GetBytes(result.TryToJson());
+                        byte[] body = Encoding.UTF8.GetBytes(result.ToString());
                         byte[] compressedData = GZipHelper.GZipCompress(body);
 
                         actionExecutedContext.Response.Content = new ByteArrayContent(compressedData);
@@ -108,7 +109,7 @@ namespace Berry.SOA.API.Filters
                     }
                     else if (AcceptEncoding != null && AcceptEncoding.Contains(new StringWithQualityHeaderValue("deflate")))
                     {
-                        byte[] body = Encoding.UTF8.GetBytes(result.TryToJson());
+                        byte[] body = Encoding.UTF8.GetBytes(result.ToString());
                         byte[] compressedData = GZipHelper.DeflateCompress(body);
 
                         actionExecutedContext.Response.Content = new ByteArrayContent(compressedData);

@@ -55,6 +55,7 @@
     <Compile Include="Encrypt\DESEncryptHelper.cs" />
     <Compile Include="EntityAttributeHelper.cs" />
     <Compile Include="ExceptionMessageHelper.cs" />
+    <Compile Include="GlobalIDGeneratorHelper.cs" />
     <Compile Include="GZipHelper.cs" />
     <Compile Include="HttpHelper.cs" />
     <Compile Include="ImageHelper.cs" />

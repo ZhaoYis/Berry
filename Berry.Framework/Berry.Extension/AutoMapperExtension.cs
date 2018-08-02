@@ -37,7 +37,7 @@ namespace Berry.Extension
         {
             if (source == null) return default(List<TDestination>);
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap(typeof(TDestination), source.GetType()));
+            var config = new MapperConfiguration(cfg => cfg.CreateMap(source.GetType(), typeof(TDestination)));
             var mapper = config.CreateMapper();
             return mapper.Map<List<TDestination>>(source);
         }
@@ -49,11 +49,32 @@ namespace Berry.Extension
         /// <typeparam name="TDestination">目标对象类型</typeparam>
         /// <param name="source">数据源</param>
         /// <returns></returns>
-        public static List<TDestination> MapTo<TSource, TDestination>(this IEnumerable<TSource> source) where TDestination : class where TSource : class
+        public static List<TDestination> MapTo<TSource, TDestination>(this IEnumerable<TSource> source)
+            where TDestination : class
+            where TSource : class
         {
             if (source == null) return new List<TDestination>();
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<TDestination, TSource>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<TSource, TDestination>());
+            var mapper = config.CreateMapper();
+            return mapper.Map<List<TDestination>>(source);
+        }
+
+        /// <summary>
+        /// 集合列表类型映射
+        /// </summary>
+        /// <typeparam name="TSource">数据源类型</typeparam>
+        /// <typeparam name="TDestination">目标对象类型</typeparam>
+        /// <param name="source">数据源</param>
+        /// <param name="configure">自定义配置</param>
+        /// <returns></returns>
+        public static List<TDestination> MapTo<TSource, TDestination>(this IEnumerable<TSource> source, Action<IMapperConfigurationExpression> configure)
+            where TDestination : class
+            where TSource : class
+        {
+            if (source == null) return new List<TDestination>();
+
+            var config = new MapperConfiguration(configure);
             var mapper = config.CreateMapper();
             return mapper.Map<List<TDestination>>(source);
         }
@@ -66,11 +87,13 @@ namespace Berry.Extension
         /// <param name="source">数据源</param>
         /// <param name="destination">目标对象</param>
         /// <returns></returns>
-        public static TDestination MapTo<TSource, TDestination>(this TSource source, TDestination destination) where TSource : class where TDestination : class
+        public static TDestination MapTo<TSource, TDestination>(this TSource source, TDestination destination)
+            where TSource : class
+            where TDestination : class
         {
             if (source == null) return destination;
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<TDestination, TSource>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<TSource, TDestination>());
             var mapper = config.CreateMapper();
             return mapper.Map<TSource, TDestination>(source, destination);
         }
@@ -82,11 +105,13 @@ namespace Berry.Extension
         /// <typeparam name="TSource">要被转化的实体，Entity</typeparam>
         /// <param name="source">可以使用这个扩展方法的类型，任何引用类型</param>
         /// <returns>转化之后的实体</returns>
-        public static TDestination MapTo<TSource, TDestination>(this TSource source) where TDestination : class where TSource : class
+        public static TDestination MapTo<TSource, TDestination>(this TSource source)
+            where TDestination : class
+            where TSource : class
         {
             if (source == null) return default(TDestination);
 
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<TDestination, TSource>());
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<TSource, TDestination>());
             var mapper = config.CreateMapper();
             return mapper.Map<TDestination>(source);
         }
@@ -119,7 +144,7 @@ namespace Berry.Extension
             var mapper = config.CreateMapper();
             return mapper.Map<IDataReader, List<T>>(dt.CreateDataReader());
         }
-        
+
         /// <summary>
         /// 将List转换为Datatable
         /// </summary>
