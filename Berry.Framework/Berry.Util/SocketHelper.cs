@@ -166,7 +166,7 @@ namespace Berry.Util
             /// <summary>
             /// 欢迎消息
             /// </summary>
-            private string boundary = "bbs.msdn5.com";
+            private string boundary = "欢迎消息";
 
             /// <summary>
             /// 当前监听端口
