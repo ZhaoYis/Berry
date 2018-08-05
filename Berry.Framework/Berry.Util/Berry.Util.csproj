@@ -72,6 +72,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Encrypt\RSAEncryptHelper.cs" />
     <Compile Include="SessionHelper.cs" />
+    <Compile Include="SocketHelper.cs" />
     <Compile Include="Stopwatch\BaseStopwatch.cs" />
     <Compile Include="Stopwatch\StopwatchHelper.cs" />
     <Compile Include="StringHelper.cs" />

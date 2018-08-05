@@ -849,6 +849,13 @@
             <param name="arg"></param>
             <returns></returns>
         </member>
+        <member name="M:Berry.SOA.API.Controllers.CommonController.RefreshAuthorizationToken(Berry.SOA.API.ParameterModel.GetTokenArgEntity)">
+            <summary>
+            刷新Token
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
         <member name="M:Berry.SOA.API.Controllers.HomeController.Index">
             <summary>
             首页
@@ -875,6 +882,13 @@
         <member name="M:Berry.SOA.API.Controllers.Interface.ICommon.GetAuthorizationToken(Berry.SOA.API.ParameterModel.GetTokenArgEntity)">
             <summary>
             获取授权Token
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Interface.ICommon.RefreshAuthorizationToken(Berry.SOA.API.ParameterModel.GetTokenArgEntity)">
+            <summary>
+            刷新Token
             </summary>
             <param name="arg"></param>
             <returns></returns>

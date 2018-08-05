@@ -20,7 +20,7 @@ namespace Berry.Util
         {
             if (string.IsNullOrEmpty(source)) return "";
 
-            byte[] sor = Encoding.Default.GetBytes(source);
+            byte[] sor = Encoding.UTF8.GetBytes(source);
             MD5 md5 = new MD5CryptoServiceProvider();//MD5.Create();
             byte[] result = md5.ComputeHash(sor);
 
