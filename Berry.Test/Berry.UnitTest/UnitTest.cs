@@ -46,7 +46,7 @@ namespace Berry.UnitTest
 
             //IocTest();
 
-            //InsertTest(2000);
+            InsertTest(2);
 
             //InsertListTest(10);
 
@@ -58,7 +58,7 @@ namespace Berry.UnitTest
 
             //RedisTest();
 
-            MapToTest();
+            //MapToTest();
         }
 
         [TestMethod]

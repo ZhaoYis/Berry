@@ -669,6 +669,8 @@
     <Compile Include="Areas\BaseManage\Controllers\RoleController.cs" />
     <Compile Include="Areas\BaseManage\Controllers\UserController.cs" />
     <Compile Include="Areas\BaseManage\Controllers\UserGroupController.cs" />
+    <Compile Include="Areas\CustomManage\Controllers\UserDemandController.cs" />
+    <Compile Include="Areas\CustomManage\CustomManageAreaRegistration.cs" />
     <Compile Include="Areas\GeneratorManage\Controllers\MultiTableController.cs" />
     <Compile Include="Areas\GeneratorManage\Controllers\SingleTableController.cs" />
     <Compile Include="Areas\GeneratorManage\Controllers\TemplateController.cs" />
@@ -799,6 +801,9 @@
     <Content Include="Areas\SystemManage\Views\RedisMonitor\Clients.cshtml" />
     <Content Include="Areas\SystemManage\Views\RedisMonitor\GetClients.cshtml" />
     <Content Include="Areas\SystemManage\Views\RedisMonitor\BaseRedisStatus.cshtml" />
+    <Content Include="Areas\CustomManage\Views\web.config" />
+    <Content Include="Areas\CustomManage\Views\UserDemand\Form.cshtml" />
+    <Content Include="Areas\CustomManage\Views\UserDemand\Index.cshtml" />
     <None Include="packages.config" />
     <Content Include="Views\Error\ErrorBrowser.cshtml" />
     <Content Include="Views\Error\ErrorMessage.cshtml" />

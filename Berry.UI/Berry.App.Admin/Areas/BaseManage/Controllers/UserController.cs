@@ -256,14 +256,8 @@ namespace Berry.App.Admin.Areas.BaseManage.Controllers
             UserEntity userEntity = strUserEntity.JsonToEntity<UserEntity>();
             ModuleFormInstanceEntity moduleFormInstanceEntity = strModuleFormInstanceEntity.JsonToEntity<ModuleFormInstanceEntity>();
 
-            string key = CommonHelper.GetGuid();
-            string md5 = Md5Helper.Md5(userEntity.Password);
-            string realPassword = Md5Helper.Md5(DESEncryptHelper.Encrypt(md5, key));
-
-            userEntity.Secretkey = key;
-            userEntity.Password = realPassword;
             string objectId;
-            bool isSucc = userBLL.AddUser(keyValue, userEntity,out objectId);
+            bool isSucc = userBLL.AddUser(keyValue, userEntity, out objectId);
             moduleFormInstanceEntity.ObjectId = objectId;
             moduleFormInstanceBll.SaveEntity(formInstanceId, moduleFormInstanceEntity);
 

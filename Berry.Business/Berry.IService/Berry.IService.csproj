@@ -55,6 +55,7 @@
     <Compile Include="BaseManage\IRoleService.cs" />
     <Compile Include="BaseManage\IUserGroupService.cs" />
     <Compile Include="BaseManage\IUserService.cs" />
+    <Compile Include="CustomManage\IUserDemandService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicInfoManage\INewsService.cs" />
     <Compile Include="PublicInfoManage\INoticeService.cs" />

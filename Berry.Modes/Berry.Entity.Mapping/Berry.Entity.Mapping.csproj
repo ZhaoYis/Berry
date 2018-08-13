@@ -59,6 +59,7 @@
     <Compile Include="BaseManage\RoleMap.cs" />
     <Compile Include="BaseManage\UserMap.cs" />
     <Compile Include="BaseManage\UserRelationMap.cs" />
+    <Compile Include="CustomManage\UserDemandMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicInfoManage\NewsMap.cs" />
     <Compile Include="SystemManage\AreaMap.cs" />
@@ -78,5 +79,6 @@
       <Name>Berry.Entity</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

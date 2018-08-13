@@ -238,8 +238,10 @@ namespace Berry.Util
                 }
                 catch (SocketException skex)
                 {
-                    Sockets sks = new Sockets();
-                    sks.Ex = skex;
+                    Sockets sks = new Sockets
+                    {
+                        Ex = skex
+                    };
                     PushSockets.Invoke(sks);//推送至UI
                 }
             }
@@ -349,7 +351,7 @@ namespace Berry.Util
                     _listener.Stop();
                     _listener = null;
                     _isStop = true;
-                    SocketHelper.PushSockets = null;
+                    PushSockets = null;
                 }
             }
 
@@ -359,9 +361,9 @@ namespace Berry.Util
             /// <param name="sendData">发送的文本</param>
             public void SendToAll(string sendData)
             {
-                for (int i = 0; i < ClientList.Count; i++)
+                foreach (Sockets socket in ClientList)
                 {
-                    SendToClient(ClientList[i].Ip, sendData);
+                    SendToClient(socket.Ip, sendData);
                 }
             }
 
@@ -475,7 +477,7 @@ namespace Berry.Util
                         else
                         {
                             //没有连接时,标识退出
-                            Sockets ks = new Sockets();
+                            //Sockets ks = new Sockets();
                             sks.ClientDispose = true;//如果出现异常,标识客户端下线
                             sks.Ex = new Exception("客户端无连接");
                             PushSockets.Invoke(sks);//推送至UI

@@ -57,6 +57,7 @@
     <Compile Include="BaseManage\UserBLL.cs" />
     <Compile Include="BaseManage\UserGroupBLL.cs" />
     <Compile Include="BaseManage\UserRelationBLL.cs" />
+    <Compile Include="CustomManage\UserDemandBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicInfoManage\NewsBLL.cs" />
     <Compile Include="PublicInfoManage\NoticeBLL.cs" />

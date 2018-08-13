@@ -60,6 +60,7 @@
     <Compile Include="Base\BaseService.T.cs" />
     <Compile Include="Base\BaseService.cs" />
     <Compile Include="Base\CommonService.cs" />
+    <Compile Include="CustomManage\UserDemandService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicInfoManage\NewsService.cs" />
     <Compile Include="PublicInfoManage\NoticeService.cs" />
