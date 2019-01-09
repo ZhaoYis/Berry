@@ -5,6 +5,7 @@ using Berry.IService.SystemManage;
 using Berry.Service.Base;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -13,7 +14,7 @@ namespace Berry.Service.SystemManage
     /// <summary>
     /// 数据字典明细
     /// </summary>
-    public class DataItemDetailService : BaseService, IDataItemDetailService
+    public class DataItemDetailService : BaseService<DataItemDetailEntity>, IDataItemDetailService
     {
         /// <summary>
         /// 明细列表
@@ -22,9 +23,22 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public IEnumerable<DataItemDetailEntity> GetDataItemDetailList(string itemId)
         {
-            IEnumerable<DataItemDetailEntity> res = this.BaseRepository()
-                .FindList<DataItemDetailEntity>(d => d.ItemId == itemId && d.DeleteMark == false && d.EnabledMark == true).OrderBy(d => d.SortCode);
+            IEnumerable<DataItemDetailEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetDataItemDetailList-明细列表", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
+                    res = this.BaseRepository().FindList<DataItemDetailEntity>(conn, d => d.ItemId == itemId && d.DeleteMark == false && d.EnabledMark == true, tran).OrderBy(d => d.SortCode);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -35,8 +49,20 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public DataItemDetailEntity GetDataItemDetailEntity(string keyValue)
         {
-            DataItemDetailEntity res = this.BaseRepository().FindEntity<DataItemDetailEntity>(keyValue);
-
+            DataItemDetailEntity res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetDataItemDetailEntity-明细实体", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    res = this.BaseRepository().FindEntity<DataItemDetailEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -46,8 +72,16 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public IEnumerable<DataItemViewModel> GetDataItemList()
         {
-            StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT  i.Id AS ItemId,
+            IEnumerable<DataItemViewModel> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetDataItemList-获取数据字典列表", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    StringBuilder strSql = new StringBuilder();
+                    strSql.Append(@"SELECT  i.Id AS ItemId,
                                     i.ItemCode AS EnCode ,
                                     d.Id AS ItemDetailId,
                                     d.ParentId ,
@@ -66,15 +100,21 @@ namespace Berry.Service.SystemManage
                                     AND d.DeleteMark = 0
                             ORDER BY d.SortCode ASC");
 
-            DataTable data = this.BaseRepository().FindTable(strSql.ToString());
-            if (data.IsExistRows())
+                    res = this.BaseRepository().FindList<DataItemViewModel>(conn, strSql.ToString(), tran);
+
+                    //DataTable data = this.BaseRepository().FindTable(conn, strSql.ToString(), null, tran);
+                    //if (data.IsExistRows())
+                    //{
+                    //    res = data.DataTableToList<DataItemViewModel>();
+                    //}
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                IEnumerable<DataItemViewModel> res = data.DataTableToList<DataItemViewModel>();
-
-                return res;
-            }
-
-            return new List<DataItemViewModel>();
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -86,16 +126,28 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public bool ExistItemValue(string itemValue, string keyValue, string itemId)
         {
-            List<DataItemDetailEntity> data = this.BaseRepository()
-                .FindList<DataItemDetailEntity>(t => t.ItemValue == itemValue && t.ItemId == itemId).ToList();
-            if (!string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "ExistItemValue-项目值不能重复", () =>
             {
-                data = data.Where(t => t.Id != keyValue).ToList();
-            }
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            bool hasExit = data.Count > 0;
+                    List<DataItemDetailEntity> data = this.BaseRepository().FindList<DataItemDetailEntity>(conn, t => t.ItemValue == itemValue && t.ItemId == itemId, tran).ToList();
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        data = data.Where(t => t.Id != keyValue).ToList();
+                    }
+                    res = data.Count > 0;
 
-            return hasExit;
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -107,16 +159,28 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public bool ExistItemName(string itemName, string keyValue, string itemId)
         {
-            List<DataItemDetailEntity> data = this.BaseRepository()
-                .FindList<DataItemDetailEntity>(t => t.ItemName == itemName && t.ItemId == itemId).ToList();
-            if (!string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "ExistItemName-项目名不能重复", () =>
             {
-                data = data.Where(t => t.Id != keyValue).ToList();
-            }
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            bool hasExit = data.Count > 0;
+                    List<DataItemDetailEntity> data = this.BaseRepository().FindList<DataItemDetailEntity>(conn, t => t.ItemName == itemName && t.ItemId == itemId, tran).ToList();
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        data = data.Where(t => t.Id != keyValue).ToList();
+                    }
+                    res = data.Count > 0;
 
-            return hasExit;
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -125,7 +189,19 @@ namespace Berry.Service.SystemManage
         /// <param name="keyValue">主键</param>
         public void RemoveDataItemDetailByKey(string keyValue)
         {
-            int res = this.BaseRepository().Delete<DataItemDetailEntity>(keyValue);
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "RemoveDataItemDetailByKey-删除明细", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    int res = this.BaseRepository().Delete<DataItemDetailEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
         }
 
         /// <summary>
@@ -136,16 +212,30 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public void SaveDataItemDetail(string keyValue, DataItemDetailEntity dataItemDetailEntity)
         {
-            if (!string.IsNullOrEmpty(keyValue))
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "SaveDataItemDetail-保存明细表单（新增、修改）", () =>
             {
-                dataItemDetailEntity.Modify(keyValue);
-                int res = this.BaseRepository().Update<DataItemDetailEntity>(dataItemDetailEntity);
-            }
-            else
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        dataItemDetailEntity.Modify(keyValue);
+                        int res = this.BaseRepository().Update<DataItemDetailEntity>(conn, dataItemDetailEntity, tran);
+                    }
+                    else
+                    {
+                        dataItemDetailEntity.Create();
+                        int res = this.BaseRepository().Insert<DataItemDetailEntity>(conn, dataItemDetailEntity, tran);
+                    }
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                dataItemDetailEntity.Create();
-                int res = this.BaseRepository().Insert<DataItemDetailEntity>(dataItemDetailEntity);
-            }
+                Trace.WriteLine(e.Message);
+            });
         }
     }
 }

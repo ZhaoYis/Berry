@@ -186,7 +186,7 @@ namespace Berry.Log
                     Class = type.Namespace + type.FullName,
                     Ip = NetHelper.Ip,
                     Host = NetHelper.Host,
-                    ExceptionInfo = e.Message,
+                    ExceptionInfo = e.ToString(),
                     ExceptionSource = e.Source,
                     ExceptionRemark = e.Message + "" + e.StackTrace,
                     Content = desc

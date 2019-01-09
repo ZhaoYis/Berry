@@ -40,9 +40,8 @@ namespace Berry.IBLL.BaseManage
         /// </summary>
         /// <param name="userAccount">用户账号</param>
         /// <param name="password">密码</param>
-        /// <param name="status">状态</param>
         /// <returns></returns>
-        UserEntity CheckLogin(string userAccount, string password, out JsonObjectStatus status);
+        Tuple<UserEntity, JsonObjectStatus> CheckLogin(string userAccount, string password);
 
         /// <summary>
         /// 根据条件查询用户

@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Web;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using Berry.Cache;
+using Berry.Cache.Core.Base;
 using Berry.Code;
 using Berry.Entity;
 using Berry.Entity.ViewModel;
@@ -145,7 +145,7 @@ namespace Berry.SOA.API.Filters
             }
 
             //判断token是否有效
-            TokenViewModel token = CacheFactory.GetCacheInstance().GetCache<TokenViewModel>(appkey);
+            TokenViewModel token = CacheFactory.GetCache().Get<TokenViewModel>(appkey);
             string serveraccesstoken = "AccessToken ";
             if (token == null)
             {

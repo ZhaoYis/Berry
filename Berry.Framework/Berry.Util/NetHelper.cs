@@ -132,7 +132,7 @@ namespace Berry.Util
             {
                 bool isLocal = HasContains(s =>
                 {
-                    return ip.StartsWith("127.") || ip.StartsWith("192.");
+                    return ip.StartsWith("127.") || ip.StartsWith("192.") || ip.StartsWith("10.");
                 }, ip);
 
                 if (isLocal) return "本地地址";

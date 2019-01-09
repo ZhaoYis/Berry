@@ -3,7 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Berry.Cache;
+using Berry.Cache.Core.Base;
+using Berry.Cache.Core.Runtime;
 using Berry.SignalRService.DTO;
 using Berry.SignalRService.Schedu;
 using Berry.SignalRService.Schedu.Jobs;
@@ -62,7 +63,7 @@ namespace Berry.SignalRService.Models
         /// <summary>
         /// 系统缓存
         /// </summary>
-        private readonly WebCache _cache = WebCache.GetWebCacheInstance();
+        private readonly ICacheService _cache = RuntimeCacheService.GetCacheInstance();
         /// <summary>
         /// 任务状态 用户ID--任务编码-任务状态
         /// </summary>
@@ -262,7 +263,7 @@ namespace Berry.SignalRService.Models
             {
                 #region 1-获取用户列表（放在客户端连接时操作）
                 ////1-获取用户列表
-                List<string> jobUserList = _cache.GetCache<List<string>>("__JobUserCacheKey");
+                List<string> jobUserList = _cache.Get<List<string>>("__JobUserCacheKey");
                 if (jobUserList != null && jobUserList.Count != 0)
                 {
                     //判断当前用户是否在集合里面
@@ -270,25 +271,25 @@ namespace Berry.SignalRService.Models
                     {
                         jobUserList.AddRange(new List<string> { userId });
                     }
-                    _cache.WriteCache(jobUserList, "__JobUserCacheKey");
+                    _cache.Add("__JobUserCacheKey", jobUserList);
                 }
                 else
                 {
                     jobUserList = new List<string> { userId };
-                    _cache.WriteCache(jobUserList, "__JobUserCacheKey");
+                    _cache.Add("__JobUserCacheKey", jobUserList);
                 }
                 #endregion
 
                 #region 2-获取此用户已经在使用的任务列表
                 //2-获取此用户已经在使用的任务列表
-                List<string> usedJobList = _cache.GetCache<List<string>>(userId + "_UsedJobListCacheKey");
+                List<string> usedJobList = _cache.Get<List<string>>(userId + "_UsedJobListCacheKey");
                 if (usedJobList == null || usedJobList.Count == 0)
                 {
                     usedJobList = new List<string>();
                     //如果还没使用任何任务，则直接全部加入
                     usedJobList.AddRange(jobCode);
                     //加入缓存
-                    _cache.WriteCache(usedJobList, userId + "_UsedJobListCacheKey");
+                    _cache.Add(userId + "_UsedJobListCacheKey", usedJobList);
                 }
                 else
                 {
@@ -302,7 +303,7 @@ namespace Berry.SignalRService.Models
                     {
                         usedJobList = union;
                         //加入缓存
-                        _cache.WriteCache(usedJobList, userId + "_UsedJobListCacheKey");
+                        _cache.Add(userId + "_UsedJobListCacheKey", usedJobList);
                     }
                 }
                 #endregion
@@ -311,7 +312,7 @@ namespace Berry.SignalRService.Models
                 //防止重复开启任务
                 Dictionary<string, JobState> doJob = new Dictionary<string, JobState>();
                 //3-检测每个任务是否开启
-                Dictionary<string, JobState> jobStateDict = _cache.GetCache<Dictionary<string, JobState>>("__JobStateCacheKey");
+                Dictionary<string, JobState> jobStateDict = _cache.Get<Dictionary<string, JobState>>("__JobStateCacheKey");
                 if (jobStateDict == null || jobStateDict.Count == 0)
                 {
                     jobStateDict = new Dictionary<string, JobState>();
@@ -341,7 +342,7 @@ namespace Berry.SignalRService.Models
                         }
                     }
                 }
-                _cache.WriteCache(jobStateDict, "__JobStateCacheKey");
+                _cache.Add("__JobStateCacheKey", jobStateDict);
                 #endregion
 
                 #region 4-开启任务并推送消息
@@ -419,10 +420,10 @@ namespace Berry.SignalRService.Models
                 //1-检查是否有用户正在使用待关闭的任务
                 List<string> allJobList = new List<string>();
                 //正在使用相关任务的用户
-                List<string> userList = _cache.GetCache<List<string>>("__JobUserCacheKey");
+                List<string> userList = _cache.Get<List<string>>("__JobUserCacheKey");
                 foreach (string user in userList)
                 {
-                    List<string> usedJobList = _cache.GetCache<List<string>>(user + "_UsedJobListCacheKey");
+                    List<string> usedJobList = _cache.Get<List<string>>(user + "_UsedJobListCacheKey");
                     if (usedJobList != null && usedJobList.Count > 0)
                     {
                         allJobList.AddRange(usedJobList);
@@ -432,7 +433,7 @@ namespace Berry.SignalRService.Models
 
                 #region 2-判断是否需要移除此用户
                 //2-判断是否需要移除此用户
-                List<string> thisUserJobList = _cache.GetCache<List<string>>(userId + "_UsedJobListCacheKey");
+                List<string> thisUserJobList = _cache.Get<List<string>>(userId + "_UsedJobListCacheKey");
                 //移除需要关闭的任务
                 foreach (var code in jobCode)
                 {
@@ -441,7 +442,7 @@ namespace Berry.SignalRService.Models
                 if (thisUserJobList == null || thisUserJobList.Count == 0)
                 {
                     userList.Remove(userId);
-                    _cache.WriteCache(userList, "__JobUserCacheKey");
+                    _cache.Add("__JobUserCacheKey", userList);
                 }
 
                 //取交集，如果有其他用户正在使用待关闭任务，则忽略此次关闭
@@ -473,7 +474,7 @@ namespace Berry.SignalRService.Models
                     if (!jobStateDict.ContainsKey(s))
                         jobStateDict.Add(s, JobState.Closed);
                 }
-                _cache.WriteCache(jobStateDict, "__JobStateCacheKey");
+                _cache.Add("__JobStateCacheKey", jobStateDict);
 
                 #region 弃用代码
                 ////已有任务
@@ -524,7 +525,7 @@ namespace Berry.SignalRService.Models
         /// <param name="newJobStatedict"></param>
         private void OpenJob(string userId, Dictionary<string, JobState> newJobStatedict)
         {
-            Dictionary<string, string> dict = _cache.GetCache<Dictionary<string, string>>("__ConnectionUserCacheKey");
+            Dictionary<string, string> dict = _cache.Get<Dictionary<string, string>>("__ConnectionUserCacheKey");
             if (dict.Count > 0)
             {
                 foreach (KeyValuePair<string, JobState> pair in newJobStatedict)
@@ -568,7 +569,7 @@ namespace Berry.SignalRService.Models
         /// <param name="newJobStatedict">要关闭的任务</param>
         private void CloseJob(string userId, Dictionary<string, JobState> newJobStatedict)
         {
-            Dictionary<string, string> dict = _cache.GetCache<Dictionary<string, string>>("__ConnectionUserCacheKey");
+            Dictionary<string, string> dict = _cache.Get<Dictionary<string, string>>("__ConnectionUserCacheKey");
             if (dict.Count > 0)
             {
                 foreach (KeyValuePair<string, JobState> pair in newJobStatedict)

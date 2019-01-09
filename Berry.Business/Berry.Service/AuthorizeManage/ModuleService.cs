@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Berry.Data.Extension;
@@ -17,7 +18,7 @@ namespace Berry.Service.AuthorizeManage
     /// <summary>
     /// 系统功能
     /// </summary>
-    public class ModuleService : BaseService, IModuleService
+    public class ModuleService : BaseService<ModuleEntity>, IModuleService
     {
         /// <summary>
         /// 获取授权功能
@@ -26,8 +27,16 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public IEnumerable<ModuleEntity> GetModuleList(string userId)
         {
-            StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT  *
+            IEnumerable<ModuleEntity> res = null;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "获取授权功能-GetModuleList", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    StringBuilder strSql = new StringBuilder();
+                    strSql.Append(@"SELECT  *
                             FROM    Base_Module
                             WHERE   Id IN (
                                     SELECT  ItemId
@@ -40,14 +49,19 @@ namespace Berry.Service.AuthorizeManage
                                             OR ObjectId = @Id )
                             AND EnabledMark = 1  AND DeleteMark = 0 Order By SortCode");
 
-            DbParameter[] parameter =
+                    DbParameter[] parameter =
+                    {
+                        //new SqlParameter("@Id",SqlDbType.NVarChar,36)
+                        DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
+                    };
+                    res = this.BaseRepository().FindList<ModuleEntity>(conn, strSql.ToString(), parameter, tran).ToList();
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                //new SqlParameter("@Id",SqlDbType.NVarChar,36)
-                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
-            };
-
-            IEnumerable<ModuleEntity> res = this.BaseRepository().FindList<ModuleEntity>(strSql.ToString(), parameter).ToList();
-
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -57,11 +71,24 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public IEnumerable<ModuleEntity> GetModuleList()
         {
-            StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT * FROM Base_Module AS m WHERE EnabledMark = 1 AND DeleteMark = 0 Order By SortCode");
+            IEnumerable<ModuleEntity> res = null;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "获取所有授权功能-GetModuleList", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            IEnumerable<ModuleEntity> res = this.BaseRepository().FindList<ModuleEntity>(strSql.ToString());
+                    StringBuilder strSql = new StringBuilder();
+                    strSql.Append(@"SELECT * FROM Base_Module AS m WHERE EnabledMark = 1 AND DeleteMark = 0 Order By SortCode");
+                    res = this.BaseRepository().FindList<ModuleEntity>(conn, strSql.ToString(), tran);
 
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -71,12 +98,27 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public int GetSortCode()
         {
-            int sortCode = this.BaseRepository().FindList<ModuleEntity>(m=>m.DeleteMark == false).Max(t => t.SortCode).ToInt();
-            if (!string.IsNullOrEmpty(sortCode.ToString()))
+            int res = 100001;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "获取所有功能按钮-GetModuleButtonList", () =>
             {
-                return sortCode + 1;
-            }
-            return 100001;
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    int sortCode = this.BaseRepository().FindList<ModuleEntity>(conn, m => m.DeleteMark == false, tran).Max(t => t.SortCode).TryToInt32();
+                    if (!string.IsNullOrEmpty(sortCode.ToString()))
+                    {
+                        res = sortCode + 1;
+                    }
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -85,17 +127,34 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public IEnumerable<ModuleEntity> GetList(string parentId)
         {
-            StringBuilder strSql = new StringBuilder();
-            if (!string.IsNullOrEmpty(parentId))
+            IEnumerable<ModuleEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetList-功能列表", () =>
             {
-                parentId = StringHelper.SqlFilters(parentId);
-                strSql.Append("SELECT * FROM Base_Module Where ParentId ='" + parentId + "' Order By SortCode");
-            }
-            else
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    StringBuilder strSql = new StringBuilder();
+                    if (!string.IsNullOrEmpty(parentId))
+                    {
+                        parentId = StringHelper.SqlFilters(parentId);
+                        strSql.Append("SELECT * FROM Base_Module Where ParentId ='" + parentId + "' Order By SortCode");
+                    }
+                    else
+                    {
+                        strSql.Append("SELECT * FROM Base_Module Order By SortCode");
+                    }
+
+                    res = this.BaseRepository().FindList<ModuleEntity>(conn, strSql.ToString(), tran);
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                strSql.Append("SELECT * FROM Base_Module Order By SortCode");
-            }
-            return this.BaseRepository().FindList<ModuleEntity>(strSql.ToString());
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -105,7 +164,23 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public ModuleEntity GetEntity(string keyValue)
         {
-            return this.BaseRepository().FindEntity<ModuleEntity>(keyValue);
+            ModuleEntity res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetEntity-功能实体", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    res = this.BaseRepository().FindEntity<ModuleEntity>(conn, keyValue, tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -116,13 +191,30 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public bool ExistEnCode(string enCode, string keyValue)
         {
-            var expression = LambdaExtension.True<ModuleEntity>();
-            expression = expression.And(t => t.EnCode == enCode);
-            if (!string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "ExistEnCode-功能编号不能重复", () =>
             {
-                expression = expression.And(t => t.Id != keyValue);
-            }
-            return this.BaseRepository().FindList<ModuleEntity>(expression).ToList().Count == 0;
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    var expression = LambdaExtension.True<ModuleEntity>();
+                    expression = expression.And(t => t.EnCode == enCode);
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        expression = expression.And(t => t.Id != keyValue);
+                    }
+
+                    res = this.BaseRepository().FindList<ModuleEntity>(conn, expression, tran).ToList().Count == 0;
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -133,13 +225,30 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public bool ExistFullName(string fullName, string keyValue)
         {
-            var expression = LambdaExtension.True<ModuleEntity>();
-            expression = expression.And(t => t.FullName == fullName);
-            if (!string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "ExistFullName-功能名称不能重复", () =>
             {
-                expression = expression.And(t => t.Id != keyValue);
-            }
-            return this.BaseRepository().FindList<ModuleEntity>(expression).ToList().Count == 0;
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    var expression = LambdaExtension.True<ModuleEntity>();
+                    expression = expression.And(t => t.FullName == fullName);
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        expression = expression.And(t => t.Id != keyValue);
+                    }
+
+                    res = this.BaseRepository().FindList<ModuleEntity>(conn, expression, tran).ToList().Count == 0;
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -148,17 +257,31 @@ namespace Berry.Service.AuthorizeManage
         /// <param name="keyValue">主键</param>
         public void RemoveForm(string keyValue)
         {
-            int count = this.BaseRepository().FindList<ModuleEntity>(t => t.ParentId == keyValue).Count();
-            if (count > 0)
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "RemoveForm-删除功能", () =>
             {
-                throw new Exception("当前所选数据有子节点数据！");
-            }
-            //删除模块
-            this.BaseRepository().Delete<ModuleEntity>(keyValue);
-            //删除按钮
-            this.BaseRepository().Delete<ModuleButtonEntity>(t => t.ModuleId == keyValue);
-            //删除视图
-            this.BaseRepository().Delete<ModuleColumnEntity>(t => t.ModuleId == keyValue);
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    int count = this.BaseRepository().FindList<ModuleEntity>(conn, t => t.ParentId == keyValue, tran).Count();
+                    if (count > 0)
+                    {
+                        throw new Exception("当前所选数据有子节点数据！");
+                    }
+                    //删除模块
+                    this.BaseRepository().Delete<ModuleEntity>(conn, keyValue, tran);
+                    //删除按钮
+                    this.BaseRepository().Delete<ModuleButtonEntity>(conn, t => t.ModuleId == keyValue, tran);
+                    //删除视图
+                    this.BaseRepository().Delete<ModuleColumnEntity>(conn, t => t.ModuleId == keyValue, tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
         }
 
         /// <summary>
@@ -171,41 +294,55 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public void SaveForm(string keyValue, ModuleEntity moduleEntity, List<ModuleButtonEntity> moduleButtonList, List<ModuleColumnEntity> moduleColumnList)
         {
-            int res = -1;
-            if (!string.IsNullOrEmpty(keyValue))
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "SaveForm-保存表单（新增、修改）", () =>
             {
-                moduleEntity.Modify(keyValue);
-                res = this.BaseRepository().Update<ModuleEntity>(moduleEntity);
-            }
-            else
-            {
-                moduleEntity.Create();
-                res = this.BaseRepository().Insert(moduleEntity);
-            }
-
-            res = this.BaseRepository().Delete<ModuleButtonEntity>(t => t.ModuleId == keyValue);
-            if (moduleButtonList != null)
-            {
-                List<ModuleButtonEntity> temp = new List<ModuleButtonEntity>();
-                foreach (ModuleButtonEntity buttonEntity in moduleButtonList)
+                using (var conn = this.BaseRepository().GetBaseConnection())
                 {
-                    buttonEntity.Create();
-                    temp.Add(buttonEntity);
-                }
-                res = this.BaseRepository().Insert<ModuleButtonEntity>(temp);
-            }
+                    tran = conn.BeginTransaction();
 
-            res = this.BaseRepository().Delete<ModuleColumnEntity>(t => t.ModuleId == keyValue);
-            if (moduleColumnList != null)
-            {
-                List<ModuleColumnEntity> temp = new List<ModuleColumnEntity>();
-                foreach (ModuleColumnEntity columnEntity in moduleColumnList)
-                {
-                    columnEntity.Create();
-                    temp.Add(columnEntity);
+                    int res = -1;
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        moduleEntity.Modify(keyValue);
+                        res = this.BaseRepository().Update<ModuleEntity>(conn,moduleEntity, tran);
+                    }
+                    else
+                    {
+                        moduleEntity.Create();
+                        res = this.BaseRepository().Insert(conn, moduleEntity, tran);
+                    }
+
+                    res = this.BaseRepository().Delete<ModuleButtonEntity>(conn, t => t.ModuleId == keyValue, tran);
+                    if (moduleButtonList != null)
+                    {
+                        List<ModuleButtonEntity> temp = new List<ModuleButtonEntity>();
+                        foreach (ModuleButtonEntity buttonEntity in moduleButtonList)
+                        {
+                            buttonEntity.Create();
+                            temp.Add(buttonEntity);
+                        }
+                        res = this.BaseRepository().Insert<ModuleButtonEntity>(conn, temp, tran);
+                    }
+
+                    res = this.BaseRepository().Delete<ModuleColumnEntity>(conn, t => t.ModuleId == keyValue, tran);
+                    if (moduleColumnList != null)
+                    {
+                        List<ModuleColumnEntity> temp = new List<ModuleColumnEntity>();
+                        foreach (ModuleColumnEntity columnEntity in moduleColumnList)
+                        {
+                            columnEntity.Create();
+                            temp.Add(columnEntity);
+                        }
+                        res = this.BaseRepository().Insert<ModuleColumnEntity>(conn, temp, tran);
+                    }
+
+                    tran.Commit();
                 }
-                res = this.BaseRepository().Insert<ModuleColumnEntity>(temp);
-            }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
         }
     }
 }

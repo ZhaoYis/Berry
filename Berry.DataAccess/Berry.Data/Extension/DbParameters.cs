@@ -6,8 +6,6 @@ using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
-using MySql.Data.MySqlClient;
-using Oracle.ManagedDataAccess.Client;
 
 namespace Berry.Data.Extension
 {
@@ -62,13 +60,13 @@ namespace Berry.Data.Extension
                     parameter = new SqlParameter();
                     break;
 
-                case DatabaseType.Oracle:
-                    parameter = new OracleParameter();
-                    break;
+                //case DatabaseType.Oracle:
+                //    parameter = new OracleParameter();
+                //    break;
 
-                case DatabaseType.MySql:
-                    parameter = new MySqlParameter();
-                    break;
+                //case DatabaseType.MySql:
+                //    parameter = new MySqlParameter();
+                //    break;
 
                 default:
                     parameter = new SqlParameter();
@@ -124,22 +122,22 @@ namespace Berry.Data.Extension
                         i++;
                     }
                     break;
-                case DatabaseType.MySql:
-                    dbParameter = new DbParameter[size];
-                    while (i < size)
-                    {
-                        dbParameter[i] = new MySqlParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
-                        i++;
-                    }
-                    break;
-                case DatabaseType.Oracle:
-                    dbParameter = new DbParameter[size];
-                    while (i < size)
-                    {
-                        dbParameter[i] = new OracleParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
-                        i++;
-                    }
-                    break;
+                //case DatabaseType.MySql:
+                //    dbParameter = new DbParameter[size];
+                //    while (i < size)
+                //    {
+                //        dbParameter[i] = new MySqlParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
+                //        i++;
+                //    }
+                //    break;
+                //case DatabaseType.Oracle:
+                //    dbParameter = new DbParameter[size];
+                //    while (i < size)
+                //    {
+                //        dbParameter[i] = new OracleParameter(dbParameter[i].ParameterName, dbParameter[i].Value);
+                //        i++;
+                //    }
+                //    break;
                 //case DatabaseType.Access:
                 //    dbParameter = new DbParameter[size];
                 //    while (i < size)

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using Berry.App.Cache;
 using Quartz;
 
@@ -15,7 +16,7 @@ namespace Berry.App.CacheRefresh.Job
             var config = reHelper.GetConfigFromDataMap(context.JobDetail.JobDataMap);
             Trace.WriteLine("开始刷新UserGroupCache,cron表达式：" + config.CronExpression);
 
-            new UserGroupCache().RefreshCache(reHelper.GetExpireTime(config.TimeSpan));
+            new UserGroupCache().RefreshCache(TimeSpan.FromMinutes(config.TimeSpan));
         }
     }
 }

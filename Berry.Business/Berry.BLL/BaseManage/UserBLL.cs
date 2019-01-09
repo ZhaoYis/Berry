@@ -109,11 +109,10 @@ namespace Berry.BLL.BaseManage
         /// </summary>
         /// <param name="userAccount">用户账号</param>
         /// <param name="password">密码</param>
-        /// <param name="status">状态</param>
         /// <returns></returns>
-        public UserEntity CheckLogin(string userAccount, string password, out JsonObjectStatus status)
+        public Tuple<UserEntity, JsonObjectStatus> CheckLogin(string userAccount, string password)
         {
-            return _userService.CheckLogin(userAccount, password, out status);
+            return _userService.CheckLogin(userAccount, password);
         }
 
         /// <summary>

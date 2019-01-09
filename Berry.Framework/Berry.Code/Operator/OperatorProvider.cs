@@ -1,7 +1,7 @@
-﻿using Berry.Cache;
-using Berry.Extension;
+﻿using Berry.Extension;
 using Berry.Util;
 using System;
+using Berry.Cache.Core.Base;
 
 namespace Berry.Code.Operator
 {
@@ -44,11 +44,11 @@ namespace Berry.Code.Operator
                 }
                 else if (_loginProvider == "Cache")
                 {
-                    CacheFactory.GetCacheInstance().WriteCache(DESEncryptHelper.Encrypt(user.TryToJson()), LoginUserKey, user.LoginTime.AddMinutes(60));
+                    CacheFactory.GetCache().Add(LoginUserKey, DESEncryptHelper.Encrypt(user.TryToJson()), TimeSpan.FromMinutes(60));
                 }
 
                 //添加当前登陆用户Token
-                CacheFactory.GetCacheInstance().WriteCache(user.Token, user.UserId, user.LoginTime.AddMinutes(60));
+                CacheFactory.GetCache().Add(user.UserId, user.Token, TimeSpan.FromMinutes(60));
             }
             catch (Exception ex)
             {
@@ -83,7 +83,7 @@ namespace Berry.Code.Operator
                 }
                 else if (_loginProvider == "Cache")
                 {
-                    string json = CacheFactory.GetCacheInstance().GetCache<string>(LoginUserKey);
+                    string json = CacheFactory.GetCache().Get<string>(LoginUserKey);
                     if (!string.IsNullOrEmpty(json))
                     {
                         user = DESEncryptHelper.Decrypt(json).JsonToEntity<OperatorEntity>();
@@ -112,7 +112,7 @@ namespace Berry.Code.Operator
             }
             else if (_loginProvider == "Cache")
             {
-                CacheFactory.GetCacheInstance().RemoveCache(LoginUserKey);
+                CacheFactory.GetCache().Remove(LoginUserKey);
             }
         }
 
@@ -135,7 +135,7 @@ namespace Berry.Code.Operator
                 }
                 else if (_loginProvider == "Cache")
                 {
-                    str = CacheFactory.GetCacheInstance().GetCache<string>(LoginUserKey);
+                    str = CacheFactory.GetCache().Get<string>(LoginUserKey);
                 }
 
                 return string.IsNullOrEmpty(str);
@@ -163,14 +163,14 @@ namespace Berry.Code.Operator
             }
             else if (_loginProvider == "Cache")
             {
-                string json = CacheFactory.GetCacheInstance().GetCache<string>(LoginUserKey);
+                string json = CacheFactory.GetCache().Get<string>(LoginUserKey);
                 if (!string.IsNullOrEmpty(json))
                 {
                     user = DESEncryptHelper.Decrypt(json).JsonToEntity<OperatorEntity>();
                 }
             }
 
-            string token = CacheFactory.GetCacheInstance().GetCache<string>(user.UserId);
+            string token = CacheFactory.GetCache().Get<string>(user.UserId);
             if (string.IsNullOrEmpty(token))
             {
                 return -1;//过期

@@ -6,7 +6,8 @@ using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using Berry.Cache;
+using Berry.Cache.Core.Base;
+using Berry.Cache.Core.Runtime;
 using Berry.SignalRService.DTO;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hosting;
@@ -36,10 +37,11 @@ namespace Berry.SignalRService.Models
         /// 连接数
         /// </summary>
         private static int _connections = 0;
+
         /// <summary>
         /// 系统缓存
         /// </summary>
-        private readonly WebCache _cache = WebCache.GetWebCacheInstance();
+        private readonly ICacheService _cache = RuntimeCacheService.GetCacheInstance();
         /// <summary>
         /// 用户列表，userId-connId 
         /// userId带有前缀，其中：S-服务器用户 U-登陆用户 T-访客用户（未登录）
@@ -396,8 +398,8 @@ namespace Berry.SignalRService.Models
                     UserIdDict.Remove(userId);
                 }
             }
-            
-            _cache.WriteCache(UserIdDict, "__ConnectionUserCacheKey");
+
+            _cache.Add("__ConnectionUserCacheKey", UserIdDict);
         }
 
         #endregion

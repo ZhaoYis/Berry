@@ -1,17 +1,19 @@
-﻿using Berry.Data.Repository;
-using Berry.Entity.SystemManage;
+﻿using Berry.Entity.SystemManage;
 using Berry.IService.SystemManage;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
-using Berry.Cache;
+using Berry.Cache.Core.Base;
 using Berry.Extension;
+using Berry.Service.Base;
 
 namespace Berry.Service.SystemManage
 {
     /// <summary>
     /// 区域管理
     /// </summary>
-    public class AreaService : RepositoryFactory, IAreaService
+    public class AreaService : BaseService<AreaEntity>, IAreaService
     {
         #region 获取数据
 
@@ -21,7 +23,23 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public IEnumerable<AreaEntity> GetList()
         {
-            return this.BaseRepository().FindList<AreaEntity>(t => t.DeleteMark == false && t.EnabledMark == true && t.Layer != 4).OrderBy(t => t.CreateDate).ToList();
+            IEnumerable<AreaEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetList-区域列表", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    res = this.BaseRepository().FindList<AreaEntity>(conn, t => t.DeleteMark == false && t.EnabledMark == true && t.Layer != 4, tran).OrderBy(t => t.CreateDate).ToList();
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -32,17 +50,33 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public IEnumerable<AreaEntity> GetList(string parentId, string keyword)
         {
-            var expression = LambdaExtension.True<AreaEntity>();
-            if (!string.IsNullOrEmpty(parentId))
+            IEnumerable<AreaEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetList-区域列表", () =>
             {
-                expression = expression.And(t => t.ParentId == parentId);
-            }
-            if (!string.IsNullOrEmpty(keyword))
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    var expression = LambdaExtension.True<AreaEntity>();
+                    if (!string.IsNullOrEmpty(parentId))
+                    {
+                        expression = expression.And(t => t.ParentId == parentId);
+                    }
+                    if (!string.IsNullOrEmpty(keyword))
+                    {
+                        expression = expression.And(t => t.AreaCode.Contains(keyword));
+                        expression = expression.Or(t => t.AreaName.Contains(keyword));
+                    }
+                    res = this.BaseRepository().FindList(conn, expression, tran).OrderBy(t => t.CreateDate).ToList();
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                expression = expression.And(t => t.AreaCode.Contains(keyword));
-                expression = expression.Or(t => t.AreaName.Contains(keyword));
-            }
-            return this.BaseRepository().FindList(expression).OrderBy(t => t.CreateDate).ToList();
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -52,7 +86,21 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public AreaEntity GetEntity(string keyValue)
         {
-            return this.BaseRepository().FindEntity<AreaEntity>(keyValue);
+            AreaEntity res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetEntity-区域实体", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    res = this.BaseRepository().FindEntity<AreaEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         #endregion 获取数据
@@ -65,9 +113,21 @@ namespace Berry.Service.SystemManage
         /// <param name="keyValue">主键</param>
         public void RemoveForm(string keyValue)
         {
+            CacheFactory.GetCache().Remove("__AreaCache");
 
-            CacheFactory.GetCacheInstance().RemoveCache("__AreaCache");
-            this.BaseRepository().Delete(keyValue);
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "RemoveForm-删除区域", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    int res = this.BaseRepository().Delete<AreaEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
         }
 
         /// <summary>
@@ -78,18 +138,32 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public void SaveForm(string keyValue, AreaEntity areaEntity)
         {
-            if (!string.IsNullOrEmpty(keyValue))
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "SaveForm-保存区域表单（新增、修改）", () =>
             {
-                areaEntity.Modify(keyValue);
-                this.BaseRepository().Update(areaEntity);
-            }
-            else
-            {
-                areaEntity.Create();
-                this.BaseRepository().Insert(areaEntity);
-            }
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            CacheFactory.GetCacheInstance().RemoveCache("__AreaCache");
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        areaEntity.Modify(keyValue);
+                        int res = this.BaseRepository().Update<AreaEntity>(conn, areaEntity, tran);
+                    }
+                    else
+                    {
+                        areaEntity.Create();
+                        int res = this.BaseRepository().Insert<AreaEntity>(conn, areaEntity, tran);
+                    }
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+
+            CacheFactory.GetCache().Remove("__AreaCache");
         }
 
         #endregion 提交数据

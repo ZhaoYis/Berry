@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -61,9 +62,10 @@ namespace Berry.Data
         public static DbParameter[] GetParameter(Hashtable ht)
         {
             IList<DbParameter> parameter = new List<DbParameter>();
-            DbType dbtype = new DbType();
             foreach (string key in ht.Keys)
             {
+                DbType dbtype = new DbType();
+
                 if (ht[key] is DateTime)
                     dbtype = DbType.DateTime;
                 else
@@ -82,7 +84,6 @@ namespace Berry.Data
         /// </summary>
         /// <param name="commandParameters"></param>
         /// <returns></returns>
-
         public static SqlParameter[] DbParameterToSqlParameter(DbParameter[] commandParameters)
         {
             if (commandParameters == null)
@@ -158,7 +159,7 @@ namespace Berry.Data
                         if (value.GetType() == typeof(DateTime))
                         {
                             var time = (DateTime)value;
-                            if (time.Ticks != 0 && time.Kind != DateTimeKind.Unspecified)
+                            if (time.Ticks != 0 && time != DateTime.MinValue && time != SqlDateTime.MinValue.Value)
                             {
                                 sb_prame.Append(",[" + prop.Name + "]");
                                 sp.Append("," + DbParameters.CreateDbParmCharacter() + "" + (prop.Name));
@@ -246,20 +247,44 @@ namespace Berry.Data
             {
                 if (!notMappedField.Contains(prop.Name))
                 {
-                    if (prop.GetValue(entity, null) != null && keyField != prop.Name)
+                    object value = prop.GetValue(entity, null);
+                    if (value != null && keyField != prop.Name)
                     {
-                        if (isFirstValue)
+                        if (value.GetType() == typeof(DateTime))
                         {
-                            isFirstValue = false;
-                            sb.Append("[" + prop.Name + "]");
-                            sb.Append("=");
-                            sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            var time = (DateTime)value;
+                            if (time.Ticks != 0 && time != DateTime.MinValue && time != SqlDateTime.MinValue.Value)
+                            {
+                                if (isFirstValue)
+                                {
+                                    isFirstValue = false;
+                                    sb.Append("[" + prop.Name + "]");
+                                    sb.Append("=");
+                                    sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                                }
+                                else
+                                {
+                                    sb.Append(",[" + prop.Name + "]");
+                                    sb.Append("=");
+                                    sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                                }
+                            }
                         }
                         else
                         {
-                            sb.Append(",[" + prop.Name + "]");
-                            sb.Append("=");
-                            sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            if (isFirstValue)
+                            {
+                                isFirstValue = false;
+                                sb.Append("[" + prop.Name + "]");
+                                sb.Append("=");
+                                sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            }
+                            else
+                            {
+                                sb.Append(",[" + prop.Name + "]");
+                                sb.Append("=");
+                                sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
+                            }
                         }
                     }
                 }
@@ -308,80 +333,7 @@ namespace Berry.Data
                         if (value.GetType() == typeof(DateTime))
                         {
                             var time = (DateTime)value;
-                            if (time.Ticks != 0 && time.Kind != DateTimeKind.Unspecified)
-                            {
-                                if (isFirstValue)
-                                {
-                                    isFirstValue = false;
-                                    sb.Append("[" + prop.Name + "]");
-                                    sb.Append("=");
-                                    sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
-                                }
-                                else
-                                {
-                                    sb.Append(",[" + prop.Name + "]");
-                                    sb.Append("=");
-                                    sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (isFirstValue)
-                            {
-                                isFirstValue = false;
-                                sb.Append("[" + prop.Name + "]");
-                                sb.Append("=");
-                                sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
-                            }
-                            else
-                            {
-                                sb.Append(",[" + prop.Name + "]");
-                                sb.Append("=");
-                                sb.Append(DbParameters.CreateDbParmCharacter() + prop.Name);
-                            }
-                        }
-                    }
-                }
-            }
-            sb.Append(" Where ").Append(keyField).Append("=").Append(DbParameters.CreateDbParmCharacter() + keyField);
-            return sb;
-        }
-
-        /// <summary>
-        /// 泛型方法，反射生成UpdateSql语句
-        /// </summary>
-        /// <param name="entity">实体类</param>
-        /// <param name="where">更新条件</param>
-        /// <returns>int</returns>
-        public static StringBuilder UpdateSql<T>(T entity, string where = "")
-        {
-            Type type = entity.GetType();
-            //表名
-            string table = EntityAttributeHelper.GetEntityTable<T>();
-            //主键
-            string keyField = EntityAttributeHelper.GetEntityKey<T>();
-            //获取不做映射的字段
-            List<string> notMappedField = EntityAttributeHelper.GetNotMappedFields<T>();
-
-            PropertyInfo[] props = type.GetProperties();
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append("Update ");
-            sb.Append(table);
-            sb.Append(" Set ");
-            bool isFirstValue = true;
-            foreach (PropertyInfo prop in props)
-            {
-                if (!notMappedField.Contains(prop.Name))
-                {
-                    object value = prop.GetValue(entity, null);
-                    if (value != null && keyField != prop.Name)
-                    {
-                        if (value.GetType() == typeof(DateTime))
-                        {
-                            var time = (DateTime)value;
-                            if (time.Ticks != 0 && time.Kind != DateTimeKind.Unspecified)
+                            if (time.Ticks != 0 && time != DateTime.MinValue && time != SqlDateTime.MinValue.Value)
                             {
                                 if (isFirstValue)
                                 {
@@ -444,8 +396,7 @@ namespace Berry.Data
         {
             //表名
             string table = EntityAttributeHelper.GetEntityTable<T>();
-            if (string.IsNullOrWhiteSpace(where))
-                where = "1 = 1";
+            if (string.IsNullOrWhiteSpace(where)) where = "1 = 1";
 
             return new StringBuilder("Delete From " + table + " " + where);
         }
@@ -534,7 +485,7 @@ namespace Berry.Data
         /// <param name="where">条件</param>
         /// <param name="allFieid">是否查询所有字段</param>
         /// <returns></returns>
-        public static StringBuilder SelectSql<T>(string where, bool allFieid = false) where T : class, new()
+        public static StringBuilder SelectSql<T>(string where, bool allFieid = false) where T : class
         {
             //表名
             string table = EntityAttributeHelper.GetEntityTable<T>();
@@ -619,6 +570,26 @@ namespace Berry.Data
             string table = EntityAttributeHelper.GetEntityTable<T>();
 
             return new StringBuilder("SELECT Count(1) FROM " + table + " WHERE 1=1 ");
+        }
+
+        /// <summary>
+        /// 拼接 查询条数 SQL语句
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="where"></param>
+        /// <returns></returns>
+        public static StringBuilder SelectCountSql<T>(string where) where T : new()
+        {
+            //表名
+            string table = EntityAttributeHelper.GetEntityTable<T>();
+            if (!string.IsNullOrEmpty(where))
+            {
+                if (!where.ToLower().Contains("where"))
+                {
+                    where = " WHERE " + where;
+                }
+            }
+            return new StringBuilder("SELECT Count(1) FROM " + table + " " + where);
         }
 
         /// <summary>

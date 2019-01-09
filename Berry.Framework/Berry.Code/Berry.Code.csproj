@@ -45,7 +45,6 @@
     <Compile Include="CategoryType.cs" />
     <Compile Include="CustomAttribute.cs" />
     <Compile Include="DatabaseLinksEnum.cs" />
-    <Compile Include="DatabaseType.cs" />
     <Compile Include="ErrorHandel.cs" />
     <Compile Include="GlobalConstCode.cs" />
     <Compile Include="JsonObjectStatus.cs" />
@@ -60,9 +59,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Berry.Cache\Berry.Cache.csproj">
-      <Project>{35a1f58b-c99d-46bf-981f-34af5337f9d1}</Project>
-      <Name>Berry.Cache</Name>
+    <ProjectReference Include="..\Berry.Cache.Core\Berry.Cache.Core.csproj">
+      <Project>{1f0d4e6e-fff8-4914-89f3-53198463d5a3}</Project>
+      <Name>Berry.Cache.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Berry.Extension\Berry.Extension.csproj">
       <Project>{7a95fd4d-8c13-401b-a1d5-cbc4e391b4dc}</Project>

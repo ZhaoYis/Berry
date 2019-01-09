@@ -5,6 +5,7 @@ using Berry.Entity.SystemManage;
 using Berry.Entity.ViewModel;
 using System.Collections.Generic;
 using System.Linq;
+using Berry.Cache.Core.Base;
 
 namespace Berry.App.Cache
 {
@@ -44,11 +45,10 @@ namespace Berry.App.Cache
             //}
             //return cacheList;
 
-            List<DataItemViewModel> cacheList = CacheFactory.GetCacheInstance().GetListCache<DataItemViewModel>(
-                _dataItemDetailBll.CacheKey, () =>
+            List<DataItemViewModel> cacheList = CacheFactory.GetCache().Get(_dataItemDetailBll.CacheKey, () =>
                 {
                     return _dataItemDetailBll.GetDataItemList().ToList();
-                }, out long total);
+                }, TimeSpan.FromMinutes(120));
             return cacheList;
         }
 
@@ -56,14 +56,14 @@ namespace Berry.App.Cache
         /// 刷新缓存
         /// </summary>
         /// <returns></returns>
-        public void RefreshCache(DateTime expireTime)
+        public void RefreshCache(TimeSpan expireTime)
         {
-            bool hasExpire = CacheFactory.GetCacheInstance().HasExpire(_dataItemDetailBll.CacheKey);
+            bool hasExpire = CacheFactory.GetCache().Exists(_dataItemDetailBll.CacheKey);
             if (!hasExpire)
             {
                 var cacheList = _dataItemDetailBll.GetDataItemList().ToList();
                 //以集合的方式存在缓存下面
-                CacheFactory.GetCacheInstance().WriteListCache<DataItemViewModel>(cacheList, _dataItemDetailBll.CacheKey, expireTime);
+                CacheFactory.GetCache().Add(_dataItemDetailBll.CacheKey, cacheList, expireTime);
 
                 //以单体的形式存在缓存下面
                 //foreach (DataItemViewModel model in cacheList)
@@ -82,11 +82,11 @@ namespace Berry.App.Cache
         {
             if (!string.IsNullOrEmpty(code))
             {
-                DataItemEntity entity = CacheFactory.GetCacheInstance().GetCache<DataItemEntity>("__" + code);
+                DataItemEntity entity = CacheFactory.GetCache().Get<DataItemEntity>("__" + code);
                 if (entity == null)
                 {
                     entity = _dataItemBll.GetEntityByCode(code);
-                    CacheFactory.GetCacheInstance().WriteCache(entity, "__" + code);
+                    CacheFactory.GetCache().Add("__" + code, entity);
                 }
                 return entity;
             }

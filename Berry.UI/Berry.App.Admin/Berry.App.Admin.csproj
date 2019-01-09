@@ -669,7 +669,6 @@
     <Compile Include="Areas\BaseManage\Controllers\RoleController.cs" />
     <Compile Include="Areas\BaseManage\Controllers\UserController.cs" />
     <Compile Include="Areas\BaseManage\Controllers\UserGroupController.cs" />
-    <Compile Include="Areas\CustomManage\Controllers\UserDemandController.cs" />
     <Compile Include="Areas\CustomManage\CustomManageAreaRegistration.cs" />
     <Compile Include="Areas\GeneratorManage\Controllers\MultiTableController.cs" />
     <Compile Include="Areas\GeneratorManage\Controllers\SingleTableController.cs" />
@@ -802,8 +801,6 @@
     <Content Include="Areas\SystemManage\Views\RedisMonitor\GetClients.cshtml" />
     <Content Include="Areas\SystemManage\Views\RedisMonitor\BaseRedisStatus.cshtml" />
     <Content Include="Areas\CustomManage\Views\web.config" />
-    <Content Include="Areas\CustomManage\Views\UserDemand\Form.cshtml" />
-    <Content Include="Areas\CustomManage\Views\UserDemand\Index.cshtml" />
     <None Include="packages.config" />
     <Content Include="Views\Error\ErrorBrowser.cshtml" />
     <Content Include="Views\Error\ErrorMessage.cshtml" />
@@ -842,6 +839,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Areas\CustomManage\Controllers\" />
     <Folder Include="Content\skin\" />
     <Folder Include="Models\" />
   </ItemGroup>
@@ -858,25 +856,17 @@
       <Project>{6697b3a9-4865-42fe-8ecd-beab49a72b1f}</Project>
       <Name>Berry.BLL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Berry.DataAccess\Berry.Data.ADO\Berry.Data.ADO.csproj">
-      <Project>{21dd130d-46f2-42d8-9e66-b3b016c9bb37}</Project>
-      <Name>Berry.Data.ADO</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Berry.DataAccess\Berry.Data.Dapper\Berry.Data.Dapper.csproj">
-      <Project>{1c53b6fc-4dd3-4176-8045-980632c2beff}</Project>
+      <Project>{46683cf5-8fd9-4b5c-9617-6469f2f79b42}</Project>
       <Name>Berry.Data.Dapper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Berry.DataAccess\Berry.Data.EF\Berry.Data.EF.csproj">
-      <Project>{25467f63-a13d-44b1-b9c4-27f73ab6357f}</Project>
-      <Name>Berry.Data.EF</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Berry.DataAccess\Berry.Data\Berry.Data.csproj">
       <Project>{b01d7040-aa2f-4642-8454-f13a3b92923a}</Project>
       <Name>Berry.Data</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Berry.Framework\Berry.Cache\Berry.Cache.csproj">
-      <Project>{35a1f58b-c99d-46bf-981f-34af5337f9d1}</Project>
-      <Name>Berry.Cache</Name>
+    <ProjectReference Include="..\..\Berry.Framework\Berry.Cache.Core\Berry.Cache.Core.csproj">
+      <Project>{1f0d4e6e-fff8-4914-89f3-53198463d5a3}</Project>
+      <Name>Berry.Cache.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Berry.Framework\Berry.CodeGenerator\Berry.CodeGenerator.csproj">
       <Project>{ee0f1360-7ed4-4ed3-afd6-66a62957b9a5}</Project>

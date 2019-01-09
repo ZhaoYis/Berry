@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Text;
 using Berry.Data.Extension;
 using Berry.Data.Repository;
@@ -9,6 +10,7 @@ using Berry.Entity.AuthorizeManage;
 using Berry.Entity.CommonEntity;
 using Berry.Extension;
 using Berry.IService.AuthorizeManage;
+using Berry.Service.Base;
 using Newtonsoft.Json.Linq;
 
 namespace Berry.Service.AuthorizeManage
@@ -16,7 +18,7 @@ namespace Berry.Service.AuthorizeManage
     /// <summary>
     /// 系统表单
     /// </summary>
-    public class ModuleFormService : RepositoryFactory, IModuleFormService
+    public class ModuleFormService : BaseService<ModuleFormEntity>, IModuleFormService
     {
         #region 获取数据
         /// <summary>
@@ -27,8 +29,16 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public DataTable GetPageList(PaginationEntity pagination, string queryJson)
         {
-            var strSql = new StringBuilder();
-            strSql.Append(@"SELECT
+            DataTable res = null;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "获取所有功能按钮-GetModuleButtonList", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    StringBuilder strSql = new StringBuilder();
+                    strSql.Append(@"SELECT
 	                                m.Id,
 	                                m.ModuleId,
 	                                m1.FullName as ModuleName,
@@ -49,22 +59,32 @@ namespace Berry.Service.AuthorizeManage
                                 LEFT JOIN Base_Module m1 ON m1.Id = m.ModuleId
                                 WHERE m.DeleteMark = 0");
 
-            List<DbParameter> parameter = new List<DbParameter>();
-            JObject queryParam = queryJson.TryToJObject();
-            if (queryParam != null)
-            {
-                if (!string.IsNullOrEmpty(queryParam["Keyword"].ToString()))//关键字查询
-                {
-                    string keyord = queryParam["Keyword"].ToString();
-                    strSql.Append(@" AND ( m1.FullName LIKE @keyword 
+                    List<DbParameter> parameter = new List<DbParameter>();
+                    JObject queryParam = queryJson.TryToJObject();
+                    if (queryParam != null)
+                    {
+                        if (!string.IsNullOrEmpty(queryParam["Keyword"].ToString()))//关键字查询
+                        {
+                            string keyord = queryParam["Keyword"].ToString();
+                            strSql.Append(@" AND ( m1.FullName LIKE @keyword 
                                         or m.FullName LIKE @keyword 
                                         or m.CreateUserName LIKE @keyword )");
 
-                    parameter.Add(DbParameters.CreateDbParameter("@keyword", '%' + keyord + '%'));
-                }
-            }
+                            parameter.Add(DbParameters.CreateDbParameter("@keyword", '%' + keyord + '%'));
+                        }
+                    }
 
-            return this.BaseRepository().FindTable(strSql.ToString(), parameter.ToArray(), pagination);
+                    Tuple<DataTable, int> data = this.BaseRepository().FindTable(conn, strSql.ToString(), parameter, pagination.sidx, pagination.sord.ToLower() == "asc", pagination.rows, pagination.page);
+                    pagination.records = data.Item2;
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+
+            return res;
         }
         /// <summary>
         /// 获取一个实体类
@@ -73,7 +93,23 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public ModuleFormEntity GetEntity(string keyValue)
         {
-            return this.BaseRepository().FindEntity<ModuleFormEntity>(keyValue);
+            ModuleFormEntity res = null;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "获取一个实体类-GetEntity", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    res = this.BaseRepository().FindEntity<ModuleFormEntity>(conn, keyValue, tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
         /// <summary>
         /// 通过模块Id获取系统表单
@@ -82,9 +118,25 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public ModuleFormEntity GetEntityByModuleId(string moduleId)
         {
-            var expression = LambdaExtension.True<ModuleFormEntity>();
-            expression = expression.And(t => t.ModuleId == moduleId);
-            return this.BaseRepository().FindEntity<ModuleFormEntity>(expression);
+            ModuleFormEntity res = null;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "通过模块Id获取系统表单-GetEntityByModuleId", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    var expression = LambdaExtension.True<ModuleFormEntity>();
+                    expression = expression.And(t => t.ModuleId == moduleId);
+                    res = this.BaseRepository().FindEntity<ModuleFormEntity>(conn, expression, tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
         /// <summary>
         /// 判断模块是否已经有系统表单
@@ -92,19 +144,35 @@ namespace Berry.Service.AuthorizeManage
         /// <param name="keyValue"></param>
         /// <param name="moduleId"></param>
         /// <returns></returns>
-        public bool IsExistModuleId(string keyValue,string moduleId)
+        public bool IsExistModuleId(string keyValue, string moduleId)
         {
-            var expression = LambdaExtension.True<ModuleFormEntity>();
-            if(string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "判断模块是否已经有系统表单-IsExistModuleId", () =>
             {
-                expression = expression.And(t => t.ModuleId == moduleId);
-            }
-            else
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    var expression = LambdaExtension.True<ModuleFormEntity>();
+                    if (string.IsNullOrEmpty(keyValue))
+                    {
+                        expression = expression.And(t => t.ModuleId == moduleId);
+                    }
+                    else
+                    {
+                        expression = expression.And(t => t.ModuleId == moduleId && t.Id != keyValue);
+                    }
+                    ModuleFormEntity entity = this.BaseRepository().FindEntity<ModuleFormEntity>(conn, expression, tran);
+                    res = entity != null;
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                expression = expression.And(t => t.ModuleId == moduleId && t.Id != keyValue);
-            }
-            ModuleFormEntity entity = this.BaseRepository().FindEntity<ModuleFormEntity>(expression);
-            return entity != null;
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
         #endregion
 
@@ -117,16 +185,32 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public int SaveEntity(string keyValue, ModuleFormEntity entity)
         {
-            if (string.IsNullOrEmpty(keyValue))
+            int res = 0;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "保存一个实体-SaveEntity", () =>
             {
-                entity.Create();
-                return this.BaseRepository().Insert(entity);
-            }
-            else
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    if (string.IsNullOrEmpty(keyValue))
+                    {
+                        entity.Create();
+                        res = this.BaseRepository().Insert(conn, entity, tran);
+                    }
+                    else
+                    {
+                        entity.Modify(keyValue);
+                        res = this.BaseRepository().Update(conn, entity, tran);
+                    }
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                entity.Modify(keyValue);
-                return this.BaseRepository().Update(entity);
-            }
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
         /// <summary>
         /// 虚拟删除一个实体
@@ -135,16 +219,32 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public int VirtualDelete(string keyValue)
         {
-            ModuleFormEntity entity = this.BaseRepository().FindEntity<ModuleFormEntity>(keyValue);
-            if (entity != null)
+            int res = 0;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "虚拟删除一个实体-VirtualDelete", () =>
             {
-                entity.DeleteMark = true;
-                return this.BaseRepository().Update(entity);
-            }
-            else
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    ModuleFormEntity entity = this.BaseRepository().FindEntity<ModuleFormEntity>(conn, keyValue, tran);
+                    if (entity != null)
+                    {
+                        entity.DeleteMark = true;
+                        res = this.BaseRepository().Update(conn, entity, tran);
+                    }
+                    else
+                    {
+                        throw new Exception("没有该记录无法删除");
+                    }
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                throw new Exception("没有该记录无法删除");
-            }
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
         #endregion
     }

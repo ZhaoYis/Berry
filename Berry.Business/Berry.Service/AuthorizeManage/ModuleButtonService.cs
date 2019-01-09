@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Berry.Data.Extension;
@@ -15,7 +16,7 @@ namespace Berry.Service.AuthorizeManage
     /// <summary>
     /// 系统按钮
     /// </summary>
-    public class ModuleButtonService : BaseService, IModuleButtonService
+    public class ModuleButtonService : BaseService<ModuleButtonEntity>, IModuleButtonService
     {
         /// <summary>
         /// 获取授权功能按钮
@@ -24,8 +25,15 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public IEnumerable<ModuleButtonEntity> GetModuleButtonList(string userId)
         {
-            StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT  *
+            IEnumerable<ModuleButtonEntity> res = null;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "获取授权功能按钮-GetModuleButtonList", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    StringBuilder strSql = new StringBuilder();
+                    strSql.Append(@"SELECT  *
                             FROM    Base_ModuleButton
                             WHERE   Id IN (
                                     SELECT  ItemId
@@ -37,13 +45,18 @@ namespace Berry.Service.AuthorizeManage
                                                   WHERE     Id = @Id ) )
                                             OR ObjectId = @Id ) Order By SortCode");
 
-            DbParameter[] parameter =
+                    DbParameter[] parameter =
+                    {
+                        //new SqlParameter("@Id",SqlDbType.NVarChar,36)
+                        DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
+                    };
+                    res = this.BaseRepository().FindList<ModuleButtonEntity>(conn, strSql.ToString(), parameter, tran);
+                    tran.Commit();
+                }
+            }, e =>
             {
-                //new SqlParameter("@Id",SqlDbType.NVarChar,36)
-                DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
-            };
-
-            IEnumerable<ModuleButtonEntity> res = this.BaseRepository().FindList<ModuleButtonEntity>(strSql.ToString(), parameter);
+                Trace.WriteLine(e.Message);
+            });
 
             return res;
         }
@@ -54,10 +67,24 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public IEnumerable<ModuleButtonEntity> GetModuleButtonList()
         {
-            StringBuilder strSql = new StringBuilder();
-            strSql.Append(@"SELECT * FROM Base_ModuleButton  Order By SortCode ASC");
+            IEnumerable<ModuleButtonEntity> res = null;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "获取所有功能按钮-GetModuleButtonList", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            IEnumerable<ModuleButtonEntity> res = this.BaseRepository().FindList<ModuleButtonEntity>(strSql.ToString());
+                    StringBuilder strSql = new StringBuilder();
+                    strSql.Append(@"SELECT * FROM Base_ModuleButton  Order By SortCode ASC");
+                    res = this.BaseRepository().FindList<ModuleButtonEntity>(conn, strSql.ToString(), tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
 
             return res;
         }
@@ -69,9 +96,25 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public IEnumerable<ModuleButtonEntity> GetList(string moduleId)
         {
-            var expression = LambdaExtension.True<ModuleButtonEntity>();
-            expression = expression.And(t => t.ModuleId == moduleId);
-            return this.BaseRepository().FindList(expression).OrderBy(t => t.SortCode).ToList();
+            IEnumerable<ModuleButtonEntity> res = null;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "按钮列表-GetList", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    var expression = LambdaExtension.True<ModuleButtonEntity>();
+                    expression = expression.And(t => t.ModuleId == moduleId);
+                    res = this.BaseRepository().FindList(conn, expression, tran).OrderBy(t => t.SortCode).ToList();
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -81,7 +124,23 @@ namespace Berry.Service.AuthorizeManage
         /// <returns></returns>
         public ModuleButtonEntity GetEntity(string keyValue)
         {
-            return this.BaseRepository().FindEntity<ModuleButtonEntity>(keyValue);
+            ModuleButtonEntity res = null;
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "按钮实体-GetEntity", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    res = this.BaseRepository().FindEntity<ModuleButtonEntity>(conn, keyValue, tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -90,8 +149,23 @@ namespace Berry.Service.AuthorizeManage
         /// <param name="moduleButtonEntity">按钮实体</param>
         public void AddEntity(ModuleButtonEntity moduleButtonEntity)
         {
-            moduleButtonEntity.Create();
-            this.BaseRepository().Insert<ModuleButtonEntity>(moduleButtonEntity);
+            IDbTransaction tran = null;
+            this.Logger(this.GetType(), "添加按钮-AddEntity", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    moduleButtonEntity.Create();
+                    int res = this.BaseRepository().Insert<ModuleButtonEntity>(conn, moduleButtonEntity, tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+
         }
     }
 }

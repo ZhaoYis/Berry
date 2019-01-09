@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Berry.Cache;
+using Berry.Cache.Core.Base;
 using Berry.Extension;
 using JWT;
 using JWT.Algorithms;
@@ -38,8 +38,8 @@ namespace Berry.Util.JWT
             IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
             IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
             //设置过期时间
-            DateTime time = DateTime.Now.AddMinutes(120);
-            playload.exp = DateTimeHelper.GetTimeStamp(time).ToString();
+            TimeSpan time = TimeSpan.FromMinutes(120);
+            playload.exp = DateTimeHelper.GetTimeStamp(DateTime.Now.AddHours(2)).ToString();
             Dictionary<string, object> dict = playload.Object2Dictionary();
             //获取私钥
             string secret = GetSecret();
@@ -47,7 +47,7 @@ namespace Berry.Util.JWT
             if (!string.IsNullOrEmpty(playload.aud) && playload.aud.Equals("guest"))
             {
                 //计算公用Token
-                token = CacheFactory.GetCacheInstance().GetCache("JWT_TokenCacheKey:Guest", () =>
+                token = CacheFactory.GetCache().Get("JWT_TokenCacheKey:Guest", () =>
                 {
                     return encoder.Encode(dict, secret);
                 }, time);
@@ -55,7 +55,7 @@ namespace Berry.Util.JWT
             else
             {
                 //计算Token
-                token = CacheFactory.GetCacheInstance().GetCache(string.Format("JWT_TokenCacheKey:{0}", playload.aud), () =>
+                token = CacheFactory.GetCache().Get(string.Format("JWT_TokenCacheKey:{0}", playload.aud), () =>
                 {
                     return encoder.Encode(dict, secret);
                 }, time);
@@ -72,7 +72,7 @@ namespace Berry.Util.JWT
         {
             if (!string.IsNullOrEmpty(userId) && userId.Equals("guest"))
             {
-                bool has = CacheFactory.GetCacheInstance().HasExpire("JWT_TokenCacheKey:Guest");
+                bool has = CacheFactory.GetCache().Exists("JWT_TokenCacheKey:Guest");
                 if (has)
                 {
                     JWTPlayloadInfo playload = new JWTPlayloadInfo
@@ -88,7 +88,7 @@ namespace Berry.Util.JWT
             }
             else
             {
-                bool has = CacheFactory.GetCacheInstance().HasExpire(string.Format("JWT_TokenCacheKey:{0}", userId));
+                bool has = CacheFactory.GetCache().Exists(string.Format("JWT_TokenCacheKey:{0}", userId));
                 if (has)
                 {
                     JWTPlayloadInfo playload = new JWTPlayloadInfo
@@ -129,13 +129,13 @@ namespace Berry.Util.JWT
                 {
                     if (!string.IsNullOrEmpty(playload.aud) && playload.aud.Equals("guest"))
                     {
-                        string cacheToken = CacheFactory.GetCacheInstance().GetCache<string>("JWT_TokenCacheKey:Guest");
+                        string cacheToken = CacheFactory.GetCache().Get<string>("JWT_TokenCacheKey:Guest");
 
                         return Check(playload, cacheToken, token) ? playload : null;
                     }
                     else
                     {
-                        string cacheToken = CacheFactory.GetCacheInstance().GetCache<string>(string.Format("JWT_TokenCacheKey:{0}", playload.aud));
+                        string cacheToken = CacheFactory.GetCache().Get<string>(string.Format("JWT_TokenCacheKey:{0}", playload.aud));
                         return Check(playload, cacheToken, token) ? playload : null;
                     }
                 }
@@ -159,11 +159,11 @@ namespace Berry.Util.JWT
             {
                 if (!string.IsNullOrEmpty(playload.aud) && playload.aud.Equals("guest"))
                 {
-                    CacheFactory.GetCacheInstance().RemoveCache("JWT_TokenCacheKey:Guest");
+                    CacheFactory.GetCache().Remove("JWT_TokenCacheKey:Guest");
                 }
                 else
                 {
-                    CacheFactory.GetCacheInstance().RemoveCache(string.Format("JWT_TokenCacheKey:{0}", playload.aud));
+                    CacheFactory.GetCache().Remove(string.Format("JWT_TokenCacheKey:{0}", playload.aud));
                 }
                 return false;
             }

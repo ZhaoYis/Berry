@@ -6,14 +6,17 @@ using Berry.IService.PublicInfoManage;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Linq.Expressions;
+using Berry.Service.Base;
 
 namespace Berry.Service.PublicInfoManage
 {
     /// <summary>
     /// 新闻中心
     /// </summary>
-    public class NewsService : RepositoryFactory, INewsService
+    public class NewsService : BaseService<NewsEntity>, INewsService
     {
         #region 获取数据
 
@@ -25,29 +28,47 @@ namespace Berry.Service.PublicInfoManage
         /// <returns></returns>
         public IEnumerable<NewsEntity> GetPageList(PaginationEntity pagination, string queryJson)
         {
-            var expression = LambdaExtension.True<NewsEntity>();
-            JObject queryParam = queryJson.TryToJObject();
-            if (queryParam != null)
+            IEnumerable<NewsEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetPageList -新闻列表", () =>
             {
-                if (!queryParam["FullHead"].IsEmpty())
+                using (var conn = this.BaseRepository().GetBaseConnection())
                 {
-                    string FullHead = queryParam["FullHead"].ToString();
-                    expression = expression.And(t => t.FullHead.Contains(FullHead));
-                }
-                if (!queryParam["Category"].IsEmpty())
-                {
-                    string Category = queryParam["Category"].ToString();
-                    expression = expression.And(t => t.Category == Category);
-                }
-                if (!queryParam["CategoryId"].IsEmpty())
-                {
-                    string CategoryId = queryParam["CategoryId"].ToString();
-                    expression = expression.And(t => t.CategoryId == CategoryId);
-                }
-            }
+                    tran = conn.BeginTransaction();
 
-            expression = expression.And(t => t.TypeId == 1);
-            return this.BaseRepository().FindList(expression, pagination);
+                    var expression = LambdaExtension.True<NewsEntity>();
+                    JObject queryParam = queryJson.TryToJObject();
+                    if (queryParam != null)
+                    {
+                        if (!queryParam["FullHead"].IsEmpty())
+                        {
+                            string FullHead = queryParam["FullHead"].ToString();
+                            expression = expression.And(t => t.FullHead.Contains(FullHead));
+                        }
+                        if (!queryParam["Category"].IsEmpty())
+                        {
+                            string Category = queryParam["Category"].ToString();
+                            expression = expression.And(t => t.Category == Category);
+                        }
+                        if (!queryParam["CategoryId"].IsEmpty())
+                        {
+                            string CategoryId = queryParam["CategoryId"].ToString();
+                            expression = expression.And(t => t.CategoryId == CategoryId);
+                        }
+                    }
+
+                    expression = expression.And(t => t.TypeId == 1);
+                    Tuple<IEnumerable<NewsEntity>, int> tuple = this.BaseRepository().FindList<NewsEntity>(conn, expression, pagination.sidx, pagination.sord.ToLower() == "asc", pagination.rows, pagination.page, tran);
+                    pagination.records = tuple.Item2;
+                    res = tuple.Item1;
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -57,7 +78,21 @@ namespace Berry.Service.PublicInfoManage
         /// <returns></returns>
         public NewsEntity GetEntity(string keyValue)
         {
-            return this.BaseRepository().FindEntity<NewsEntity>(keyValue);
+            NewsEntity res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetEntity-新闻实体", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    res = this.BaseRepository().FindEntity<NewsEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -67,7 +102,23 @@ namespace Berry.Service.PublicInfoManage
         /// <returns></returns>
         public IEnumerable<NewsEntity> GetList(Expression<Func<NewsEntity, bool>> condition)
         {
-            return this.BaseRepository().FindList<NewsEntity>(condition);
+            IEnumerable<NewsEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetList-获取所有数据", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    res = this.BaseRepository().FindList<NewsEntity>(conn, condition, tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         #endregion 获取数据
@@ -80,7 +131,19 @@ namespace Berry.Service.PublicInfoManage
         /// <param name="keyValue">主键</param>
         public void RemoveForm(string keyValue)
         {
-            this.BaseRepository().Delete<NewsEntity>(keyValue);
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "RemoveForm-删除新闻", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    int res = this.BaseRepository().Delete<NewsEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
         }
 
         /// <summary>
@@ -91,18 +154,34 @@ namespace Berry.Service.PublicInfoManage
         /// <returns></returns>
         public void SaveForm(string keyValue, NewsEntity newsEntity)
         {
-            if (!string.IsNullOrEmpty(keyValue))
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "SaveForm-保存新闻表单（新增、修改）", () =>
             {
-                newsEntity.Modify(keyValue);
-                newsEntity.TypeId = 1;
-                this.BaseRepository().Update<NewsEntity>(newsEntity);
-            }
-            else
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        newsEntity.Modify(keyValue);
+                        newsEntity.TypeId = 1;
+
+                        int res = this.BaseRepository().Update<NewsEntity>(conn, newsEntity, tran);
+                    }
+                    else
+                    {
+                        newsEntity.Create();
+                        newsEntity.TypeId = 1;
+
+                        int res = this.BaseRepository().Insert<NewsEntity>(conn, newsEntity, tran);
+                    }
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                newsEntity.Create();
-                newsEntity.TypeId = 1;
-                this.BaseRepository().Insert<NewsEntity>(newsEntity);
-            }
+                Trace.WriteLine(e.Message);
+            });
         }
 
         /// <summary>
@@ -112,9 +191,23 @@ namespace Berry.Service.PublicInfoManage
         /// <returns></returns>
         public void UpdateForm(NewsEntity newsEntity)
         {
-            newsEntity.TypeId = 1;
-            newsEntity.Modify(newsEntity.Id);
-            this.BaseRepository().Update<NewsEntity>(newsEntity);
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "UpdateForm-修改", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    newsEntity.TypeId = 1;
+                    newsEntity.Modify(newsEntity.Id);
+                    this.BaseRepository().Update<NewsEntity>(conn, newsEntity, tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
         }
 
         #endregion 提交数据

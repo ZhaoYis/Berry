@@ -36,7 +36,8 @@ namespace Berry.Util.LambdaToSQL
             if (temp.StartsWith("1 And"))
             {
                 _aiWhereStr = _aiWhereStr.Replace("1 And", "");
-            }else if (temp.StartsWith("0 And"))
+            }
+            else if (temp.StartsWith("0 And"))
             {
                 _aiWhereStr = _aiWhereStr.Replace("0 And", "");
             }

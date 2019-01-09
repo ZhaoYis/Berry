@@ -1,10 +1,13 @@
-﻿using Berry.Entity.BaseManage;
+﻿using System;
+using Berry.Entity.BaseManage;
 using Berry.Entity.CommonEntity;
 using Berry.Extension;
 using Berry.IService.BaseManage;
 using Berry.Service.Base;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Berry.Service.BaseManage
@@ -12,7 +15,7 @@ namespace Berry.Service.BaseManage
     /// <summary>
     /// 用户组管理
     /// </summary>
-    public class UserGroupService : BaseService, IUserGroupService
+    public class UserGroupService : BaseService<RoleEntity>, IUserGroupService
     {
         /// <summary>
         /// 用户组列表
@@ -20,8 +23,23 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public IEnumerable<RoleEntity> GetUserGroupList()
         {
-            IEnumerable<RoleEntity> res = this.BaseRepository().FindList<RoleEntity>(r => r.Category == 4 && r.DeleteMark == false && r.EnabledMark == true);
+            IEnumerable<RoleEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetUserGroupList-用户组列表", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
+                    res = this.BaseRepository().FindList<RoleEntity>(conn, t => t.Category == 4 && t.EnabledMark == true && t.DeleteMark == false, tran);
+                    res = res.OrderByDescending(r => r.CreateDate);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -33,27 +51,42 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public IEnumerable<RoleEntity> GetPageList(PaginationEntity pagination, string queryJson)
         {
-            var expression = LambdaExtension.True<RoleEntity>();
-            JObject queryParam = queryJson.TryToJObject();
-            if (queryParam != null)
+            IEnumerable<RoleEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetPageList-用户组列表", () =>
             {
-                string enCode = queryParam["EnCode"].ToString();
-                string fullName = queryParam["FullName"].ToString();
-
-                if (!string.IsNullOrEmpty(enCode))
+                using (var conn = this.BaseRepository().GetBaseConnection())
                 {
-                    expression = expression.And(t => t.EnCode.Contains(enCode));
+                    tran = conn.BeginTransaction();
+
+                    var expression = LambdaExtension.True<RoleEntity>();
+                    JObject queryParam = queryJson.TryToJObject();
+                    if (queryParam != null)
+                    {
+                        string enCode = queryParam["EnCode"].ToString();
+                        string fullName = queryParam["FullName"].ToString();
+
+                        if (!string.IsNullOrEmpty(enCode))
+                        {
+                            expression = expression.And(t => t.EnCode.Contains(enCode));
+                        }
+
+                        if (!string.IsNullOrEmpty(fullName))
+                        {
+                            expression = expression.And(t => t.FullName.Contains(fullName));
+                        }
+                    }
+                    expression = expression.And(t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true);
+                    Tuple<IEnumerable<RoleEntity>, int> tuple = this.BaseRepository().FindList<RoleEntity>(conn, expression, pagination.sidx, pagination.sord.ToLower() == "asc", pagination.rows, pagination.page, tran);
+                    pagination.records = tuple.Item2;
+                    res = tuple.Item1;
+
+                    tran.Commit();
                 }
-
-                if (!string.IsNullOrEmpty(fullName))
-                {
-                    expression = expression.And(t => t.FullName.Contains(fullName));
-                }
-            }
-            expression = expression.And(t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true);
-
-            IEnumerable<RoleEntity> res = this.BaseRepository().FindList<RoleEntity>(expression, pagination);
-
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -63,8 +96,20 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public IEnumerable<RoleEntity> GetAllUserGroupList()
         {
-            IEnumerable<RoleEntity> res = this.BaseRepository().FindList<RoleEntity>(GetAllUserGroupSQL.ToString());
-
+            IEnumerable<RoleEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetAllUserGroupList-用户组列表", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    res = this.BaseRepository().FindList<RoleEntity>(conn, GetAllUserGroupSQL.ToString(), tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -75,8 +120,20 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public RoleEntity GetUserGroupEntity(string keyValue)
         {
-            RoleEntity res = this.BaseRepository().FindEntity<RoleEntity>(keyValue);
-
+            RoleEntity res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetUserGroupEntity-用户组实体", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    res = this.BaseRepository().FindEntity<RoleEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -88,15 +145,28 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistEnCode(string enCode, string keyValue)
         {
-            List<RoleEntity> data = this.BaseRepository().FindList<RoleEntity>(t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true && t.EnCode == enCode).ToList();
-            if (!string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "ExistEnCode-组编号不能重复", () =>
             {
-                data = data.Where(t => t.Id != keyValue).ToList();
-            }
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            bool hasExit = data.Count > 0;
+                    List<RoleEntity> data = this.BaseRepository().FindList<RoleEntity>(conn, t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true && t.EnCode == enCode, tran).ToList();
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        data = data.Where(t => t.Id != keyValue).ToList();
+                    }
+                    res = data.Count > 0;
 
-            return hasExit;
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -107,15 +177,28 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistFullName(string fullName, string keyValue)
         {
-            List<RoleEntity> data = this.BaseRepository().FindList<RoleEntity>(t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true && t.FullName == fullName).ToList();
-            if (!string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "ExistFullName-组名称不能重复", () =>
             {
-                data = data.Where(t => t.Id != keyValue).ToList();
-            }
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            bool hasExit = data.Count > 0;
+                    List<RoleEntity> data = this.BaseRepository().FindList<RoleEntity>(conn, t => t.Category == 4 && t.DeleteMark == false && t.EnabledMark == true && t.FullName == fullName, tran).ToList();
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        data = data.Where(t => t.Id != keyValue).ToList();
+                    }
+                    res = data.Count > 0;
 
-            return hasExit;
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -124,7 +207,19 @@ namespace Berry.Service.BaseManage
         /// <param name="keyValue">主键</param>
         public void RemoveUserGroupByKey(string keyValue)
         {
-            int res = this.BaseRepository().Delete<RoleEntity>(keyValue);
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "RemoveUserGroupByKey-删除用户组", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    int res = this.BaseRepository().Delete<RoleEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
         }
 
         /// <summary>
@@ -135,19 +230,33 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public void SaveUserGroup(string keyValue, RoleEntity userGroupEntity)
         {
-            if (!string.IsNullOrEmpty(keyValue))
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "SaveRole-保存角色表单（新增、修改）", () =>
             {
-                userGroupEntity.Modify(keyValue);
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-                int res = this.BaseRepository().Update<RoleEntity>(userGroupEntity);
-            }
-            else
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        userGroupEntity.Modify(keyValue);
+
+                        int res = this.BaseRepository().Update<RoleEntity>(conn, userGroupEntity, tran);
+                    }
+                    else
+                    {
+                        userGroupEntity.Create();
+                        userGroupEntity.Category = 4;
+
+                        int res = this.BaseRepository().Insert<RoleEntity>(conn, userGroupEntity, tran);
+                    }
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                userGroupEntity.Create();
-                userGroupEntity.Category = 4;
-
-                int res = this.BaseRepository().Insert<RoleEntity>(userGroupEntity);
-            }
+                Trace.WriteLine(e.Message);
+            });
         }
 
         #region SQL语句

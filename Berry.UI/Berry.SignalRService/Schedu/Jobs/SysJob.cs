@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Berry.Cache;
+using Berry.Cache.Core.Base;
+using Berry.Cache.Core.Runtime;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using Quartz;
@@ -15,7 +17,7 @@ namespace Berry.SignalRService.Schedu.Jobs
         /// <summary>
         /// 系统缓存
         /// </summary>
-        private readonly WebCache _cache = WebCache.GetWebCacheInstance();
+        private readonly ICacheService _cache = RuntimeCacheService.GetCacheInstance();
 
         private IHubConnectionContext<dynamic> _clients;
 
@@ -58,7 +60,7 @@ namespace Berry.SignalRService.Schedu.Jobs
         private List<string> GetUserConnList(string jobName)
         {
             List<string> res = new List<string>();
-            Dictionary<string, string> dict = _cache.GetCache<Dictionary<string, string>>("__ConnectionUserCacheKey");
+            Dictionary<string, string> dict = _cache.Get<Dictionary<string, string>>("__ConnectionUserCacheKey");
             if (dict.Count > 0)
             {
                 List<string> userIdsList = new List<string>();
@@ -71,7 +73,7 @@ namespace Berry.SignalRService.Schedu.Jobs
                 List<string> temp = new List<string>();
                 foreach (string userId in userIdsList)
                 {
-                    List<string> usedJobList = _cache.GetCache<List<string>>(userId + "_UsedJobListCacheKey");
+                    List<string> usedJobList = _cache.Get<List<string>>(userId + "_UsedJobListCacheKey");
                     if (usedJobList != null && usedJobList.Contains(jobName))
                     {
                         temp.Add(userId);

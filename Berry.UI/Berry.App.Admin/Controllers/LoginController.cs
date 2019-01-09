@@ -146,8 +146,10 @@ namespace Berry.App.Admin.Controllers
                 #region 账户验证
                 else
                 {
-                    JsonObjectStatus status;
-                    UserEntity user = userBll.CheckLogin(username, password, out status);
+                    Tuple<UserEntity, JsonObjectStatus> tuple = userBll.CheckLogin(username, password);
+
+                    JsonObjectStatus status = tuple.Item2;
+                    UserEntity user = tuple.Item1;
                     if (status != JsonObjectStatus.Success || user == null)
                     {
                         res = Error(status.GetEnumDescription());

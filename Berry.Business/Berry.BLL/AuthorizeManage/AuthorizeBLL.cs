@@ -4,6 +4,8 @@ using Berry.IBLL.AuthorizeManage;
 using Berry.IService.AuthorizeManage;
 using Berry.Service.AuthorizeManage;
 using System.Collections.Generic;
+using Berry.IService.BaseManage;
+using Berry.Service.BaseManage;
 
 namespace Berry.BLL.AuthorizeManage
 {
@@ -13,6 +15,7 @@ namespace Berry.BLL.AuthorizeManage
     public partial class AuthorizeBLL : IAuthorizeBLL
     {
         private IAuthorizeService authorizeService = new AuthorizeService();
+        private IUserService userService = new UserService();
 
         /// <summary>
         /// 获得可读数据权限范围SQL
@@ -33,7 +36,7 @@ namespace Berry.BLL.AuthorizeManage
         /// <returns></returns>
         public string GetDataAuthorUserId(OperatorEntity operators, bool isWrite = false)
         {
-            return authorizeService.GetDataAuthorUserId(operators, isWrite);
+            return userService.GetDataAuthorUserId(operators, isWrite);
         }
 
         /// <summary>

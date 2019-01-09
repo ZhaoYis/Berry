@@ -5,6 +5,7 @@ using System;
 
 namespace Berry.IOC
 {
+
     /// <summary>
     /// UnityIoc帮助类
     /// </summary>
@@ -20,7 +21,10 @@ namespace Berry.IOC
         /// <summary>
         /// 获取DbContainer对象
         /// </summary>
-        public static UnityIocHelper DbInstance => Dbinstance;
+        public static UnityIocHelper UnityIocInstance
+        {
+            get { return Dbinstance; }
+        }
 
         /// <summary>
         /// 构造
@@ -36,9 +40,8 @@ namespace Berry.IOC
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                throw new Exception(e.Message);
             }
-            //section.Configure(_container);
         }
 
         /// <summary>
@@ -46,9 +49,8 @@ namespace Berry.IOC
         /// </summary>
         /// <param name="containerName"></param>
         /// <param name="itype"></param>
-        /// <param name="name"></param>
         /// <returns></returns>
-        public static string GetmapToByName(string containerName, string itype, string name = "")
+        public static string GetmapToByName(string containerName, string itype)
         {
             try
             {
@@ -62,7 +64,7 @@ namespace Berry.IOC
                         RegisterElementCollection registrations = container.Registrations;
                         foreach (var registration in registrations)
                         {
-                            if (name == "" && string.IsNullOrEmpty(registration.Name) && registration.TypeName == itype)
+                            if (string.IsNullOrEmpty(registration.Name) && registration.TypeName == itype)
                             {
                                 string mapToName = registration.MapToName;
                                 return mapToName;
@@ -75,9 +77,21 @@ namespace Berry.IOC
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                return "";
+                throw new Exception(e.Message);
             }
+        }
+
+        /// <summary>
+        /// 获取参数
+        /// </summary>
+        /// <param name="parameterName"></param>
+        /// <param name="parameterValue"></param>
+        /// <returns></returns>
+        public static ResolverOverride GetParameterOverride(string parameterName, object parameterValue)
+        {
+            ResolverOverride resolver = new ParameterOverride(parameterName, parameterValue);
+
+            return resolver;
         }
 
         public object GetService(Type serviceType)

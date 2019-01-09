@@ -4,6 +4,7 @@ using Berry.Cache;
 using Berry.Entity.BaseManage;
 using System.Collections.Generic;
 using System.Linq;
+using Berry.Cache.Core.Base;
 
 namespace Berry.App.Cache
 {
@@ -20,11 +21,11 @@ namespace Berry.App.Cache
         /// <returns></returns>
         public IEnumerable<UserEntity> GetList()
         {
-            var cacheList = CacheFactory.GetCacheInstance().GetListCache<UserEntity>(busines.CacheKey, out long toatl);
+            var cacheList = CacheFactory.GetCache().Get<List<UserEntity>>(busines.CacheKey);
             if (cacheList == null || cacheList.Count == 0)
             {
                 cacheList = busines.GetUserList().ToList();
-                CacheFactory.GetCacheInstance().WriteListCache<UserEntity>(cacheList, busines.CacheKey);
+                CacheFactory.GetCache().Add(busines.CacheKey, cacheList);
             }
             return cacheList;
         }

@@ -1,17 +1,19 @@
-﻿using Berry.Data.Repository;
-using Berry.Entity.SystemManage;
+﻿using Berry.Entity.SystemManage;
 using Berry.Extension;
 using Berry.IService.SystemManage;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
+using Berry.Service.Base;
 
 namespace Berry.Service.SystemManage
 {
     /// <summary>
     /// 数据库备份
     /// </summary>
-    public class DataBaseBackupService : RepositoryFactory<DataBaseBackupEntity>, IDataBaseBackupService
+    public class DataBaseBackupService : BaseService<DataBaseBackupEntity>, IDataBaseBackupService
     {
         #region 获取数据
 
@@ -23,37 +25,50 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public IEnumerable<DataBaseBackupEntity> GetList(string dataBaseLinkId, string queryJson)
         {
-            //var expression = LinqExtensions.True<DataBaseBackupEntity>();
-
-            var list = this.BaseRepository().FindList(d => d.DeleteMark == false);
-
-            if (!string.IsNullOrEmpty(dataBaseLinkId))
+            IEnumerable<DataBaseBackupEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetList-库备份列表", () =>
             {
-                list = list.Where(t => t.DatabaseLinkId == dataBaseLinkId).ToList();
-            }
-
-            JObject queryParam = queryJson.TryToJObject();
-            if (queryParam != null)
-            {
-                //查询条件
-                if (!queryParam["condition"].IsEmpty() && !queryParam["keyword"].IsEmpty())
+                using (var conn = this.BaseRepository().GetBaseConnection())
                 {
-                    string condition = queryParam["condition"].ToString();
-                    string keyword = queryParam["keyword"].ToString();
-                    switch (condition)
+                    tran = conn.BeginTransaction();
+
+                    IEnumerable<DataBaseBackupEntity> list = this.BaseRepository().FindList<DataBaseBackupEntity>(conn, d => d.DeleteMark == false, tran);
+
+                    if (!string.IsNullOrEmpty(dataBaseLinkId))
                     {
-                        case "EnCode":            //计划编号
-                            list = list.Where(t => t.EnCode.Contains(keyword)).ToList();
-                            break;
-
-                        case "FullName":          //计划名称
-                            list = list.Where(t => t.FullName.Contains(keyword)).ToList();
-                            break;
+                        list = list.Where(t => t.DatabaseLinkId == dataBaseLinkId).ToList();
                     }
-                }
-            }
 
-            return list.OrderByDescending(t => t.CreateDate).ToList();
+                    JObject queryParam = queryJson.TryToJObject();
+                    if (queryParam != null)
+                    {
+                        //查询条件
+                        if (!queryParam["condition"].IsEmpty() && !queryParam["keyword"].IsEmpty())
+                        {
+                            string condition = queryParam["condition"].ToString();
+                            string keyword = queryParam["keyword"].ToString();
+                            switch (condition)
+                            {
+                                case "EnCode":            //计划编号
+                                    list = list.Where(t => t.EnCode.Contains(keyword)).ToList();
+                                    break;
+                                case "FullName":          //计划名称
+                                    list = list.Where(t => t.FullName.Contains(keyword)).ToList();
+                                    break;
+                            }
+                        }
+                    }
+
+                    res = list.OrderByDescending(t => t.CreateDate).ToList();
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -63,7 +78,23 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public IEnumerable<DataBaseBackupEntity> GetPathList(string databaseBackupId)
         {
-            return this.BaseRepository().FindList(t => t.ParentId == databaseBackupId).OrderByDescending(t => t.CreateDate).ToList();
+            IEnumerable<DataBaseBackupEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetPathList-库备份文件路径列表", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    res = this.BaseRepository().FindList<DataBaseBackupEntity>(conn, t => t.ParentId == databaseBackupId, tran).OrderByDescending(t => t.CreateDate).ToList();
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -73,7 +104,21 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public DataBaseBackupEntity GetEntity(string keyValue)
         {
-            return this.BaseRepository().FindEntity(keyValue);
+            DataBaseBackupEntity res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetEntity-库备份实体", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    res = this.BaseRepository().FindEntity<DataBaseBackupEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         #endregion 获取数据
@@ -86,7 +131,19 @@ namespace Berry.Service.SystemManage
         /// <param name="keyValue">主键</param>
         public void RemoveForm(string keyValue)
         {
-            this.BaseRepository().Delete(keyValue);
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "RemoveForm-删除库备份", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    int res = this.BaseRepository().Delete<DataBaseBackupEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
         }
 
         /// <summary>
@@ -97,16 +154,30 @@ namespace Berry.Service.SystemManage
         /// <returns></returns>
         public void SaveForm(string keyValue, DataBaseBackupEntity dataBaseBackupEntity)
         {
-            if (!string.IsNullOrEmpty(keyValue))
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "SaveForm-保存库备份表单（新增、修改）", () =>
             {
-                dataBaseBackupEntity.Modify(keyValue);
-                this.BaseRepository().Update(dataBaseBackupEntity);
-            }
-            else
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        dataBaseBackupEntity.Modify(keyValue);
+                        int res = this.BaseRepository().Update<DataBaseBackupEntity>(conn, dataBaseBackupEntity, tran);
+                    }
+                    else
+                    {
+                        dataBaseBackupEntity.Create();
+                        int res = this.BaseRepository().Insert<DataBaseBackupEntity>(conn, dataBaseBackupEntity, tran);
+                    }
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                dataBaseBackupEntity.Create();
-                this.BaseRepository().Insert(dataBaseBackupEntity);
-            }
+                Trace.WriteLine(e.Message);
+            });
         }
 
         #endregion 提交数据

@@ -4,6 +4,8 @@ using Berry.IService.BaseManage;
 using Berry.Service.Base;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Berry.Service.BaseManage
@@ -11,7 +13,7 @@ namespace Berry.Service.BaseManage
     /// <summary>
     /// 机构管理
     /// </summary>
-    public class OrganizeService : BaseService, IOrganizeService
+    public class OrganizeService : BaseService<OrganizeEntity>, IOrganizeService
     {
         /// <summary>
         /// 机构列表
@@ -19,9 +21,23 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public IEnumerable<OrganizeEntity> GetOrganizeList()
         {
-            List<OrganizeEntity> res = this.BaseRepository().FindList<OrganizeEntity>(or => or.DeleteMark == false)
-                .OrderByDescending(or => or.SortCode).ToList();
+            List<OrganizeEntity> res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetOrganizeList-机构列表", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
+                    res = this.BaseRepository().FindList<OrganizeEntity>(conn, or => or.DeleteMark == false, tran)
+                       .OrderByDescending(or => or.SortCode).ToList();
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -32,8 +48,20 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public OrganizeEntity GetOrganizeEntity(string keyValue)
         {
-            OrganizeEntity res = this.BaseRepository().FindEntity<OrganizeEntity>(keyValue);
-
+            OrganizeEntity res = null;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "GetOrganizeEntity-机构实体", () =>
+            {
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
+                    res = this.BaseRepository().FindEntity<OrganizeEntity>(conn, keyValue, tran);
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
             return res;
         }
 
@@ -45,15 +73,28 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistFullName(string organizeName, string keyValue)
         {
-            List<OrganizeEntity> data = this.BaseRepository().FindList<OrganizeEntity>(t => t.FullName == organizeName).ToList();
-            if (!string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "ExistFullName-公司名称不能重复", () =>
             {
-                data = data.Where(t => t.Id != keyValue).ToList();
-            }
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            bool hasExit = data.Count > 0;
+                    List<OrganizeEntity> data = this.BaseRepository().FindList<OrganizeEntity>(conn, t => t.FullName == organizeName, tran).ToList();
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        data = data.Where(t => t.Id != keyValue).ToList();
+                    }
+                    res = data.Count > 0;
 
-            return hasExit;
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -64,15 +105,28 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistEnCode(string enCode, string keyValue)
         {
-            List<OrganizeEntity> data = this.BaseRepository().FindList<OrganizeEntity>(t => t.EnCode == enCode).ToList();
-            if (!string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "ExistEnCode-外文名称不能重复", () =>
             {
-                data = data.Where(t => t.Id != keyValue).ToList();
-            }
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            bool hasExit = data.Count > 0;
+                    List<OrganizeEntity> data = this.BaseRepository().FindList<OrganizeEntity>(conn, t => t.EnCode == enCode, tran).ToList();
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        data = data.Where(t => t.Id != keyValue).ToList();
+                    }
+                    res = data.Count > 0;
 
-            return hasExit;
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -83,15 +137,28 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public bool ExistShortName(string shortName, string keyValue)
         {
-            List<OrganizeEntity> data = this.BaseRepository().FindList<OrganizeEntity>(t => t.ShortName == shortName).ToList();
-            if (!string.IsNullOrEmpty(keyValue))
+            bool res = false;
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "ExistShortName-中文名称不能重复", () =>
             {
-                data = data.Where(t => t.Id != keyValue).ToList();
-            }
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            bool hasExit = data.Count > 0;
+                    List<OrganizeEntity> data = this.BaseRepository().FindList<OrganizeEntity>(conn, t => t.ShortName == shortName, tran).ToList();
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        data = data.Where(t => t.Id != keyValue).ToList();
+                    }
+                    res = data.Count > 0;
 
-            return hasExit;
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
+            return res;
         }
 
         /// <summary>
@@ -100,13 +167,27 @@ namespace Berry.Service.BaseManage
         /// <param name="keyValue">主键</param>
         public void RemoveOrganizeByKey(string keyValue)
         {
-            int count = this.BaseRepository().FindList<OrganizeEntity>(t => t.ParentId == keyValue).Count();
-            if (count > 0)
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "RemoveOrganizeByKey-删除机构", () =>
             {
-                throw new Exception("当前所选数据有子节点数据！");
-            }
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-            int res = this.BaseRepository().Delete<OrganizeEntity>(keyValue);
+                    int count = this.BaseRepository().FindList<OrganizeEntity>(conn, t => t.ParentId == keyValue, tran).Count();
+                    if (count > 0)
+                    {
+                        throw new Exception("当前所选数据有子节点数据！");
+                    }
+
+                    int res = this.BaseRepository().Delete<OrganizeEntity>(conn, keyValue, tran);
+
+                    tran.Commit();
+                }
+            }, e =>
+            {
+                Trace.WriteLine(e.Message);
+            });
         }
 
         /// <summary>
@@ -117,18 +198,30 @@ namespace Berry.Service.BaseManage
         /// <returns></returns>
         public void AddOrganize(string keyValue, OrganizeEntity organizeEntity)
         {
-            if (!string.IsNullOrEmpty(keyValue))
+            IDbTransaction tran = null;
+            Logger(this.GetType(), "AddOrganize-保存机构表单（新增、修改）", () =>
             {
-                organizeEntity.Modify(keyValue);
+                using (var conn = this.BaseRepository().GetBaseConnection())
+                {
+                    tran = conn.BeginTransaction();
 
-                int res = this.BaseRepository().Update<OrganizeEntity>(organizeEntity);
-            }
-            else
+                    if (!string.IsNullOrEmpty(keyValue))
+                    {
+                        organizeEntity.Modify(keyValue);
+                        int res = this.BaseRepository().Update<OrganizeEntity>(conn, organizeEntity, tran);
+                    }
+                    else
+                    {
+                        organizeEntity.Create();
+                        int res = this.BaseRepository().Insert<OrganizeEntity>(conn, organizeEntity, tran);
+                    }
+
+                    tran.Commit();
+                }
+            }, e =>
             {
-                organizeEntity.Create();
-
-                int res = this.BaseRepository().Insert<OrganizeEntity>(organizeEntity);
-            }
+                Trace.WriteLine(e.Message);
+            });
         }
     }
 }

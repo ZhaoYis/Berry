@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq.Expressions;
+using Berry.Code.Operator;
 
 namespace Berry.IService.BaseManage
 {
@@ -29,6 +30,14 @@ namespace Berry.IService.BaseManage
         UserEntity QueryUserByUserId(string userId);
 
         /// <summary>
+        /// 获得权限范围用户ID
+        /// </summary>
+        /// <param name="operators">当前登陆用户信息</param>
+        /// <param name="isWrite">可写入</param>
+        /// <returns></returns>
+        string GetDataAuthorUserId(OperatorEntity operators, bool isWrite = false);
+
+        /// <summary>
         /// 根据指定条件查询
         /// </summary>
         /// <param name="query"></param>
@@ -42,7 +51,7 @@ namespace Berry.IService.BaseManage
         /// <param name="password">密码</param>
         /// <param name="status">状态</param>
         /// <returns></returns>
-        UserEntity CheckLogin(string userAccount, string password, out JsonObjectStatus status);
+        Tuple<UserEntity, JsonObjectStatus> CheckLogin(string userAccount, string password);
 
         /// <summary>
         /// 根据条件查询用户

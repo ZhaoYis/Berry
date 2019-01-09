@@ -14,318 +14,346 @@ namespace Berry.Data
     public interface IDatabase : ILogger
     {
         /// <summary>
-        /// 开始事务
+        /// 数据库连接字符串
+        /// </summary>
+        string ConnectionString { get; set; }
+
+        /// <summary>
+        /// 获取基础数据库连接
         /// </summary>
         /// <returns></returns>
-        IDatabase BeginTrans();
+        IDbConnection GetBaseConnection();
 
         /// <summary>
-        /// 提交
+        /// 执行 SQL 语句
         /// </summary>
-        int Commit();
-
-        /// <summary>
-        /// 回滚
-        /// </summary>
-        void Rollback();
-
-        /// <summary>
-        /// 关闭
-        /// </summary>
-        void Close();
-
-        /// <summary>
-        /// 执行T-SQL
-        /// </summary>
-        /// <param name="strSql">sql语句</param>
+        /// <param name="connection"></param>
+        /// <param name="strSql"></param>
         /// <returns></returns>
-        int ExecuteBySql(string strSql);
+        int ExecuteBySql(IDbConnection connection, string strSql);
 
         /// <summary>
-        /// 执行T-SQL
+        /// 执行 SQL 语句
         /// </summary>
-        /// <param name="strSql">sql语句</param>
-        /// <param name="dbParameter">DbCommand参数</param>
+        /// <param name="connection"></param>
+        /// <param name="strSql"></param>
+        /// <param name="parameters"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        int ExecuteBySql(string strSql, params DbParameter[] dbParameter);
+        int ExecuteBySql(IDbConnection connection, string strSql, object parameters, IDbTransaction transaction = null, int? timeout = 0);
+
+        /// <summary>
+        /// 执行 SQL 语句返回集合
+        /// </summary>
+        /// <typeparam name="TR"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="strSql"></param>
+        /// <param name="parameters"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        IEnumerable<TR> ExecuteBySqlAndReturnList<TR>(IDbConnection connection, string strSql, object parameters, IDbTransaction transaction = null, int? timeout = 0);
+
+        /// <summary>
+        /// 执行 SQL 语句返回对象
+        /// </summary>
+        /// <typeparam name="TR"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="strSql"></param>
+        /// <param name="parameters"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        TR ExecuteBySqlAndReturnObject<TR>(IDbConnection connection, string strSql, object parameters, IDbTransaction transaction = null, int? timeout = 0);
 
         /// <summary>
         /// 执行存储过程
         /// </summary>
-        /// <param name="procName">存储过程名称</param>
+        /// <param name="connection"></param>
+        /// <param name="procName"></param>
         /// <returns></returns>
-        int ExecuteByProc(string procName);
+        int ExecuteByProc(IDbConnection connection, string procName);
 
         /// <summary>
         /// 执行存储过程
         /// </summary>
-        /// <param name="procName">存储过程名称</param>
-        /// <param name="dbParameter">DbCommand参数</param>
+        /// <param name="connection"></param>
+        /// <param name="procName"></param>
+        /// <param name="parameters"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        int ExecuteByProc(string procName, DbParameter[] dbParameter);
+        int ExecuteByProc(IDbConnection connection, string procName, object parameters, IDbTransaction transaction = null, int? timeout = 0);
 
         /// <summary>
         /// 执行存储过程，返回集合
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="procName">存储过程名称</param>
+        /// <typeparam name="TR"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="procName"></param>
         /// <returns></returns>
-        IEnumerable<T> ExecuteByProc<T>(string procName);
+        IEnumerable<TR> ExecuteByProc<TR>(IDbConnection connection, string procName);
 
         /// <summary>
         /// 执行存储过程，返回集合
         /// </summary>
+        /// <typeparam name="TR"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="procName"></param>
+        /// <param name="parameters"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        IEnumerable<TR> ExecuteByProc<TR>(IDbConnection connection, string procName, object parameters, IDbTransaction transaction = null, int? timeout = 0);
+
+        /// <summary>
+        /// 实体插入
+        /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="procName">存储过程名称</param>
-        /// <param name="dbParameter">DbCommand参数</param>
+        /// <param name="connection"></param>
+        /// <param name="entity"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        IEnumerable<T> ExecuteByProc<T>(string procName, DbParameter[] dbParameter);
+        int Insert<T>(IDbConnection connection, T entity, IDbTransaction transaction = null, int? timeout = 0) where T : class;
 
         /// <summary>
-        /// 插入一条数据
+        /// 实体批量插入
         /// </summary>
-        /// <param name="entity">对象实体</param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="entities"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        int Insert<T>(T entity) where T : class;
-
-        /// <summary>
-        /// 批量插入数据
-        /// </summary>
-        /// <param name="entity">对象实体集合</param>
-        /// <returns></returns>
-        int Insert<T>(List<T> entity) where T : class;
+        int Insert<T>(IDbConnection connection, List<T> entities, IDbTransaction transaction = null, int? timeout = 0) where T : class;
 
         /// <summary>
         /// 删除
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        int Delete<T>() where T : class;
+        int Delete<T>(IDbConnection connection, IDbTransaction transaction = null, int? timeout = 0) where T : class;
 
         /// <summary>
-        /// 删除一条数据
+        /// 删除
         /// </summary>
-        /// <param name="entity">对象实体</param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="entity"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        int Delete<T>(T entity) where T : class;
+        int Delete<T>(IDbConnection connection, T entity, IDbTransaction transaction = null, int? timeout = 0) where T : class;
 
         /// <summary>
         /// 批量删除
         /// </summary>
-        /// <param name="entity">对象实体集合</param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="entities"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        int Delete<T>(List<T> entity) where T : class;
+        int Delete<T>(IDbConnection connection, List<T> entities, IDbTransaction transaction = null, int? timeout = 0) where T : class;
 
         /// <summary>
-        /// 根据条件删除数据
-        /// </summary>
-        /// <param name="condition">条件</param>
-        /// <returns></returns>
-        int Delete<T>(Expression<Func<T, bool>> condition) where T : class, new();
-
-        /// <summary>
-        /// 根据主键删除一条数据
-        /// </summary>
-        /// <param name="keyValue">主键</param>
-        /// <returns></returns>
-        int Delete<T>(object keyValue) where T : class;
-
-        /// <summary>
-        /// 根据主键批量删除一条数据
-        /// </summary>
-        /// <param name="keyValue">主键数组</param>
-        /// <returns></returns>
-        int Delete<T>(object[] keyValue) where T : class;
-
-        /// <summary>
-        /// 根据属性删除
-        /// </summary>
-        /// <param name="propertyValue">属性值</param>
-        /// <param name="propertyName">属性名</param>
-        /// <returns></returns>
-        int Delete<T>(object propertyValue, string propertyName) where T : class;
-
-        /// <summary>
-        /// 更新一条数据
-        /// </summary>
-        /// <param name="entity">实体对象</param>
-        /// <returns></returns>
-        int Update<T>(T entity) where T : class;
-
-        /// <summary>
-        /// 批量更新
-        /// </summary>
-        /// <param name="entity">实体对象集合</param>
-        /// <returns></returns>
-        int Update<T>(List<T> entity) where T : class;
-
-        /// <summary>
-        /// 根据条件更新
-        /// </summary>
-        /// <param name="modelModifyProps">要修改的列及修改后列的值集合</param>
-        /// <param name="condition">修改的条件</param>
-        /// <returns>返回受影响行数</returns>
-        int Update<T>(T modelModifyProps, Expression<Func<T, bool>> condition) where T : class, new();
-
-        /// <summary>
-        /// 返回Object
-        /// </summary>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <returns></returns>
-        object FindObject(string strSql);
-
-        /// <summary>
-        /// 返回Object
-        /// </summary>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <param name="dbParameter">DbCommand参数</param>
-        /// <returns></returns>
-        object FindObject(string strSql, DbParameter[] dbParameter);
-
-        /// <summary>
-        /// 根据主键获取一条数据
-        /// </summary>
-        /// <param name="keyValue">主键值</param>
-        /// <returns></returns>
-        T FindEntity<T>(object keyValue) where T : class, new();
-
-        /// <summary>
-        /// 根据条件获取一条数据
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <returns></returns>
-        T FindEntity<T>(Expression<Func<T, bool>> condition) where T : class, new();
-
-        /// <summary>
-        /// 获取IQueryable对象
-        /// </summary>
-        /// <returns></returns>
-        IQueryable<T> IQueryable<T>() where T : class, new();
-
-        /// <summary>
-        /// 根据条件获取IQueryable对象
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <returns></returns>
-        IQueryable<T> IQueryable<T>(Expression<Func<T, bool>> condition) where T : class, new();
-
-        /// <summary>
-        /// 获取一条数据，返回对象集合
-        /// </summary>
-        /// <returns></returns>
-        IEnumerable<T> FindList<T>() where T : class, new();
-        
-        /// <summary>
-        /// 根据条件获取一条数据，返回对象集合
-        /// </summary>
-        /// <param name="condition">条件</param>
-        /// <returns></returns>
-        IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition) where T : class, new();
-
-        /// <summary>
-        /// 根据T-SQL语句获取一条数据，返回对象集合
-        /// </summary>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql) where T : class, new();
-
-        /// <summary>
-        /// 根据T-SQL语句获取一条数据，返回对象集合
-        /// </summary>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <param name="dbParameter">DbCommand参数</param>
-        /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter) where T : class, new();
-
-        /// <summary>
-        /// 获取分页数据
+        /// 根据条件删除
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
-        /// <param name="isAsc">是否升序</param>
-        /// <param name="pageSize">分页大小</param>
-        /// <param name="pageIndex">索引</param>
-        /// <param name="total">总记录数</param>
+        /// <param name="connection"></param>
+        /// <param name="condition"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new();
+        int Delete<T>(IDbConnection connection, Expression<Func<T, bool>> condition, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 根据主键删除
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="keyValue"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        int Delete<T>(IDbConnection connection, object keyValue, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 更新
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="entity"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        int Update<T>(IDbConnection connection, T entity, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 根据条件以及指定属性名称更新
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="modelModifyProps"></param>
+        /// <param name="condition"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        int Update<T>(IDbConnection connection, T modelModifyProps, Expression<Func<T, bool>> condition, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 根据主键查询一个实体
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="keyValue"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        T FindEntity<T>(IDbConnection connection, object keyValue, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 根据条件查询一个实体
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="condition"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        T FindEntity<T>(IDbConnection connection, Expression<Func<T, bool>> condition, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 获取IQueryable
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        IQueryable<T> IQueryable<T>(IDbConnection connection, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 获取IQueryable
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="condition"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        IQueryable<T> IQueryable<T>(IDbConnection connection, Expression<Func<T, bool>> condition, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 得到一个集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        IEnumerable<T> FindList<T>(IDbConnection connection, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 根据条件查询出一个集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="condition"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        IEnumerable<T> FindList<T>(IDbConnection connection, Expression<Func<T, bool>> condition, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 执行sql语句，得到一个集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="strSql"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        IEnumerable<T> FindList<T>(IDbConnection connection, string strSql, IDbTransaction transaction = null, int? timeout = 0) where T : class;
+
+        /// <summary>
+        /// 执行sql语句，得到一个集合
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
+        /// <param name="strSql"></param>
+        /// <param name="parameters"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        IEnumerable<T> FindList<T>(IDbConnection connection, string strSql, object parameters, IDbTransaction transaction = null, int? timeout = 0) where T : class;
 
         /// <summary>
         /// 根据条件获取分页数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="connection"></param>
         /// <param name="condition">条件</param>
         /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
-        /// <param name="total">总记录</param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(Expression<Func<T, bool>> condition, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new();
+        Tuple<IEnumerable<T>, int> FindList<T>(IDbConnection connection, Expression<Func<T, bool>> condition, string orderField, bool isAsc, int pageSize, int pageIndex, IDbTransaction transaction = null, int? timeout = 0) where T : class;
 
         /// <summary>
-        /// 根据T-SQL获取分页数据
+        /// 根据条件查询一个DataTable
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
-        /// <param name="isAsc">是否升序</param>
-        /// <param name="pageSize">每页条数</param>
-        /// <param name="pageIndex">索引</param>
-        /// <param name="total">总记录</param>
+        /// <param name="connection"></param>
+        /// <param name="condition"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new();
+        DataTable FindTable<T>(IDbConnection connection, Expression<Func<T, bool>> condition, IDbTransaction transaction = null, int? timeout = 0) where T : class;
 
         /// <summary>
-        /// 根据T-SQL获取分页数据
+        /// 查询一个DataTable
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <param name="dbParameter">DbCommand参数</param>
-        /// <param name="orderField">排序字段，多个用英文逗号隔开，类似：Id Asc,Name Desc</param>
-        /// <param name="isAsc">是否升序</param>
-        /// <param name="pageSize">每页条数</param>
-        /// <param name="pageIndex">索引</param>
-        /// <param name="total">总记录</param>
+        /// <param name="connection"></param>
+        /// <param name="strSql"></param>
+        /// <param name="parameters"></param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        IEnumerable<T> FindList<T>(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total) where T : class, new();
-
-        /// <summary>
-        /// 返回DataTable
-        /// </summary>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <returns></returns>
-        DataTable FindTable(string strSql);
-
-        /// <summary>
-        /// 返回DataTable
-        /// </summary>
-        /// <param name="strSql">T-SQL语句</param>
-        /// <param name="dbParameter">DbCommand参数</param>
-        /// <returns></returns>
-        DataTable FindTable(string strSql, DbParameter[] dbParameter);
+        DataTable FindTable(IDbConnection connection, string strSql, object parameters, IDbTransaction transaction = null, int? timeout = 0);
 
         /// <summary>
         /// 获取分页DataTable
         /// </summary>
+        /// <param name="connection"></param>
         /// <param name="strSql">T-SQL语句</param>
         /// <param name="orderField">排序字段</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
-        /// <param name="total">总记录</param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        DataTable FindTable(string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, out int total);
+        Tuple<DataTable, int> FindTable(IDbConnection connection, string strSql, string orderField, bool isAsc, int pageSize, int pageIndex, IDbTransaction transaction = null, int? timeout = 0);
 
         /// <summary>
         /// 获取分页DataTable
         /// </summary>
+        /// <param name="connection"></param>
         /// <param name="strSql">T-SQL语句</param>
-        /// <param name="dbParameter">DbCommand参数</param>
+        /// <param name="parameters">DbCommand参数</param>
         /// <param name="orderField">排序字段</param>
         /// <param name="isAsc">是否升序</param>
         /// <param name="pageSize">每页条数</param>
         /// <param name="pageIndex">索引</param>
-        /// <param name="total">总记录</param>
+        /// <param name="transaction"></param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        DataTable FindTable(string strSql, DbParameter[] dbParameter, string orderField, bool isAsc, int pageSize, int pageIndex, out int total);
+        Tuple<DataTable, int> FindTable(IDbConnection connection, string strSql, object parameters, string orderField, bool isAsc, int pageSize, int pageIndex, IDbTransaction transaction = null, int? timeout = 0);
     }
 }

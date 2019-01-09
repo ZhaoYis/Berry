@@ -1,4 +1,5 @@
-﻿using Berry.App.Admin.Handler;
+﻿using System;
+using Berry.App.Admin.Handler;
 using Berry.App.Cache;
 using Berry.BLL.AuthorizeManage;
 using Berry.Code.Operator;
@@ -193,21 +194,39 @@ namespace Berry.App.Admin.Controllers
             var dataSort = dataList.Distinct(new ComparintTools<DataItemViewModel>("EnCode"));
             Dictionary<string, object> dictionarySort = new Dictionary<string, object>();
 
-            foreach (DataItemViewModel itemSort in dataSort)
+            try
             {
-                var dataItemList = dataList.Where(t => t.EnCode == itemSort.EnCode).ToList();
-                Dictionary<string, string> dictionaryItemList = new Dictionary<string, string>();
-
-                foreach (DataItemViewModel itemList in dataItemList)
+                foreach (DataItemViewModel itemSort in dataSort)
                 {
-                    dictionaryItemList.Add(itemList.ItemValue, itemList.ItemName);
-                }
+                    var dataItemList = dataList.Where(t => t.EnCode == itemSort.EnCode).ToList();
+                    Dictionary<string, string> dictionaryItemList = new Dictionary<string, string>();
 
-                foreach (DataItemViewModel itemList in dataItemList)
-                {
-                    dictionaryItemList.Add(itemList.ItemDetailId, itemList.ItemName);
+                    foreach (DataItemViewModel itemList in dataItemList)
+                    {
+                        if (!string.IsNullOrEmpty(itemList.ItemValue) && !dictionaryItemList.ContainsKey(itemList.ItemValue))
+                            dictionaryItemList.Add(itemList.ItemValue, itemList.ItemName);
+                    }
+
+                    foreach (DataItemViewModel itemList in dataItemList)
+                    {
+                        if (!string.IsNullOrEmpty(itemList.ItemDetailId) && !dictionaryItemList.ContainsKey(itemList.ItemDetailId))
+                            dictionaryItemList.Add(itemList.ItemDetailId, itemList.ItemName);
+                    }
+
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(itemSort.EnCode) && !dictionaryItemList.ContainsKey(itemSort.EnCode))
+                            dictionarySort.Add(itemSort.EnCode, dictionaryItemList);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
-                dictionarySort.Add(itemSort.EnCode, dictionaryItemList);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
             return dictionarySort;
         }

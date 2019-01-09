@@ -17,7 +17,8 @@ using System.Data.SqlClient;
 using System.Linq;
 using AutoMapper;
 using Berry.App.Cache;
-using Berry.Cache;
+using Berry.Cache.Core.Base;
+using Berry.Cache.Core.Redis;
 using Berry.Data.Dapper;
 using Berry.Data.Extension;
 using Berry.Entity;
@@ -87,7 +88,7 @@ namespace Berry.UnitTest
                 ResolverOverride parDbType = new ParameterOverride("dbType", "");
                 IDatabase database = _container.Resolve<IDatabase>(parConnStr, parDbType);
 
-                int res = database.ExecuteBySql("SELECT COUNT(*) FROM sys.dm_os_hosts");
+                //int res = database.ExecuteBySql("SELECT COUNT(*) FROM sys.dm_os_hosts");
             }
             catch (Exception e)
             {
@@ -200,7 +201,7 @@ namespace Berry.UnitTest
 
             string time = Stopwatch(() =>
             {
-                MsSqlDatabase database = new MsSqlDatabase("MsSqlBaseDbConnectionString");
+                MsSqlDatabase4Dapper database = new MsSqlDatabase4Dapper("MsSqlBaseDbConnectionString");
                 DbParameter[] parameter =
                 {
                     DbParameters.CreateDbParameter("@FEILDS","*",DbType.String),
@@ -212,8 +213,8 @@ namespace Berry.UnitTest
                     DbParameters.CreateDbParameter("@ORDERFEILD","CreateDate",DbType.String),
                 };
 
-                List<UserEntity> res = database.ExecuteByProc<UserEntity>("[dbo].[PROC_PAGINATIONBY_SINGLE_TABLE]", parameter).ToList();
-                Console.WriteLine("QueryTestByProc=>记录数：" + res.Count);
+                //List<UserEntity> res = database.ExecuteByProc<UserEntity>("[dbo].[PROC_PAGINATIONBY_SINGLE_TABLE]", parameter).ToList();
+                //Console.WriteLine("QueryTestByProc=>记录数：" + res.Count);
             });
 
             Console.WriteLine("执行结束，耗时：" + time);
@@ -258,7 +259,7 @@ namespace Berry.UnitTest
             Console.WriteLine("res:" + res.Count());
 
             Console.WriteLine("===========================");
-            BaseEntity cache = CacheFactory.GetCacheInstance().GetCache<BaseEntity>("__TestBaseEntityKey");
+            BaseEntity cache = CacheFactory.GetCache().Get<BaseEntity>("__TestBaseEntityKey");
             if (cache == null)
             {
                 cache = new BaseEntity
@@ -266,7 +267,7 @@ namespace Berry.UnitTest
                     Id = "123",
                     PK = 1
                 };
-                CacheFactory.GetCacheInstance().WriteCache<BaseEntity>(cache, "__TestBaseEntityKey");
+                CacheFactory.GetCache().Add("__TestBaseEntityKey", cache);
             }
             Console.WriteLine(cache.Id);
         }

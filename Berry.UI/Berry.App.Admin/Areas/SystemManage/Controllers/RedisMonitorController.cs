@@ -5,8 +5,8 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using Berry.App.Admin.Handler;
-using Berry.Cache;
-using Berry.Cache.Model;
+using Berry.Cache.Core.Model;
+using Berry.Cache.Core.Redis;
 
 namespace Berry.App.Admin.Areas.SystemManage.Controllers
 {

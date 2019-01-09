@@ -18,14 +18,6 @@ namespace Berry.IService.AuthorizeManage
         string GetDataAuthor(OperatorEntity operators, bool isWrite = false);
 
         /// <summary>
-        /// 获得权限范围用户ID
-        /// </summary>
-        /// <param name="operators">当前登陆用户信息</param>
-        /// <param name="isWrite">可写入</param>
-        /// <returns></returns>
-        string GetDataAuthorUserId(OperatorEntity operators, bool isWrite = false);
-
-        /// <summary>
         /// Action执行权限认证
         /// </summary>
         /// <param name="userId">用户Id</param>

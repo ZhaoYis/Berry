@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Berry.BLL.SystemManage;
-using Berry.Cache;
+using Berry.Cache.Core.Base;
 using Berry.Entity.SystemManage;
 
 namespace Berry.App.Cache
@@ -20,7 +20,7 @@ namespace Berry.App.Cache
         /// <returns></returns>
         private IEnumerable<AreaEntity> GetList()
         {
-            var cacheList = CacheFactory.GetCacheInstance().GetListCache<AreaEntity>(areaBll.CacheKey, out long total);
+            var cacheList = CacheFactory.GetCache().Get<List<AreaEntity>>(areaBll.CacheKey);
             if (cacheList == null || cacheList.Count == 0)
             {
                 cacheList = areaBll.GetList().ToList();
@@ -30,7 +30,7 @@ namespace Berry.App.Cache
                 //以单体的形式存在缓存下面
                 foreach (AreaEntity model in cacheList)
                 {
-                    CacheFactory.GetCacheInstance().WriteCache<AreaEntity>(model, areaBll.CacheKey);
+                    CacheFactory.GetCache().Add(areaBll.CacheKey, model);
                 }
             }
             return cacheList;
@@ -40,9 +40,9 @@ namespace Berry.App.Cache
         /// 刷新缓存
         /// </summary>
         /// <returns></returns>
-        public void RefreshCache(DateTime expireTime)
+        public void RefreshCache(TimeSpan expireTime)
         {
-            bool hasExpire = CacheFactory.GetCacheInstance().HasExpire(areaBll.CacheKey);
+            bool hasExpire = CacheFactory.GetCache().Exists(areaBll.CacheKey);
             if (!hasExpire)
             {
                 var cacheList = areaBll.GetList().ToList();
@@ -52,7 +52,7 @@ namespace Berry.App.Cache
                 //以单体的形式存在缓存下面
                 foreach (AreaEntity model in cacheList)
                 {
-                    CacheFactory.GetCacheInstance().WriteCache<AreaEntity>(model, areaBll.CacheKey, expireTime);
+                    CacheFactory.GetCache().Add(areaBll.CacheKey, model, expireTime);
                 }
             }
         }

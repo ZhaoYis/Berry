@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Berry.BLL.BaseManage;
 using Berry.Cache;
+using Berry.Cache.Core.Base;
 using Berry.Entity.BaseManage;
 
 namespace Berry.App.Cache
@@ -20,12 +21,12 @@ namespace Berry.App.Cache
         /// <returns></returns>
         private IEnumerable<RoleEntity> GetList()
         {
-            List<RoleEntity> cacheList = CacheFactory.GetCacheInstance().GetListCache<RoleEntity>(busines.CacheKey, out long total);
+            List<RoleEntity> cacheList = CacheFactory.GetCache().Get<List<RoleEntity>>(busines.CacheKey);
             if (cacheList == null || cacheList.Count == 0)
             {
                 cacheList = busines.GetList().ToList();
 
-                CacheFactory.GetCacheInstance().WriteListCache<RoleEntity>(cacheList, busines.CacheKey);
+                CacheFactory.GetCache().Add(busines.CacheKey, cacheList);
             }
             return cacheList;
         }
@@ -34,13 +35,13 @@ namespace Berry.App.Cache
         /// 刷新缓存
         /// </summary>
         /// <returns></returns>
-        public void RefreshCache(DateTime expireTime)
+        public void RefreshCache(TimeSpan expireTime)
         {
-            bool hasExpire = CacheFactory.GetCacheInstance().HasExpire(busines.CacheKey);
+            bool hasExpire = CacheFactory.GetCache().Exists(busines.CacheKey);
             if (!hasExpire)
             {
                 var cacheList = busines.GetList().ToList();
-                CacheFactory.GetCacheInstance().WriteListCache<RoleEntity>(cacheList, busines.CacheKey, expireTime);
+                CacheFactory.GetCache().Add(busines.CacheKey, cacheList, expireTime);
             }
         }
 
