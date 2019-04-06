@@ -8,8 +8,14 @@ namespace Berry.Extension
     /// </summary>
     public static class DateTimeExtension
     {
+        private const int SECOND = 1;
+        private const int MINUTE = 60 * SECOND;
+        private const int HOUR = 60 * MINUTE;
+        private const int DAY = 24 * HOUR;
+        private const int MONTH = 30 * DAY;
+
         #region Json日期转换
-        
+
         /// <summary>
         /// Json 的日期格式与.Net DateTime类型的转换
         /// </summary>
@@ -49,6 +55,59 @@ namespace Berry.Extension
         }
 
         #endregion Json日期转换
+
+        /// <summary>
+        /// 友好显示日期
+        /// </summary>
+        /// <param name="dateTime"></param>
+        /// <returns></returns>
+        public static string ToFriendlyDateTime(this DateTime dateTime)
+        {
+            TimeSpan ts = DateTime.Now - dateTime;
+            double delta = ts.TotalSeconds;
+            if (delta < 0)
+            {
+                return "not yet";
+            }
+            if (delta < 1 * MINUTE)
+            {
+                return ts.Seconds == 1 ? "1秒前" : ts.Seconds + "秒前";
+            }
+            if (delta < 2 * MINUTE)
+            {
+                return "1分钟之前";
+            }
+            if (delta < 45 * MINUTE)
+            {
+                return ts.Minutes + "分钟前";
+            }
+            if (delta < 90 * MINUTE)
+            {
+                return "1小时前";
+            }
+            if (delta < 24 * HOUR)
+            {
+                return ts.Hours + "小时前";
+            }
+            if (delta < 48 * HOUR)
+            {
+                return "昨天";
+            }
+            if (delta < 30 * DAY)
+            {
+                return ts.Days + " 天之前";
+            }
+            if (delta < 12 * MONTH)
+            {
+                int months = Convert.ToInt32(Math.Floor((double)ts.Days / 30));
+                return months <= 1 ? "一个月之前" : months + "月之前";
+            }
+            else
+            {
+                int years = Convert.ToInt32(Math.Floor((double)ts.Days / 365));
+                return years <= 1 ? "一年前" : years + "年前";
+            }
+        }
 
         /// <summary>
         /// 获取格式化字符串，带时分秒，格式："yyyy-MM-dd HH:mm:ss"

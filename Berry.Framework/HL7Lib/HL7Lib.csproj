@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F82EFE6F-26B5-4295-8531-FBC702A78C4F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HL7Lib</RootNamespace>
+    <AssemblyName>HL7Lib</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Base\Component.cs" />
+    <Compile Include="Base\ComponentID.cs" />
+    <Compile Include="Base\Extensions.cs" />
+    <Compile Include="Base\Field.cs" />
+    <Compile Include="Base\Helper.cs" />
+    <Compile Include="Base\HL7Message.cs" />
+    <Compile Include="Base\ParseComponent.cs" />
+    <Compile Include="Base\ParseField.cs" />
+    <Compile Include="Base\Segment.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Segments\HL7_ABS.cs" />
+    <Compile Include="Segments\HL7_ACC.cs" />
+    <Compile Include="Segments\HL7_ADD.cs" />
+    <Compile Include="Segments\HL7_AFF.cs" />
+    <Compile Include="Segments\HL7_AIG.cs" />
+    <Compile Include="Segments\HL7_AIL.cs" />
+    <Compile Include="Segments\HL7_AIP.cs" />
+    <Compile Include="Segments\HL7_AIS.cs" />
+    <Compile Include="Segments\HL7_AL1.cs" />
+    <Compile Include="Segments\HL7_APR.cs" />
+    <Compile Include="Segments\HL7_ARQ.cs" />
+    <Compile Include="Segments\HL7_AUT.cs" />
+    <Compile Include="Segments\HL7_BHS.cs" />
+    <Compile Include="Segments\HL7_BLC.cs" />
+    <Compile Include="Segments\HL7_BLG.cs" />
+    <Compile Include="Segments\HL7_BPO.cs" />
+    <Compile Include="Segments\HL7_BPX.cs" />
+    <Compile Include="Segments\HL7_BTS.cs" />
+    <Compile Include="Segments\HL7_BTX.cs" />
+    <Compile Include="Segments\HL7_CDM.cs" />
+    <Compile Include="Segments\HL7_CER.cs" />
+    <Compile Include="Segments\HL7_CM0.cs" />
+    <Compile Include="Segments\HL7_CM1.cs" />
+    <Compile Include="Segments\HL7_CM2.cs" />
+    <Compile Include="Segments\HL7_CNS.cs" />
+    <Compile Include="Segments\HL7_CON.cs" />
+    <Compile Include="Segments\HL7_CSP.cs" />
+    <Compile Include="Segments\HL7_CSR.cs" />
+    <Compile Include="Segments\HL7_CSS.cs" />
+    <Compile Include="Segments\HL7_CTD.cs" />
+    <Compile Include="Segments\HL7_CTI.cs" />
+    <Compile Include="Segments\HL7_DB1.cs" />
+    <Compile Include="Segments\HL7_DG1.cs" />
+    <Compile Include="Segments\HL7_DRG.cs" />
+    <Compile Include="Segments\HL7_DSC.cs" />
+    <Compile Include="Segments\HL7_DSP.cs" />
+    <Compile Include="Segments\HL7_ECD.cs" />
+    <Compile Include="Segments\HL7_ECR.cs" />
+    <Compile Include="Segments\HL7_EDU.cs" />
+    <Compile Include="Segments\HL7_EQL.cs" />
+    <Compile Include="Segments\HL7_EQP.cs" />
+    <Compile Include="Segments\HL7_EQU.cs" />
+    <Compile Include="Segments\HL7_ERQ.cs" />
+    <Compile Include="Segments\HL7_ERR.cs" />
+    <Compile Include="Segments\HL7_EVN.cs" />
+    <Compile Include="Segments\HL7_FAC.cs" />
+    <Compile Include="Segments\HL7_FHS.cs" />
+    <Compile Include="Segments\HL7_FT1.cs" />
+    <Compile Include="Segments\HL7_FTS.cs" />
+    <Compile Include="Segments\HL7_GOL.cs" />
+    <Compile Include="Segments\HL7_GP1.cs" />
+    <Compile Include="Segments\HL7_GP2.cs" />
+    <Compile Include="Segments\HL7_GT1.cs" />
+    <Compile Include="Segments\HL7_IAM.cs" />
+    <Compile Include="Segments\HL7_IIM.cs" />
+    <Compile Include="Segments\HL7_IN1.cs" />
+    <Compile Include="Segments\HL7_IN2.cs" />
+    <Compile Include="Segments\HL7_IN3.cs" />
+    <Compile Include="Segments\HL7_INV.cs" />
+    <Compile Include="Segments\HL7_IPC.cs" />
+    <Compile Include="Segments\HL7_ISD.cs" />
+    <Compile Include="Segments\HL7_LAN.cs" />
+    <Compile Include="Segments\HL7_LCC.cs" />
+    <Compile Include="Segments\HL7_LCH.cs" />
+    <Compile Include="Segments\HL7_LDP.cs" />
+    <Compile Include="Segments\HL7_LOC.cs" />
+    <Compile Include="Segments\HL7_LRL.cs" />
+    <Compile Include="Segments\HL7_MFA.cs" />
+    <Compile Include="Segments\HL7_MFE.cs" />
+    <Compile Include="Segments\HL7_MFI.cs" />
+    <Compile Include="Segments\HL7_MRG.cs" />
+    <Compile Include="Segments\HL7_MSA.cs" />
+    <Compile Include="Segments\HL7_MSH.cs" />
+    <Compile Include="Segments\HL7_NCK.cs" />
+    <Compile Include="Segments\HL7_NDS.cs" />
+    <Compile Include="Segments\HL7_NK1.cs" />
+    <Compile Include="Segments\HL7_NPU.cs" />
+    <Compile Include="Segments\HL7_NSC.cs" />
+    <Compile Include="Segments\HL7_NST.cs" />
+    <Compile Include="Segments\HL7_NTE.cs" />
+    <Compile Include="Segments\HL7_OBR.cs" />
+    <Compile Include="Segments\HL7_OBX.cs" />
+    <Compile Include="Segments\HL7_ODS.cs" />
+    <Compile Include="Segments\HL7_ODT.cs" />
+    <Compile Include="Segments\HL7_OM1.cs" />
+    <Compile Include="Segments\HL7_OM2.cs" />
+    <Compile Include="Segments\HL7_OM3.cs" />
+    <Compile Include="Segments\HL7_OM4.cs" />
+    <Compile Include="Segments\HL7_OM5.cs" />
+    <Compile Include="Segments\HL7_OM6.cs" />
+    <Compile Include="Segments\HL7_OM7.cs" />
+    <Compile Include="Segments\HL7_ORC.cs" />
+    <Compile Include="Segments\HL7_ORG.cs" />
+    <Compile Include="Segments\HL7_OVR.cs" />
+    <Compile Include="Segments\HL7_PCR.cs" />
+    <Compile Include="Segments\HL7_PD1.cs" />
+    <Compile Include="Segments\HL7_PDA.cs" />
+    <Compile Include="Segments\HL7_PDC.cs" />
+    <Compile Include="Segments\HL7_PEO.cs" />
+    <Compile Include="Segments\HL7_PES.cs" />
+    <Compile Include="Segments\HL7_PID.cs" />
+    <Compile Include="Segments\HL7_PR1.cs" />
+    <Compile Include="Segments\HL7_PRA.cs" />
+    <Compile Include="Segments\HL7_PRB.cs" />
+    <Compile Include="Segments\HL7_PRC.cs" />
+    <Compile Include="Segments\HL7_PRD.cs" />
+    <Compile Include="Segments\HL7_PSH.cs" />
+    <Compile Include="Segments\HL7_PTH.cs" />
+    <Compile Include="Segments\HL7_PV1.cs" />
+    <Compile Include="Segments\HL7_PV2.cs" />
+    <Compile Include="Segments\HL7_QAK.cs" />
+    <Compile Include="Segments\HL7_QID.cs" />
+    <Compile Include="Segments\HL7_QPD.cs" />
+    <Compile Include="Segments\HL7_QRD.cs" />
+    <Compile Include="Segments\HL7_QRF.cs" />
+    <Compile Include="Segments\HL7_QRI.cs" />
+    <Compile Include="Segments\HL7_RCP.cs" />
+    <Compile Include="Segments\HL7_RDF.cs" />
+    <Compile Include="Segments\HL7_RF1.cs" />
+    <Compile Include="Segments\HL7_RGS.cs" />
+    <Compile Include="Segments\HL7_RMI.cs" />
+    <Compile Include="Segments\HL7_ROL.cs" />
+    <Compile Include="Segments\HL7_RQ1.cs" />
+    <Compile Include="Segments\HL7_RQD.cs" />
+    <Compile Include="Segments\HL7_RXA.cs" />
+    <Compile Include="Segments\HL7_RXC.cs" />
+    <Compile Include="Segments\HL7_RXD.cs" />
+    <Compile Include="Segments\HL7_RXE.cs" />
+    <Compile Include="Segments\HL7_RXG.cs" />
+    <Compile Include="Segments\HL7_RXO.cs" />
+    <Compile Include="Segments\HL7_RXR.cs" />
+    <Compile Include="Segments\HL7_SAC.cs" />
+    <Compile Include="Segments\HL7_SCH.cs" />
+    <Compile Include="Segments\HL7_SFT.cs" />
+    <Compile Include="Segments\HL7_SID.cs" />
+    <Compile Include="Segments\HL7_SPM.cs" />
+    <Compile Include="Segments\HL7_SPR.cs" />
+    <Compile Include="Segments\HL7_STF.cs" />
+    <Compile Include="Segments\HL7_TCC.cs" />
+    <Compile Include="Segments\HL7_TCD.cs" />
+    <Compile Include="Segments\HL7_TQ1.cs" />
+    <Compile Include="Segments\HL7_TQ2.cs" />
+    <Compile Include="Segments\HL7_TXA.cs" />
+    <Compile Include="Segments\HL7_UB1.cs" />
+    <Compile Include="Segments\HL7_UB2.cs" />
+    <Compile Include="Segments\HL7_URD.cs" />
+    <Compile Include="Segments\HL7_URS.cs" />
+    <Compile Include="Segments\HL7_VAR.cs" />
+    <Compile Include="Segments\HL7_VTQ.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Address Names.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Boy Names.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Girl Names.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Last Names.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

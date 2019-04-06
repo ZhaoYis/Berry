@@ -162,11 +162,10 @@ namespace Berry.Log
         /// </summary>
         /// <param name="type">类型</param>
         /// <param name="desc">描述</param>
-        /// <param name="errorHandel">异常处理方式</param>
         /// <param name="tryHandel">调试代码</param>
         /// <param name="catchHandel">异常处理方式</param>
         /// <param name="finallHandel">最终处理方式</param>
-        public static void Logger(Type type, string desc, ErrorHandel errorHandel, Action tryHandel, Action<Exception> catchHandel = null, Action finallHandel = null)
+        public static void Logger(Type type, string desc, Action tryHandel, Action<Exception> catchHandel = null, Action finallHandel = null)
         {
             ILog log = LogManager.GetLogger(type);
             try
@@ -200,10 +199,10 @@ namespace Berry.Log
                     catchHandel.Invoke(e);
                 }
 
-                if (errorHandel == ErrorHandel.Throw)
-                {
-                    throw;
-                }
+                //if (errorHandel == ErrorHandel.Throw)
+                //{
+                //    throw;
+                //}
             }
             finally
             {

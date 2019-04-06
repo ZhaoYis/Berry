@@ -66,6 +66,7 @@
     <Compile Include="CommonEntity\WeChatBaseInfo.cs" />
     <Compile Include="CommonEntity\WeChatUserInfoEntity.cs" />
     <Compile Include="CustomManage\UserDemandEntity.cs" />
+    <Compile Include="CustomManage\WechatConfigEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicInfoManage\NewsEntity.cs" />
     <Compile Include="SystemManage\AreaEntity.cs" />

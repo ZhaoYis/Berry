@@ -1,10 +1,9 @@
-﻿using System;
-using System.Reflection;
-using System.Web.Mvc;
-using Berry.Code;
+﻿using Berry.Code;
 using Berry.Entity;
 using Berry.Extension;
 using Berry.Log;
+using System;
+using System.Web.Mvc;
 
 namespace Berry.App.Admin.Handler
 {
@@ -25,14 +24,12 @@ namespace Berry.App.Admin.Handler
         /// </summary>
         /// <param name="type"></param>
         /// <param name="function">方法名称</param>
-        /// <param name="errorHandel">异常处理方式</param>
         /// <param name="tryHandel">调试代码</param>
         /// <param name="catchHandel">异常处理方式</param>
         /// <param name="finallHandel">最终处理方式</param>
-        public void Logger(Type type, string function, Action tryHandel, Action<Exception> catchHandel = null,
-            Action finallHandel = null, ErrorHandel errorHandel = ErrorHandel.Throw)
+        public void Logger(Type type, string function, Action tryHandel, Action<Exception> catchHandel = null, Action finallHandel = null)
         {
-            LogHelper.Logger(type, function, errorHandel, tryHandel, catchHandel, finallHandel);
+            LogHelper.Logger(type, function, tryHandel, catchHandel, finallHandel);
         }
         #endregion
 

@@ -31,14 +31,13 @@ namespace Berry.SOA.API.Controllers.Base
         /// </summary>
         /// <param name="type"></param>
         /// <param name="desc">方法名称</param>
-        /// <param name="errorHandel">异常处理方式</param>
         /// <param name="tryHandel">调试代码</param>
         /// <param name="catchHandel">异常处理方式</param>
         /// <param name="finallHandel">最终处理方式</param>
         [IngoreAction]
-        public void Logger(Type type, string desc, Action tryHandel, Action<Exception> catchHandel = null, Action finallHandel = null, ErrorHandel errorHandel = ErrorHandel.Throw)
+        public void Logger(Type type, string desc, Action tryHandel, Action<Exception> catchHandel = null, Action finallHandel = null)
         {
-            LogHelper.Logger(type, desc, errorHandel, tryHandel, catchHandel, finallHandel);
+            LogHelper.Logger(type, desc, tryHandel, catchHandel, finallHandel);
         }
         #endregion
 

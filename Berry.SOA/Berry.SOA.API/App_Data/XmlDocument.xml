@@ -790,13 +790,12 @@
             系统日志 主动调用
             </summary>
         </member>
-        <member name="M:Berry.SOA.API.Controllers.Base.BaseApiController.Logger(System.Type,System.String,System.Action,System.Action{System.Exception},System.Action,Berry.Code.ErrorHandel)">
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseApiController.Logger(System.Type,System.String,System.Action,System.Action{System.Exception},System.Action)">
             <summary>
             利用Action委托封装Log4net对日志的处理
             </summary>
             <param name="type"></param>
             <param name="desc">方法名称</param>
-            <param name="errorHandel">异常处理方式</param>
             <param name="tryHandel">调试代码</param>
             <param name="catchHandel">异常处理方式</param>
             <param name="finallHandel">最终处理方式</param>
@@ -835,6 +834,172 @@
             </summary>
             <typeparam name="T"></typeparam>
             <param name="json"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Berry.SOA.API.Controllers.Base.BaseController">
+            <summary>
+            控制器基类
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseController.Logger(System.Type,System.String,System.Action,System.Action{System.Exception},System.Action)">
+            <summary>
+            系统日志 对try块进行了封装
+            </summary>
+            <param name="type"></param>
+            <param name="function">方法名称</param>
+            <param name="tryHandel">调试代码</param>
+            <param name="catchHandel">异常处理方式</param>
+            <param name="finallHandel">最终处理方式</param>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseController.ToJsonResult(System.Object)">
+            <summary>
+            返回成功消息
+            </summary>
+            <param name="data">数据</param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseController.Success(System.String)">
+            <summary>
+            返回成功消息
+            </summary>
+            <param name="message">消息</param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseController.Success(System.String,System.Object,System.String)">
+            <summary>
+            返回成功消息
+            </summary>
+            <param name="message">消息</param>
+            <param name="data">数据</param>
+            <param name="backUrl">跳转地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseController.Error(System.String)">
+            <summary>
+            返回失败消息
+            </summary>
+            <param name="message">消息</param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.BaseController.Error(System.String,System.Object)">
+            <summary>
+            返回失败消息
+            </summary>
+            <param name="message">消息</param>
+            <param name="data">数据</param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageContext.CustomMessageContext_MessageContextRemoved(System.Object,Senparc.NeuChar.Context.WeixinContextRemovedEventArgs{Senparc.Weixin.MP.Entities.IRequestMessageBase,Senparc.Weixin.MP.Entities.IResponseMessageBase})">
+            <summary>
+            当上下文过期，被移除时触发的时间
+            </summary>
+            <param name="sender"></param>
+            <param name="e"></param>
+        </member>
+        <member name="T:Berry.SOA.API.Controllers.Base.CustomMessageHandler">
+            <summary>
+            自定义MessageHandler
+            把MessageHandler作为基类，重写对应请求的处理方法
+            </summary>
+        </member>
+        <member name="F:Berry.SOA.API.Controllers.Base.CustomMessageHandler._wechatConfig">
+            <summary>
+            微信授权信息
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.#ctor(System.IO.Stream,Senparc.Weixin.MP.Entities.Request.PostModel,System.Int32)">
+            <summary>
+            自定义消息处理
+            </summary>
+            <param name="postModel"></param>
+            <param name="inputStream"></param>
+            <param name="maxRecordCount"></param>
+        </member>
+        <member name="P:Berry.SOA.API.Controllers.Base.CustomMessageHandler.GlobalMessageContext">
+            <summary>
+            全局消息上下文
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_QualificationVerifySuccessRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_QualificationVerifySuccess)">
+            <summary>
+            资质认证成功（此时立即获得接口权限）
+            </summary>
+            <param name="requestMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_QualificationVerifyFailRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_QualificationVerifyFail)">
+            <summary>
+            资质认证失败
+            </summary>
+            <param name="requestMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_NamingVerifySuccessRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_NamingVerifySuccess)">
+            <summary>
+            名称认证成功（即命名成功）
+            </summary>
+            <param name="requestMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_NamingVerifyFailRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_NamingVerifyFail)">
+            <summary>
+            名称认证失败（这时虽然客户端不打勾，但仍有接口权限）
+            </summary>
+            <param name="requestMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_AnnualRenewRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_AnnualRenew)">
+            <summary>
+            年审通知
+            </summary>
+            <param name="requestMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_VerifyExpiredRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_VerifyExpired)">
+            <summary>
+            认证过期失效通知
+            </summary>
+            <param name="requestMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_SubscribeRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_Subscribe)">
+            <summary>
+            Event事件类型请求之subscribe
+            </summary>
+            <param name="requestMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_UnsubscribeRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_Unsubscribe)">
+            <summary>
+            Event事件类型请求之unsubscribe
+            </summary>
+            <param name="requestMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_TemplateSendJobFinishRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_TemplateSendJobFinish)">
+            <summary>
+            发送模板消息返回结果
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnEvent_ViewRequest(Senparc.Weixin.MP.Entities.RequestMessageEvent_View)">
+            <summary>
+            事件之URL跳转视图（View）
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.DefaultResponseMessage(Senparc.Weixin.MP.Entities.IRequestMessageBase)">
+            <summary>
+            默认消息
+            </summary>
+            <param name="requestMessage"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Base.CustomMessageHandler.OnUnknownTypeRequest(Senparc.Weixin.MP.Entities.RequestMessageUnknownType)">
+            <summary>
+            未知消息类型默认消息
+            </summary>
+            <param name="requestMessage"></param>
             <returns></returns>
         </member>
         <member name="T:Berry.SOA.API.Controllers.CommonController">
@@ -905,6 +1070,30 @@
             <param name="arg"></param>
             <returns></returns>
         </member>
+        <member name="T:Berry.SOA.API.Controllers.Interface.IWXMessageHandler">
+            <summary>
+            功能描述    ：微信推给开发者的消息处理。微信后台的【接口配置信息】的url填写如：http://domain.weixin.com/WXMessageHandler
+            创 建 者    ：赵轶
+            创建日期    ：2019/3/11 14:20:09 
+            最后修改者  ：赵轶
+            最后修改日期：2019/3/11 14:20:09 
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Interface.IWXMessageHandler.Get(Senparc.Weixin.MP.Entities.Request.PostModel,System.String)">
+            <summary>
+            微信后台地址验证
+            </summary>
+            <param name="postModel">消息</param>
+            <param name="echostr">随机字符串</param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.Interface.IWXMessageHandler.Post(Senparc.Weixin.MP.Entities.Request.PostModel)">
+            <summary>
+            用户发送消息后，微信平台自动POST一个请求到这里，并等待响应XML。
+            </summary>
+            <param name="postModel">消息</param>
+            <returns></returns>
+        </member>
         <member name="T:Berry.SOA.API.Controllers.TestController">
             <summary>
             API测试控制器
@@ -927,6 +1116,67 @@
             微信登陆
             </summary>
             <param name="arg"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Berry.SOA.API.Controllers.WXMessageHandlerController">
+            <summary>
+            微信推给开发者的消息处理。微信后台的【接口配置信息】的url填写如：http://domain.weixin.com/WXMessageHandler
+            </summary>
+        </member>
+        <member name="F:Berry.SOA.API.Controllers.WXMessageHandlerController._wechatConfig">
+            <summary>
+            微信授权信息
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.WXMessageHandlerController.Get(Senparc.Weixin.MP.Entities.Request.PostModel,System.String)">
+            <summary>
+            微信后台地址验证
+            </summary>
+            <param name="postModel">消息</param>
+            <param name="echostr">随机字符串</param>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.WXMessageHandlerController.Post(Senparc.Weixin.MP.Entities.Request.PostModel)">
+            <summary>
+            用户发送消息后，微信平台自动POST一个请求到这里，并等待响应XML。
+            </summary>
+            <param name="postModel">消息</param>
+        </member>
+        <member name="T:Berry.SOA.API.Controllers.WxOpenOAuthController">
+            <summary>
+            微信授权
+            </summary>
+        </member>
+        <member name="F:Berry.SOA.API.Controllers.WxOpenOAuthController.wechatconfigbll">
+            <summary>
+            微信配置
+            </summary>
+        </member>
+        <member name="F:Berry.SOA.API.Controllers.WxOpenOAuthController.wechatConfigBll">
+            <summary>
+            微信配置信息
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.WxOpenOAuthController.GetAuthorizeUrlWithUserInfo(System.String,System.String)">
+            <summary>
+            获取授权URL，SCOPE为snsapi_userinfo
+            </summary>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.WxOpenOAuthController.UserInfoCallback(System.String,System.String,System.String)">
+            <summary>
+            OAuthScope.snsapi_base方式回调
+            </summary>
+            <param name="code"></param>
+            <param name="state"></param>
+            <param name="returnUrl"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Berry.SOA.API.Controllers.WxOpenOAuthController.GetUserRegisterStatus(System.String,System.String,System.String)">
+            <summary>
+            获取用户注册状态
+            </summary>
+            <param name="userId"></param>
+            <param name="orgId"></param>
+            <param name="returnUrl"></param>
             <returns></returns>
         </member>
         <member name="T:Berry.SOA.API.ParameterModel.BaseParameterEntity">

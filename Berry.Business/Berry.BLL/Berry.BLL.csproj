@@ -59,6 +59,7 @@
     <Compile Include="BaseManage\UserRelationBLL.cs" />
     <Compile Include="Base\BaseBLL.cs" />
     <Compile Include="CommonBLL.cs" />
+    <Compile Include="CustomManage\WechatConfigBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicInfoManage\NewsBLL.cs" />
     <Compile Include="PublicInfoManage\NoticeBLL.cs" />
@@ -108,8 +109,6 @@
       <Name>Berry.Service</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="CustomManage\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

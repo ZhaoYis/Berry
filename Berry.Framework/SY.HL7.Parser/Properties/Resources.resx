@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SII_Z12_XML_TEMPLATE" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;SII_Z12 xmlns="urn:hl7-org:v2xml"&gt;  
+  &lt;MSH&gt; 
+    &lt;MSH.1&gt;{{MSH_1}}&lt;/MSH.1&gt;  
+    &lt;MSH.2&gt;{{MSH_2}}&lt;/MSH.2&gt;  
+    &lt;MSH.3&gt; 
+      &lt;HD.1&gt;{{MSH_3_HD_1}}&lt;/HD.1&gt; 
+    &lt;/MSH.3&gt;  
+    &lt;MSH.4&gt; 
+      &lt;HD.1&gt;{{MSH_4_HD_1}}&lt;/HD.1&gt; 
+    &lt;/MSH.4&gt;  
+    &lt;MSH.7&gt;{{MSH_7}}&lt;/MSH.7&gt;  
+    &lt;MSH.9&gt; 
+      &lt;MSG.1&gt;SII&lt;/MSG.1&gt;  
+      &lt;MSG.2&gt;Z12&lt;/MSG.2&gt;  
+      &lt;MSG.3&gt;SII_Z12&lt;/MSG.3&gt; 
+    &lt;/MSH.9&gt;  
+    &lt;MSH.10&gt;{{MSH_10}}&lt;/MSH.10&gt;  
+    &lt;MSH.11&gt; 
+      &lt;PT.1&gt;P&lt;/PT.1&gt; 
+    &lt;/MSH.11&gt;  
+    &lt;MSH.12&gt; 
+      &lt;VID.1&gt;2.6&lt;/VID.1&gt; 
+    &lt;/MSH.12&gt; 
+  &lt;/MSH&gt;  
+  &lt;PID&gt; 
+    &lt;PID.2&gt; 
+      &lt;CX.1&gt;{{PID_2_CX_1}}&lt;/CX.1&gt; 
+    &lt;/PID.2&gt;  
+    &lt;PID.3&gt; 
+      &lt;CX.1&gt;{{PID_3_CX_1}}&lt;/CX.1&gt; 
+    &lt;/PID.3&gt;  
+    &lt;PID.5&gt; 
+      &lt;XPN.2&gt;{{PID_5_XPN_2}}&lt;/XPN.2&gt; 
+    &lt;/PID.5&gt; 
+    &lt;PID.8&gt;{{PID_8}}&lt;/PID.8&gt; 
+    &lt;PID.13&gt;
+      &lt;XTN.1&gt;{{PID_13_XTN_1}}&lt;/XTN.1&gt;
+    &lt;/PID.13&gt;
+  &lt;/PID&gt;  
+  &lt;PV1&gt; 
+    &lt;PV1.2&gt;{{PV1_PV1_2}}&lt;/PV1.2&gt;  
+    &lt;PV1.3&gt; 
+      &lt;PL.1&gt;{{PV1_PV1_3_PL_1}}&lt;/PL.1&gt;  
+      &lt;PL.2&gt;{{PV1_PV1_3_PL_2}}&lt;/PL.2&gt; 
+    &lt;/PV1.3&gt;  
+    &lt;PV1.7&gt; 
+      &lt;XCN.1&gt;{{PV1_PV1_7_XCN_1}}&lt;/XCN.1&gt;  
+      &lt;XCN.3&gt; 
+        &lt;FN.1&gt;{{PV1_PV1_7_XCN_3_FN_1}}&lt;/FN.1&gt; 
+      &lt;/XCN.3&gt; 
+    &lt;/PV1.7&gt;  
+    &lt;PV1.44&gt;{{PV1_PV1_44}}&lt;/PV1.44&gt; 
+  &lt;/PV1&gt;  
+  &lt;Z12&gt; 
+    &lt;Z12.1&gt; 
+      &lt;XX.1&gt;{{Z12_Z12_1_XX_1}}&lt;/XX.1&gt;  
+      &lt;XX.2&gt;{{Z12_Z12_1_XX_2}}&lt;/XX.2&gt;  
+      &lt;XX.3&gt;{{Z12_Z12_1_XX_3}}&lt;/XX.3&gt;  
+      &lt;XX.5&gt;{{Z12_Z12_1_XX_5}}&lt;/XX.5&gt;  
+      &lt;XX.6&gt;{{Z12_Z12_1_XX_6}}&lt;/XX.6&gt;  
+      &lt;XX.8&gt;{{Z12_Z12_1_XX_8}}&lt;/XX.8&gt;  
+      &lt;XX.9&gt;{{Z12_Z12_1_XX_9}}&lt;/XX.9&gt;  
+      &lt;XX.10&gt;{{Z12_Z12_1_XX_10}}&lt;/XX.10&gt;  
+      &lt;XX.11&gt;{{Z12_Z12_1_XX_11}}&lt;/XX.11&gt;  
+      &lt;XX.12&gt;{{Z12_Z12_1_XX_12}}&lt;/XX.12&gt;  
+      &lt;XX.13&gt;{{Z12_Z12_1_XX_13}}&lt;/XX.13&gt;  
+      &lt;XX.14&gt;{{Z12_Z12_1_XX_14}}&lt;/XX.14&gt;  
+      &lt;XX.15&gt;{{Z12_Z12_1_XX_15}}&lt;/XX.15&gt;
+    &lt;/Z12.1&gt;  
+    &lt;Z12.2&gt; 
+      &lt;XX.1&gt;{{Z12_Z12_2_XX_1}}&lt;/XX.1&gt;  
+      &lt;XX.2&gt;{{Z12_Z12_2_XX_2}}&lt;/XX.2&gt;  
+      &lt;XX.5&gt;{{Z12_Z12_2_XX_5}}&lt;/XX.5&gt;  
+      &lt;XX.6&gt;{{Z12_Z12_2_XX_6}}&lt;/XX.6&gt; 
+    &lt;/Z12.2&gt;  
+    &lt;Z12.3&gt; 
+      &lt;XX.1&gt;{{Z12_Z12_3_XX_1}}&lt;/XX.1&gt;  
+      &lt;XX.2&gt;{{Z12_Z12_3_XX_2}}&lt;/XX.2&gt;  
+      &lt;XX.6&gt;{{Z12_Z12_3_XX_6}}&lt;/XX.6&gt;   
+      &lt;XX.7&gt;{{Z12_Z12_3_XX_7}}&lt;/XX.7&gt;  
+    &lt;/Z12.3&gt; 
+  &lt;/Z12&gt; 
+&lt;/SII_Z12&gt;</value>
+  </data>
+</root>

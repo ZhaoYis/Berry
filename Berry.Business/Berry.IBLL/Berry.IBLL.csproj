@@ -58,6 +58,7 @@
     <Compile Include="BaseManage\IUserGroupBLL.cs" />
     <Compile Include="BaseManage\IUserRelationBLL.cs" />
     <Compile Include="Base\IBaseBLL.cs" />
+    <Compile Include="CustomManage\IWechatConfigBLL.cs" />
     <Compile Include="ICommonBLL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublicInfoManage\INewsBLL.cs" />
@@ -80,8 +81,6 @@
       <Name>Berry.Entity</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="CustomManage\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
