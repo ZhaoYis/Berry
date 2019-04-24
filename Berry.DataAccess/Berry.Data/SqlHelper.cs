@@ -1,108 +1,79 @@
-﻿using System;
+﻿// ===============================================================================
+// Microsoft Data Access Application Block for .NET
+// http://msdn.microsoft.com/library/en-us/dnbda/html/daab-rm.asp
+//
+// SQLHelper.cs
+//
+// This file contains the implementations of the SqlHelper and SqlHelperParameterCache
+// classes.
+//
+// For more information see the Data Access Application Block Implementation Overview.
+// ===============================================================================
+// Release history
+// VERSION	DESCRIPTION
+//   2.0	Added support for FillDataset, UpdateDataset and "Param" helper methods
+//
+// ===============================================================================
+// Copyright (C) 2000-2001 Microsoft Corporation
+// All rights reserved.
+// THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY
+// OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT
+// LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR
+// FITNESS FOR A PARTICULAR PURPOSE.
+// ==============================================================================
+
+using System;
 using System.Collections;
 using System.Data;
-using System.Data.Common;
 using System.Data.SqlClient;
 using System.Xml;
-using Berry.Code;
-using Berry.Data.Extension;
 
 namespace Berry.Data
 {
     /// <summary>
     /// SqlServer数据访问帮助类
     /// </summary>
-    public class SqlHelper
+    /// <summary>
+	/// The SqlHelper class is intended to encapsulate high performance, scalable best practices for
+	/// common uses of SqlClient
+	/// </summary>
+    public sealed class SqlHelper
     {
-        #region 属性
+        #region private utility methods & constructors
 
-        /// <summary>
-        /// 数据库类型
-        /// </summary>
-        public static DatabaseType DbType { get; set; }
-
-        /// <summary>
-        /// 数据库连接对象
-        /// </summary>
-        private SqlConnection SqlConnection { get; set; }
-
-        /// <summary>
-        /// 数据库连接对象
-        /// </summary>
-        //private DbConnection DbConnection { get; set; }
-
-        /// <summary>
-        /// 执行命令对象
-        /// </summary>
-        private IDbCommand DbCommand { get; set; }
-
-        /// <summary>
-        /// 关闭数据库连接
-        /// </summary>
-        public void CloseSqlConnection()
-        {
-            if (SqlConnection != null && SqlConnection.State != ConnectionState.Closed)
-            {
-                SqlConnection.Close();
-                SqlConnection.Dispose();
-            }
-            if (DbCommand != null)
-            {
-                DbCommand.Dispose();
-            }
-        }
-
-        #endregion 属性
-
-        #region 私有构造函数
-
-        /// <summary>
-        /// 私有构造
-        /// </summary>
+        // Since this class provides only static methods, make the default constructor private to prevent
+        // instances from being created with "new SqlHelper()"
         private SqlHelper() { }
 
-        ///// <summary>
-        ///// 构造
-        ///// </summary>
-        ///// <param name="sqlConnection"></param>
-        //private SqlHelper(SqlConnection sqlConnection)
-        //{
-        //    this.SqlConnection = sqlConnection;
-        //    DbCommand = this.SqlConnection.CreateCommand();
-        //}
-
-        ///// <summary>
-        ///// 构造
-        ///// </summary>
-        ///// <param name="dbConnection"></param>
-        //public SqlHelper(DbConnection dbConnection)
-        //{
-        //    this.DbConnection = dbConnection;
-        //    DbCommand = this.DbConnection.CreateCommand();
-        //}
-
-        #endregion 构造函数
-
-        #region 私有方法
-
         /// <summary>
-        /// 将SqlParameter参数数组(参数值)分配给SqlCommand命令.
-        /// 这个方法将给任何一个参数分配DBNull.Value;
-        /// 该操作将阻止默认值的使用.
+        /// This method is used to attach array of SqlParameters to a SqlCommand.
+        ///
+        /// This method will assign a value of DbNull to any parameter with a direction of
+        /// InputOutput and a value of null.
+        ///
+        /// This behavior will prevent default values from being used, but
+        /// this will be the less common case than an intended pure output parameter (derived as InputOutput)
+        /// where the user provided no input value.
         /// </summary>
-        /// <param name="command">命令名</param>
-        /// <param name="commandParameters">SqlParameters数组</param>
+        /// <param name="command">The command to which the parameters will be added</param>
+        /// <param name="commandParameters">An array of SqlParameters to be added to command</param>
         private static void AttachParameters(SqlCommand command, SqlParameter[] commandParameters)
         {
-            if (command == null) throw new ArgumentNullException("command");
+            if (command == null)
+            {
+                throw new ArgumentNullException("command");
+            }
+
             if (commandParameters != null)
             {
                 foreach (SqlParameter p in commandParameters)
                 {
                     if (p != null)
                     {
-                        // 检查未分配值的输出参数,将其分配以DBNull.Value.
-                        if ((p.Direction == ParameterDirection.InputOutput || p.Direction == ParameterDirection.Input) && (p.Value == null))
+                        // Check for derived output value with no value assigned
+                        if ((p.Direction == ParameterDirection.InputOutput ||
+                            p.Direction == ParameterDirection.Input) &&
+                            (p.Value == null))
                         {
                             p.Value = DBNull.Value;
                         }
@@ -113,52 +84,62 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 将DataRow类型的列值分配到SqlParameter参数数组.
+        /// This method assigns dataRow column values to an array of SqlParameters
         /// </summary>
-        /// <param name="commandParameters">要分配值的SqlParameter参数数组</param>
-        /// <param name="dataRow">将要分配给存储过程参数的DataRow</param>
+        /// <param name="commandParameters">Array of SqlParameters to be assigned values</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values</param>
         private static void AssignParameterValues(SqlParameter[] commandParameters, DataRow dataRow)
         {
             if ((commandParameters == null) || (dataRow == null))
             {
+                // Do nothing if we get no data
                 return;
             }
 
             int i = 0;
-            // 设置参数值
+            // Set the parameters values
             foreach (SqlParameter commandParameter in commandParameters)
             {
-                // 创建参数名称,如果不存在,只抛出一个异常.
-                if (commandParameter.ParameterName == null || commandParameter.ParameterName.Length <= 1)
-                    throw new Exception(string.Format("请提供参数{0}一个有效的名称{1}.", i, commandParameter.ParameterName));
+                // Check the parameter name
+                if (commandParameter.ParameterName == null ||
+                    commandParameter.ParameterName.Length <= 1)
+                {
+                    throw new Exception(
+                        string.Format(
+                            "Please provide a valid parameter name on the parameter #{0}, the ParameterName property has the following value: '{1}'.",
+                            i, commandParameter.ParameterName));
+                }
 
-                // 从dataRow的表中获取为参数数组中数组名称的列的索引.
-                // 如果存在和参数名称相同的列,则将列值赋给当前名称的参数.
                 if (dataRow.Table.Columns.IndexOf(commandParameter.ParameterName.Substring(1)) != -1)
+                {
                     commandParameter.Value = dataRow[commandParameter.ParameterName.Substring(1)];
+                }
+
                 i++;
             }
         }
 
         /// <summary>
-        /// 将一个对象数组分配给SqlParameter参数数组.
+        /// This method assigns an array of values to an array of SqlParameters
         /// </summary>
-        /// <param name="commandParameters">要分配值的SqlParameter参数数组</param>
-        /// <param name="parameterValues">将要分配给存储过程参数的对象数组</param>
+        /// <param name="commandParameters">Array of SqlParameters to be assigned values</param>
+        /// <param name="parameterValues">Array of objects holding the values to be assigned</param>
         private static void AssignParameterValues(SqlParameter[] commandParameters, object[] parameterValues)
         {
             if ((commandParameters == null) || (parameterValues == null))
             {
+                // Do nothing if we get no data
                 return;
             }
 
-            // 确保对象数组个数与参数个数匹配,如果不匹配,抛出一个异常.
+            // We must have the same number of values as we pave parameters to put them in
             if (commandParameters.Length != parameterValues.Length)
             {
-                throw new ArgumentException("参数值个数与参数不匹配.");
+                throw new ArgumentException("Parameter count does not match Parameter Value count.");
             }
 
-            // 给参数赋值
+            // Iterate through the SqlParameters, assigning the values from the corresponding position in the
+            // value array
             for (int i = 0, j = commandParameters.Length; i < j; i++)
             {
                 // If the current array value derives from IDbDataParameter, then assign its Value property
@@ -186,19 +167,27 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 预处理用户提供的命令,数据库连接/事务/命令类型/参数
+        /// This method opens (if necessary) and assigns a connection, transaction, command type and parameters
+        /// to the provided command
         /// </summary>
-        /// <param name="command">要处理的SqlCommand</param>
-        /// <param name="connection">数据库连接</param>
-        /// <param name="transaction">一个有效的事务或者是null值</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本, 其它.)</param>
-        /// <param name="commandText">存储过程名或都T-SQL命令文本</param>
-        /// <param name="commandParameters">和命令相关联的SqlParameter参数数组,如果没有参数为'null'</param>
-        /// <param name="mustCloseConnection"><c>true</c> 如果连接是打开的,则为true,其它情况下为false.</param>
+        /// <param name="command">The SqlCommand to be prepared</param>
+        /// <param name="connection">A valid SqlConnection, on which to execute this command</param>
+        /// <param name="transaction">A valid SqlTransaction, or 'null'</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParameters to be associated with the command or 'null' if no parameters are required</param>
+        /// <param name="mustCloseConnection"><c>true</c> if the connection was opened by the method, otherwose is false.</param>
         private static void PrepareCommand(SqlCommand command, SqlConnection connection, SqlTransaction transaction, CommandType commandType, string commandText, SqlParameter[] commandParameters, out bool mustCloseConnection)
         {
-            if (command == null) throw new ArgumentNullException("command");
-            if (string.IsNullOrEmpty(commandText)) throw new ArgumentNullException("commandText");
+            if (command == null)
+            {
+                throw new ArgumentNullException("command");
+            }
+
+            if (commandText == null || commandText.Length == 0)
+            {
+                throw new ArgumentNullException("commandText");
+            }
 
             // If the provided connection is not open, we will open it
             if (connection.State != ConnectionState.Open)
@@ -211,23 +200,27 @@ namespace Berry.Data
                 mustCloseConnection = false;
             }
 
-            // 给命令分配一个数据库连接.
+            // Associate the connection with the command
             command.Connection = connection;
 
-            // 设置命令文本(存储过程名或SQL语句)
+            // Set the command text (stored procedure name or SQL statement)
             command.CommandText = commandText;
 
-            // 分配事务
+            // If we were provided a transaction, assign it
             if (transaction != null)
             {
-                if (transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+                if (transaction.Connection == null)
+                {
+                    throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+                }
+
                 command.Transaction = transaction;
             }
 
-            // 设置命令类型.
+            // Set the command type
             command.CommandType = commandType;
 
-            // 分配命令参数
+            // Attach the command parameters if they are provided
             if (commandParameters != null)
             {
                 AttachParameters(command, commandParameters);
@@ -235,654 +228,682 @@ namespace Berry.Data
             return;
         }
 
-        #endregion 私有构造函数和方法
+        #endregion private utility methods & constructors
 
-        #region 公共操作
-
-        /// <summary>
-        /// 执行SQL返回 DataReader
-        /// </summary>
-        /// <param name="dbConnection"></param>
-        /// <param name="cmdType">命令的类型</param>
-        /// <param name="strSql">Sql语句</param>
-        /// <returns></returns>
-        public static IDataReader ExecuteReader(DbConnection dbConnection, CommandType cmdType, string strSql)
-        {
-            return ExecuteReader(dbConnection, cmdType, strSql, null);
-        }
+        #region ExecuteNonQuery
 
         /// <summary>
-        /// 执行SQL返回 DataReader
-        /// </summary>
-        /// <param name="dbConnection"></param>
-        /// <param name="cmdType">命令的类型</param>
-        /// <param name="strSql">Sql语句</param>
-        /// <param name="dbParameter">Sql参数</param>
-        /// <returns></returns>
-        public static IDataReader ExecuteReader(DbConnection dbConnection, CommandType cmdType, string strSql, params DbParameter[] dbParameter)
-        {
-            var dbCommand = dbConnection.CreateCommand();
-
-            PrepareDbCommand(dbConnection, dbCommand, null, cmdType, strSql, dbParameter);
-            IDataReader rdr = dbCommand.ExecuteReader(CommandBehavior.CloseConnection);
-            return rdr;
-        }
-
-        /// <summary>
-        /// 执行查询，并返回查询所返回的结果集
-        /// </summary>
-        /// <param name="dbConnection"></param>
-        /// <param name="cmdType">命令的类型</param>
-        /// <param name="strSql">Sql语句</param>
-        /// <returns></returns>
-        public static object ExecuteScalar(DbConnection dbConnection, CommandType cmdType, string strSql)
-        {
-            return ExecuteScalar(dbConnection, cmdType, strSql, null);
-        }
-
-        /// <summary>
-        /// 执行查询，并返回查询所返回的结果集
-        /// </summary>
-        /// <param name="dbConnection"></param>
-        /// <param name="cmdType">命令的类型</param>
-        /// <param name="cmdText">Sql语句或者存储过程名称</param>
-        /// <param name="parameters">Sql参数</param>
-        /// <returns></returns>
-        public static object ExecuteScalar(DbConnection dbConnection, CommandType cmdType, string cmdText, params DbParameter[] parameters)
-        {
-            var dbCommand = dbConnection.CreateCommand();
-
-            PrepareDbCommand(dbConnection, dbCommand, null, cmdType, cmdText, parameters);
-            object val = dbCommand.ExecuteScalar();
-            dbCommand.Parameters.Clear();
-            return val;
-        }
-
-        /// <summary>
-        /// 执行查询，并返回查询所返回的结果集
-        /// </summary>
-        /// <param name="dbConnection"></param>
-        /// <param name="cmdType">命令的类型</param>
-        /// <param name="cmdText">Sql语句</param>
-        /// <param name="parameters">Sql参数</param>
-        /// <returns></returns>
-        public static IDataReader ExecuteDataReader(DbConnection dbConnection, CommandType cmdType, string cmdText, params DbParameter[] parameters)
-        {
-            var dbCommand = dbConnection.CreateCommand();
-
-            PrepareDbCommand(dbConnection, dbCommand, null, cmdType, cmdText, parameters);
-            IDataReader val = dbCommand.ExecuteReader(CommandBehavior.CloseConnection);
-            dbCommand.Parameters.Clear();
-            return val;
-        }
-
-        /// <summary>
-        /// 为即将执行准备一个命令
-        /// </summary>
-        /// <param name="conn">SqlConnection对象</param>
-        /// <param name="cmd">SqlCommand对象</param>
-        /// <param name="isOpenTrans">DbTransaction对象</param>
-        /// <param name="cmdType">执行命令的类型（存储过程或T-SQL，等等）</param>
-        /// <param name="cmdText">存储过程名称或者T-SQL命令行, e.g. Select * from Products</param>
-        /// <param name="dbParameter">执行命令所需的sql语句对应参数</param>
-        private static void PrepareDbCommand(DbConnection conn, IDbCommand cmd, DbTransaction isOpenTrans, CommandType cmdType, string cmdText, params DbParameter[] dbParameter)
-        {
-            if (conn.State != ConnectionState.Open)
-                conn.Open();
-
-            cmd.Connection = conn;
-            cmd.CommandText = cmdText;
-
-            if (isOpenTrans != null)
-                cmd.Transaction = isOpenTrans;
-            cmd.CommandType = cmdType;
-
-            if (dbParameter != null)
-            {
-                dbParameter = DbParameters.ToDbParameter(dbParameter);
-                foreach (var parameter in dbParameter)
-                {
-                    cmd.Parameters.Add(parameter);
-                }
-            }
-        }
-        #endregion
-
-        #region ExecuteNonQuery命令
-
-        /// <summary>
-        /// 执行指定连接字符串,类型的SqlCommand.
+        /// Execute a SqlCommand (that returns no resultset and takes no parameters) against the database specified in
+        /// the connection string
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int result = ExecuteNonQuery(connString, CommandType.StoredProcedure, "PublishOrders");
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本, 其它.)</param>
-        /// <param name="commandText">存储过程名称或SQL语句</param>
-        /// <returns>返回命令影响的行数</returns>
-        public static int ExecuteNonQuery(string connectionString, CommandType commandType = CommandType.Text, string commandText = "")
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
+        public static int ExecuteNonQuery(string connectionString, CommandType commandType, string commandText)
         {
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteNonQuery(connectionString, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定连接字符串,类型的SqlCommand.如果没有提供参数,不返回结果.
+        /// Execute a SqlCommand (that returns no resultset) against the database specified in the connection string
+        /// using the provided parameters
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int result = ExecuteNonQuery(connString, CommandType.StoredProcedure, "PublishOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本, 其它.)</param>
-        /// <param name="commandText">存储过程名称或SQL语句</param>
-        /// <param name="commandParameters">SqlParameter参数数组</param>
-        /// <returns>返回命令影响的行数</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQuery(string connectionString, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
+            // Create & open a SqlConnection, and dispose of it after we are done
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
+                // Call the overload that takes a connection in place of the connection string
                 return ExecuteNonQuery(connection, commandType, commandText, commandParameters);
             }
         }
 
         /// <summary>
-        /// 执行指定连接字符串的存储过程,将对象数组的值赋给存储过程参数,
-        /// 此方法需要在参数缓存方法中探索参数并生成参数.
+        /// Execute a stored procedure via a SqlCommand (that returns no resultset) against the database specified in
+        /// the connection string using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 这个方法没有提供访问输出参数和返回值.
-        /// 示例:
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
+        ///
+        /// e.g.:
         ///  int result = ExecuteNonQuery(connString, "PublishOrders", 24, 36);
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="parameterValues">分配到存储过程输入参数的对象数组</param>
-        /// <returns>返回受影响的行数</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored prcedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQuery(string connectionString, string spName, params object[] parameterValues)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
-
-            // 如果存在参数值
-            if (parameterValues != null && parameterValues.Length > 0)
+            if (connectionString == null || connectionString.Length == 0)
             {
-                // 从探索存储过程参数(加载到缓存)并分配给存储过程参数数组.
+                throw new ArgumentNullException("connectionString");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
+            if ((parameterValues != null) && (parameterValues.Length > 0))
+            {
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connectionString, spName);
 
-                // 给存储过程参数赋值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteNonQuery(connectionString, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
-                // 没有参数情况下
+                // Otherwise we can just call the SP without params
                 return ExecuteNonQuery(connectionString, CommandType.StoredProcedure, spName);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令
+        /// Execute a SqlCommand (that returns no resultset and takes no parameters) against the provided SqlConnection.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int result = ExecuteNonQuery(conn, CommandType.StoredProcedure, "PublishOrders");
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型(存储过程,命令文本或其它.)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <returns>返回影响的行数</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQuery(SqlConnection connection, CommandType commandType, string commandText)
         {
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteNonQuery(connection, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令
+        /// Execute a SqlCommand (that returns no resultset) against the specified SqlConnection
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int result = ExecuteNonQuery(conn, CommandType.StoredProcedure, "PublishOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型(存储过程,命令文本或其它.)</param>
-        /// <param name="commandText">T存储过程名称或T-SQL语句</param>
-        /// <param name="commandParameters">SqlParamter参数数组</param>
-        /// <returns>返回影响的行数</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQuery(SqlConnection connection, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 创建SqlCommand命令,并进行预处理
+            // Create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
-
             bool mustCloseConnection = false;
             PrepareCommand(cmd, connection, null, commandType, commandText, commandParameters, out mustCloseConnection);
 
             // Finally, execute the command
             int retval = cmd.ExecuteNonQuery();
 
-            // 清除参数,以便再次使用.
+            // Detach the SqlParameters from the command object, so they can be used again
             cmd.Parameters.Clear();
             if (mustCloseConnection)
+            {
                 connection.Close();
+            }
+
             return retval;
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,将对象数组的值赋给存储过程参数.
+        /// Execute a stored procedure via a SqlCommand (that returns no resultset) against the specified SqlConnection
+        /// using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值
-        /// 示例:
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
+        ///
+        /// e.g.:
         ///  int result = ExecuteNonQuery(conn, "PublishOrders", 24, 36);
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回影响的行数</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQuery(SqlConnection connection, string spName, params object[] parameterValues)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 如果有参数值
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中加载存储过程参数
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 给存储过程分配参数值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteNonQuery(connection, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
+                // Otherwise we can just call the SP without params
                 return ExecuteNonQuery(connection, CommandType.StoredProcedure, spName);
             }
         }
 
         /// <summary>
-        /// 执行带事务的SqlCommand.
+        /// Execute a SqlCommand (that returns no resultset and takes no parameters) against the provided SqlTransaction.
         /// </summary>
         /// <remarks>
-        /// 示例.:
+        /// e.g.:
         ///  int result = ExecuteNonQuery(trans, CommandType.StoredProcedure, "PublishOrders");
         /// </remarks>
-        /// <param name="transaction">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型(存储过程,命令文本或其它.)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <returns>返回影响的行数/returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQuery(SqlTransaction transaction, CommandType commandType, string commandText)
         {
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteNonQuery(transaction, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行带事务的SqlCommand(指定参数).
+        /// Execute a SqlCommand (that returns no resultset) against the specified SqlTransaction
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int result = ExecuteNonQuery(trans, CommandType.StoredProcedure, "GetOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="transaction">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型(存储过程,命令文本或其它.)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="commandParameters">SqlParamter参数数组</param>
-        /// <returns>返回影响的行数</returns>
-        public static int ExecuteNonQuery(SqlTransaction transaction, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
+		public static int ExecuteNonQuery(SqlTransaction transaction, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 预处理
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            // Create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
             bool mustCloseConnection = false;
             PrepareCommand(cmd, transaction.Connection, transaction, commandType, commandText, commandParameters, out mustCloseConnection);
 
-            // 执行
+            // Finally, execute the command
             int retval = cmd.ExecuteNonQuery();
 
-            // 清除参数集,以便再次使用.
+            // Detach the SqlParameters from the command object, so they can be used again
             cmd.Parameters.Clear();
             return retval;
         }
 
         /// <summary>
-        /// 执行带事务的SqlCommand(指定参数值).
+        /// Execute a stored procedure via a SqlCommand (that returns no resultset) against the specified
+        /// SqlTransaction using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值
-        /// 示例:
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
+        ///
+        /// e.g.:
         ///  int result = ExecuteNonQuery(conn, trans, "PublishOrders", 24, 36);
         /// </remarks>
-        /// <param name="transaction">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回受影响的行数</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQuery(SqlTransaction transaction, string spName, params object[] parameterValues)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 如果有参数值
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 给存储过程参数赋值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
-                // 调用重载方法
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteNonQuery(transaction, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
-                // 没有参数值
+                // Otherwise we can just call the SP without params
                 return ExecuteNonQuery(transaction, CommandType.StoredProcedure, spName);
             }
         }
 
-        #endregion ExecuteNonQuery命令
+        #endregion ExecuteNonQuery
 
-        #region ExecuteDataset方法
+        #region ExecuteDataset
 
         /// <summary>
-        /// 执行指定数据库连接字符串的命令,返回DataSet.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the database specified in
+        /// the connection string.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  DataSet ds = ExecuteDataset(connString, CommandType.StoredProcedure, "GetOrders");
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <returns>返回一个包含结果集的DataSet</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDataset(string connectionString, CommandType commandType, string commandText)
         {
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteDataset(connectionString, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定数据库连接字符串的命令,返回DataSet.
+        /// Execute a SqlCommand (that returns a resultset) against the database specified in the connection string
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  DataSet ds = ExecuteDataset(connString, CommandType.StoredProcedure, "GetOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="commandParameters">SqlParamters参数数组</param>
-        /// <returns>返回一个包含结果集的DataSet</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDataset(string connectionString, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
-            // 创建并打开数据库连接对象,操作完成释放对象.
+            // Create & open a SqlConnection, and dispose of it after we are done
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                // 调用指定数据库连接字符串重载方法.
+                // Call the overload that takes a connection in place of the connection string
                 return ExecuteDataset(connection, commandType, commandText, commandParameters);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接字符串的命令,直接提供参数值,返回DataSet.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the database specified in
+        /// the connection string using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值.
-        /// 示例:
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
+        ///
+        /// e.g.:
         ///  DataSet ds = ExecuteDataset(connString, "GetOrders", 24, 36);
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="spName">存储过程名</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回一个包含结果集的DataSet</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDataset(string connectionString, string spName, params object[] parameterValues)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中检索存储过程参数
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connectionString, spName);
 
-                // 给存储过程参数分配值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteDataset(connectionString, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
+                // Otherwise we can just call the SP without params
                 return ExecuteDataset(connectionString, CommandType.StoredProcedure, spName);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,返回DataSet.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the provided SqlConnection.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  DataSet ds = ExecuteDataset(conn, CommandType.StoredProcedure, "GetOrders");
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名或T-SQL语句</param>
-        /// <returns>返回一个包含结果集的DataSet</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDataset(SqlConnection connection, CommandType commandType, string commandText)
         {
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteDataset(connection, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,指定存储过程参数,返回DataSet.
+        /// Execute a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  DataSet ds = ExecuteDataset(conn, CommandType.StoredProcedure, "GetOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名或T-SQL语句</param>
-        /// <param name="commandParameters">SqlParamter参数数组</param>
-        /// <returns>返回一个包含结果集的DataSet</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDataset(SqlConnection connection, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 预处理
+            // Create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
             bool mustCloseConnection = false;
             PrepareCommand(cmd, connection, null, commandType, commandText, commandParameters, out mustCloseConnection);
 
-            // 创建SqlDataAdapter和DataSet.
-            using (DbDataAdapter da = new SqlDataAdapter(cmd))
+            // Create the DataAdapter & DataSet
+            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
             {
                 DataSet ds = new DataSet();
 
-                // 填充DataSet.
+                // Fill the DataSet using default values for DataTable names, etc
                 da.Fill(ds);
 
+                // Detach the SqlParameters from the command object, so they can be used again
                 cmd.Parameters.Clear();
 
                 if (mustCloseConnection)
+                {
                     connection.Close();
+                }
 
+                // Return the dataset
                 return ds;
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,指定参数值,返回DataSet.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输入参数和返回值.
-        /// 示例.:
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
+        ///
+        /// e.g.:
         ///  DataSet ds = ExecuteDataset(conn, "GetOrders", 24, 36);
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回一个包含结果集的DataSet</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDataset(SqlConnection connection, string spName, params object[] parameterValues)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 比缓存中加载存储过程参数
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 给存储过程参数分配值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteDataset(connection, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
+                // Otherwise we can just call the SP without params
                 return ExecuteDataset(connection, CommandType.StoredProcedure, spName);
             }
         }
 
         /// <summary>
-        /// 执行指定事务的命令,返回DataSet.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the provided SqlTransaction.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  DataSet ds = ExecuteDataset(trans, CommandType.StoredProcedure, "GetOrders");
         /// </remarks>
-        /// <param name="transaction">事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名或T-SQL语句</param>
-        /// <returns>返回一个包含结果集的DataSet</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDataset(SqlTransaction transaction, CommandType commandType, string commandText)
         {
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteDataset(transaction, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定事务的命令,指定参数,返回DataSet.
+        /// Execute a SqlCommand (that returns a resultset) against the specified SqlTransaction
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  DataSet ds = ExecuteDataset(trans, CommandType.StoredProcedure, "GetOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="transaction">事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名或T-SQL语句</param>
-        /// <param name="commandParameters">SqlParamter参数数组</param>
-        /// <returns>返回一个包含结果集的DataSet</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDataset(SqlTransaction transaction, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 预处理
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            // Create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
             bool mustCloseConnection = false;
             PrepareCommand(cmd, transaction.Connection, transaction, commandType, commandText, commandParameters, out mustCloseConnection);
 
-            // 创建 DataAdapter & DataSet
+            // Create the DataAdapter & DataSet
             using (SqlDataAdapter da = new SqlDataAdapter(cmd))
             {
                 DataSet ds = new DataSet();
+
+                // Fill the DataSet using default values for DataTable names, etc
                 da.Fill(ds);
+
+                // Detach the SqlParameters from the command object, so they can be used again
                 cmd.Parameters.Clear();
+
+                // Return the dataset
                 return ds;
             }
         }
 
         /// <summary>
-        /// 执行指定事务的命令,指定参数值,返回DataSet.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified
+        /// SqlTransaction using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输入参数和返回值.
-        /// 示例.:
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
+        ///
+        /// e.g.:
         ///  DataSet ds = ExecuteDataset(trans, "GetOrders", 24, 36);
         /// </remarks>
-        /// <param name="transaction">事务</param>
-        /// <param name="spName">存储过程名</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回一个包含结果集的DataSet</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDataset(SqlTransaction transaction, string spName, params object[] parameterValues)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中加载存储过程参数
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 给存储过程参数分配值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteDataset(transaction, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
+                // Otherwise we can just call the SP without params
                 return ExecuteDataset(transaction, CommandType.StoredProcedure, spName);
             }
         }
 
-        #endregion ExecuteDataset方法
+        #endregion ExecuteDataset
 
-        #region ExecuteReader 数据阅读器
+        #region ExecuteReader
 
         /// <summary>
-        /// 枚举,标识数据库连接是由SqlHelper提供还是由调用者提供
+        /// This enum is used to indicate whether the connection was provided by the caller, or created by SqlHelper, so that
+        /// we can set the appropriate CommandBehavior when calling ExecuteReader()
         /// </summary>
         private enum SqlConnectionOwnership
         {
-            /// <summary>由SqlHelper提供连接</summary>
+            /// <summary>Connection is owned and managed by SqlHelper</summary>
             Internal,
 
-            /// <summary>由调用者提供连接</summary>
+            /// <summary>Connection is owned and managed by the caller</summary>
             External
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的数据阅读器.
+        /// Create and prepare a SqlCommand, and call ExecuteReader with the appropriate CommandBehavior.
         /// </summary>
         /// <remarks>
-        /// 如果是SqlHelper打开连接,当连接关闭DataReader也将关闭.
-        /// 如果是调用都打开连接,DataReader由调用都管理.
+        /// If we created and opened the connection, we want the connection to be closed when the DataReader is closed.
+        ///
+        /// If the caller provided the connection, we want to leave it to them to manage.
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="transaction">一个有效的事务,或者为 'null'</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名或T-SQL语句</param>
-        /// <param name="commandParameters">SqlParameters参数数组,如果没有参数则为'null'</param>
-        /// <param name="connectionOwnership">标识数据库连接对象是由调用者提供还是由SqlHelper提供</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="connection">A valid SqlConnection, on which to execute this command</param>
+        /// <param name="transaction">A valid SqlTransaction, or 'null'</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParameters to be associated with the command or 'null' if no parameters are required</param>
+        /// <param name="connectionOwnership">Indicates whether the connection parameter was provided by the caller, or created by SqlHelper</param>
+        /// <returns>SqlDataReader containing the results of the command</returns>
         private static SqlDataReader ExecuteReader(SqlConnection connection, SqlTransaction transaction, CommandType commandType, string commandText, SqlParameter[] commandParameters, SqlConnectionOwnership connectionOwnership)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
             bool mustCloseConnection = false;
-            // 创建命令
+            // Create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
             try
             {
                 PrepareCommand(cmd, connection, transaction, commandType, commandText, commandParameters, out mustCloseConnection);
 
-                // 创建数据阅读器
+                // Create a reader
                 SqlDataReader dataReader;
 
+                // Call ExecuteReader with the appropriate CommandBehavior
                 if (connectionOwnership == SqlConnectionOwnership.External)
                 {
                     dataReader = cmd.ExecuteReader();
@@ -892,7 +913,7 @@ namespace Berry.Data
                     dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
                 }
 
-                // 清除参数,以便再次使用..
+                // Detach the SqlParameters from the command object, so they can be used again.
                 // HACK: There is a problem here, the output parameter values are fletched
                 // when the reader is closed, so if the parameters are detached from the command
                 // then the SqlReader can磘 set its values.
@@ -901,7 +922,9 @@ namespace Berry.Data
                 foreach (SqlParameter commandParameter in cmd.Parameters)
                 {
                     if (commandParameter.Direction != ParameterDirection.Input)
+                    {
                         canClear = false;
+                    }
                 }
 
                 if (canClear)
@@ -914,75 +937,101 @@ namespace Berry.Data
             catch
             {
                 if (mustCloseConnection)
+                {
                     connection.Close();
+                }
+
                 throw;
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接字符串的数据阅读器.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the database specified in
+        /// the connection string.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  SqlDataReader dr = ExecuteReader(connString, CommandType.StoredProcedure, "GetOrders");
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名或T-SQL语句</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReader(string connectionString, CommandType commandType, string commandText)
         {
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteReader(connectionString, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定数据库连接字符串的数据阅读器,指定参数.
+        /// Execute a SqlCommand (that returns a resultset) against the database specified in the connection string
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  SqlDataReader dr = ExecuteReader(connString, CommandType.StoredProcedure, "GetOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名或T-SQL语句</param>
-        /// <param name="commandParameters">SqlParamter参数数组(new SqlParameter("@prodid", 24))</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReader(string connectionString, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+
             SqlConnection connection = null;
             try
             {
                 connection = new SqlConnection(connectionString);
                 connection.Open();
 
+                // Call the private overload that takes an internally owned connection in place of the connection string
                 return ExecuteReader(connection, null, commandType, commandText, commandParameters, SqlConnectionOwnership.Internal);
             }
             catch
             {
                 // If we fail to return the SqlDatReader, we need to close the connection ourselves
-                if (connection != null) connection.Close();
+                if (connection != null)
+                {
+                    connection.Close();
+                }
+
                 throw;
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接字符串的数据阅读器,指定参数值.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the database specified in
+        /// the connection string using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
-        /// 示例:
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
+        ///
+        /// e.g.:
         ///  SqlDataReader dr = ExecuteReader(connString, "GetOrders", 24, 36);
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="spName">存储过程名</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReader(string connectionString, string spName, params object[] parameterValues)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connectionString, spName);
@@ -993,60 +1042,75 @@ namespace Berry.Data
             }
             else
             {
+                // Otherwise we can just call the SP without params
                 return ExecuteReader(connectionString, CommandType.StoredProcedure, spName);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的数据阅读器.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the provided SqlConnection.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  SqlDataReader dr = ExecuteReader(conn, CommandType.StoredProcedure, "GetOrders");
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名或T-SQL语句</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReader(SqlConnection connection, CommandType commandType, string commandText)
         {
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteReader(connection, commandType, commandText, null);
         }
 
         /// <summary>
-        /// [调用者方式]执行指定数据库连接对象的数据阅读器,指定参数.
+        /// Execute a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  SqlDataReader dr = ExecuteReader(conn, CommandType.StoredProcedure, "GetOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandParameters">SqlParamter参数数组</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReader(SqlConnection connection, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
+            // Pass through the call to the private overload using a null transaction value and an externally owned connection
             return ExecuteReader(connection, null, commandType, commandText, commandParameters, SqlConnectionOwnership.External);
         }
 
         /// <summary>
-        /// [调用者方式]执行指定数据库连接对象的数据阅读器,指定参数值.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
-        /// 示例:
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
+        ///
+        /// e.g.:
         ///  SqlDataReader dr = ExecuteReader(conn, "GetOrders", 24, 36);
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">T存储过程名</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReader(SqlConnection connection, string spName, params object[] parameterValues)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
@@ -1057,66 +1121,90 @@ namespace Berry.Data
             }
             else
             {
+                // Otherwise we can just call the SP without params
                 return ExecuteReader(connection, CommandType.StoredProcedure, spName);
             }
         }
 
         /// <summary>
-        /// [调用者方式]执行指定数据库事务的数据阅读器,指定参数值.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the provided SqlTransaction.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  SqlDataReader dr = ExecuteReader(trans, CommandType.StoredProcedure, "GetOrders");
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReader(SqlTransaction transaction, CommandType commandType, string commandText)
         {
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteReader(transaction, commandType, commandText, null);
         }
 
         /// <summary>
-        /// [调用者方式]执行指定数据库事务的数据阅读器,指定参数.
+        /// Execute a SqlCommand (that returns a resultset) against the specified SqlTransaction
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///   SqlDataReader dr = ExecuteReader(trans, CommandType.StoredProcedure, "GetOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReader(SqlTransaction transaction, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            // Pass through to private overload, indicating that the connection is owned by the caller
             return ExecuteReader(transaction.Connection, transaction, commandType, commandText, commandParameters, SqlConnectionOwnership.External);
         }
 
         /// <summary>
-        /// [调用者方式]执行指定数据库事务的数据阅读器,指定参数值.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified
+        /// SqlTransaction using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
         ///
-        /// 示例:
+        /// e.g.:
         ///  SqlDataReader dr = ExecuteReader(trans, "GetOrders", 24, 36);
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReader(SqlTransaction transaction, string spName, params object[] parameterValues)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 如果有参数值
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
@@ -1127,315 +1215,371 @@ namespace Berry.Data
             }
             else
             {
-                // 没有参数值
+                // Otherwise we can just call the SP without params
                 return ExecuteReader(transaction, CommandType.StoredProcedure, spName);
             }
         }
 
-        #endregion ExecuteReader 数据阅读器
+        #endregion ExecuteReader
 
-        #region ExecuteScalar 返回结果集中的第一行第一列
+        #region ExecuteScalar
 
         /// <summary>
-        /// 执行指定数据库连接字符串的命令,返回结果集中的第一行第一列.
+        /// Execute a SqlCommand (that returns a 1x1 resultset and takes no parameters) against the database specified in
+        /// the connection string.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int orderCount = (int)ExecuteScalar(connString, CommandType.StoredProcedure, "GetOrderCount");
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalar(string connectionString, CommandType commandType, string commandText)
         {
-            // 执行参数为空的方法
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteScalar(connectionString, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定数据库连接字符串的命令,指定参数,返回结果集中的第一行第一列.
+        /// Execute a SqlCommand (that returns a 1x1 resultset) against the database specified in the connection string
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int orderCount = (int)ExecuteScalar(connString, CommandType.StoredProcedure, "GetOrderCount", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalar(string connectionString, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            // 创建并打开数据库连接对象,操作完成释放对象.
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+            // Create & open a SqlConnection, and dispose of it after we are done
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                // 调用指定数据库连接字符串重载方法.
+                // Call the overload that takes a connection in place of the connection string
                 return ExecuteScalar(connection, commandType, commandText, commandParameters);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接字符串的命令,指定参数值,返回结果集中的第一行第一列.
+        /// Execute a stored procedure via a SqlCommand (that returns a 1x1 resultset) against the database specified in
+        /// the connection string using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
         ///
-        /// 示例:
+        /// e.g.:
         ///  int orderCount = (int)ExecuteScalar(connString, "GetOrderCount", 24, 36);
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalar(string connectionString, string spName, params object[] parameterValues)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
-            // 如果有参数值
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connectionString, spName);
 
-                // 给存储过程参数赋值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
-                // 调用重载方法
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteScalar(connectionString, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
-                // 没有参数值
+                // Otherwise we can just call the SP without params
                 return ExecuteScalar(connectionString, CommandType.StoredProcedure, spName);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,返回结果集中的第一行第一列.
+        /// Execute a SqlCommand (that returns a 1x1 resultset and takes no parameters) against the provided SqlConnection.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int orderCount = (int)ExecuteScalar(conn, CommandType.StoredProcedure, "GetOrderCount");
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalar(SqlConnection connection, CommandType commandType, string commandText)
         {
-            // 执行参数为空的方法
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteScalar(connection, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,指定参数,返回结果集中的第一行第一列.
+        /// Execute a SqlCommand (that returns a 1x1 resultset) against the specified SqlConnection
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int orderCount = (int)ExecuteScalar(conn, CommandType.StoredProcedure, "GetOrderCount", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
-        public static object ExecuteScalar(SqlConnection connection, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
+		public static object ExecuteScalar(SqlConnection connection, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 创建SqlCommand命令,并进行预处理
+            // Create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
 
             bool mustCloseConnection = false;
             PrepareCommand(cmd, connection, null, commandType, commandText, commandParameters, out mustCloseConnection);
 
-            // 执行SqlCommand命令,并返回结果.
+            // Execute the command & return the results
             object retval = cmd.ExecuteScalar();
 
-            // 清除参数,以便再次使用.
+            // Detach the SqlParameters from the command object, so they can be used again
             cmd.Parameters.Clear();
 
             if (mustCloseConnection)
+            {
                 connection.Close();
+            }
 
             return retval;
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,指定参数值,返回结果集中的第一行第一列.
+        /// Execute a stored procedure via a SqlCommand (that returns a 1x1 resultset) against the specified SqlConnection
+        /// using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
         ///
-        /// 示例:
+        /// e.g.:
         ///  int orderCount = (int)ExecuteScalar(conn, "GetOrderCount", 24, 36);
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalar(SqlConnection connection, string spName, params object[] parameterValues)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 如果有参数值
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 给存储过程参数赋值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
-                // 调用重载方法
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteScalar(connection, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
-                // 没有参数值
+                // Otherwise we can just call the SP without params
                 return ExecuteScalar(connection, CommandType.StoredProcedure, spName);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库事务的命令,返回结果集中的第一行第一列.
+        /// Execute a SqlCommand (that returns a 1x1 resultset and takes no parameters) against the provided SqlTransaction.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int orderCount = (int)ExecuteScalar(trans, CommandType.StoredProcedure, "GetOrderCount");
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalar(SqlTransaction transaction, CommandType commandType, string commandText)
         {
-            // 执行参数为空的方法
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteScalar(transaction, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定数据库事务的命令,指定参数,返回结果集中的第一行第一列.
+        /// Execute a SqlCommand (that returns a 1x1 resultset) against the specified SqlTransaction
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  int orderCount = (int)ExecuteScalar(trans, CommandType.StoredProcedure, "GetOrderCount", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
-        public static object ExecuteScalar(SqlTransaction transaction, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
+		public static object ExecuteScalar(SqlTransaction transaction, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 创建SqlCommand命令,并进行预处理
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            // Create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
             bool mustCloseConnection = false;
             PrepareCommand(cmd, transaction.Connection, transaction, commandType, commandText, commandParameters, out mustCloseConnection);
 
-            // 执行SqlCommand命令,并返回结果.
+            // Execute the command & return the results
             object retval = cmd.ExecuteScalar();
 
-            // 清除参数,以便再次使用.
+            // Detach the SqlParameters from the command object, so they can be used again
             cmd.Parameters.Clear();
             return retval;
         }
 
         /// <summary>
-        /// 执行指定数据库事务的命令,指定参数值,返回结果集中的第一行第一列.
+        /// Execute a stored procedure via a SqlCommand (that returns a 1x1 resultset) against the specified
+        /// SqlTransaction using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
         ///
-        /// 示例:
+        /// e.g.:
         ///  int orderCount = (int)ExecuteScalar(trans, "GetOrderCount", 24, 36);
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalar(SqlTransaction transaction, string spName, params object[] parameterValues)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 如果有参数值
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // PPull the parameters for this stored procedure from the parameter cache ()
+                // PPull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 给存储过程参数赋值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
-                // 调用重载方法
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteScalar(transaction, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
-                // 没有参数值
+                // Otherwise we can just call the SP without params
                 return ExecuteScalar(transaction, CommandType.StoredProcedure, spName);
             }
         }
 
-        #endregion ExecuteScalar 返回结果集中的第一行第一列
+        #endregion ExecuteScalar
 
-        #region ExecuteXmlReader XML阅读器
+
+
+        #region ExecuteXmlReader
 
         /// <summary>
-        /// 执行指定数据库连接对象的SqlCommand命令,并产生一个XmlReader对象做为结果集返回.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the provided SqlConnection.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  XmlReader r = ExecuteXmlReader(conn, CommandType.StoredProcedure, "GetOrders");
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句 using "FOR XML AUTO"</param>
-        /// <returns>返回XmlReader结果集对象.</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command using "FOR XML AUTO"</param>
+        /// <returns>An XmlReader containing the resultset generated by the command</returns>
         public static XmlReader ExecuteXmlReader(SqlConnection connection, CommandType commandType, string commandText)
         {
-            // 执行参数为空的方法
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteXmlReader(connection, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的SqlCommand命令,并产生一个XmlReader对象做为结果集返回,指定参数.
+        /// Execute a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  XmlReader r = ExecuteXmlReader(conn, CommandType.StoredProcedure, "GetOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句 using "FOR XML AUTO"</param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
-        /// <returns>返回XmlReader结果集对象.</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command using "FOR XML AUTO"</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>An XmlReader containing the resultset generated by the command</returns>
         public static XmlReader ExecuteXmlReader(SqlConnection connection, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
             bool mustCloseConnection = false;
-            // 创建SqlCommand命令,并进行预处理
+            // Create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
             try
             {
                 PrepareCommand(cmd, connection, null, commandType, commandText, commandParameters, out mustCloseConnection);
 
-                // 执行命令
+                // Create the DataAdapter & DataSet
                 XmlReader retval = cmd.ExecuteXmlReader();
 
-                // 清除参数,以便再次使用.
+                // Detach the SqlParameters from the command object, so they can be used again
                 cmd.Parameters.Clear();
 
                 return retval;
@@ -1443,241 +1587,299 @@ namespace Berry.Data
             catch
             {
                 if (mustCloseConnection)
+                {
                     connection.Close();
+                }
+
                 throw;
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的SqlCommand命令,并产生一个XmlReader对象做为结果集返回,指定参数值.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
         ///
-        /// 示例:
+        /// e.g.:
         ///  XmlReader r = ExecuteXmlReader(conn, "GetOrders", 24, 36);
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名称 using "FOR XML AUTO"</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回XmlReader结果集对象.</returns>
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure using "FOR XML AUTO"</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>An XmlReader containing the resultset generated by the command</returns>
         public static XmlReader ExecuteXmlReader(SqlConnection connection, string spName, params object[] parameterValues)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 如果有参数值
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 给存储过程参数赋值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
-                // 调用重载方法
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteXmlReader(connection, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
-                // 没有参数值
+                // Otherwise we can just call the SP without params
                 return ExecuteXmlReader(connection, CommandType.StoredProcedure, spName);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库事务的SqlCommand命令,并产生一个XmlReader对象做为结果集返回.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the provided SqlTransaction.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  XmlReader r = ExecuteXmlReader(trans, CommandType.StoredProcedure, "GetOrders");
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句 using "FOR XML AUTO"</param>
-        /// <returns>返回XmlReader结果集对象.</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command using "FOR XML AUTO"</param>
+        /// <returns>An XmlReader containing the resultset generated by the command</returns>
         public static XmlReader ExecuteXmlReader(SqlTransaction transaction, CommandType commandType, string commandText)
         {
-            // 执行参数为空的方法
+            // Pass through the call providing null for the set of SqlParameters
             return ExecuteXmlReader(transaction, commandType, commandText, null);
         }
 
         /// <summary>
-        /// 执行指定数据库事务的SqlCommand命令,并产生一个XmlReader对象做为结果集返回,指定参数.
+        /// Execute a SqlCommand (that returns a resultset) against the specified SqlTransaction
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  XmlReader r = ExecuteXmlReader(trans, CommandType.StoredProcedure, "GetOrders", new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句 using "FOR XML AUTO"</param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
-        /// <returns>返回XmlReader结果集对象.</returns>
-        public static XmlReader ExecuteXmlReader(SqlTransaction transaction, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command using "FOR XML AUTO"</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <returns>An XmlReader containing the resultset generated by the command</returns>
+		public static XmlReader ExecuteXmlReader(SqlTransaction transaction, CommandType commandType, string commandText, params SqlParameter[] commandParameters)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 创建SqlCommand命令,并进行预处理
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            // Create a command and prepare it for execution
             SqlCommand cmd = new SqlCommand();
             bool mustCloseConnection = false;
             PrepareCommand(cmd, transaction.Connection, transaction, commandType, commandText, commandParameters, out mustCloseConnection);
 
-            // 执行命令
+            // Create the DataAdapter & DataSet
             XmlReader retval = cmd.ExecuteXmlReader();
 
-            // 清除参数,以便再次使用.
+            // Detach the SqlParameters from the command object, so they can be used again
             cmd.Parameters.Clear();
             return retval;
         }
 
         /// <summary>
-        /// 执行指定数据库事务的SqlCommand命令,并产生一个XmlReader对象做为结果集返回,指定参数值.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified
+        /// SqlTransaction using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
         ///
-        /// 示例:
+        /// e.g.:
         ///  XmlReader r = ExecuteXmlReader(trans, "GetOrders", 24, 36);
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
-        /// <returns>返回一个包含结果集的DataSet.</returns>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static XmlReader ExecuteXmlReader(SqlTransaction transaction, string spName, params object[] parameterValues)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 如果有参数值
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 给存储过程参数赋值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
-                // 调用重载方法
+                // Call the overload that takes an array of SqlParameters
                 return ExecuteXmlReader(transaction, CommandType.StoredProcedure, spName, commandParameters);
             }
             else
             {
-                // 没有参数值
+                // Otherwise we can just call the SP without params
                 return ExecuteXmlReader(transaction, CommandType.StoredProcedure, spName);
             }
         }
 
-        #endregion ExecuteXmlReader XML阅读器
+        #endregion ExecuteXmlReader
 
-        #region FillDataset 填充数据集
+        #region FillDataset
 
         /// <summary>
-        /// 执行指定数据库连接字符串的命令,映射数据表并填充数据集.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the database specified in
+        /// the connection string.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(connString, CommandType.StoredProcedure, "GetOrders", ds, new string[] {"orders"});
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)</param>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)</param>
         public static void FillDataset(string connectionString, CommandType commandType, string commandText, DataSet dataSet, string[] tableNames)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (dataSet == null) throw new ArgumentNullException("dataSet");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
-            // 创建并打开数据库连接对象,操作完成释放对象.
+            if (dataSet == null)
+            {
+                throw new ArgumentNullException("dataSet");
+            }
+
+            // Create & open a SqlConnection, and dispose of it after we are done
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                // 调用指定数据库连接字符串重载方法.
+                // Call the overload that takes a connection in place of the connection string
                 FillDataset(connection, commandType, commandText, dataSet, tableNames);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接字符串的命令,映射数据表并填充数据集.指定命令参数.
+        /// Execute a SqlCommand (that returns a resultset) against the database specified in the connection string
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(connString, CommandType.StoredProcedure, "GetOrders", ds, new string[] {"orders"}, new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)
         /// </param>
         public static void FillDataset(string connectionString, CommandType commandType,
             string commandText, DataSet dataSet, string[] tableNames,
             params SqlParameter[] commandParameters)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (dataSet == null) throw new ArgumentNullException("dataSet");
-            // 创建并打开数据库连接对象,操作完成释放对象.
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+
+            if (dataSet == null)
+            {
+                throw new ArgumentNullException("dataSet");
+            }
+            // Create & open a SqlConnection, and dispose of it after we are done
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                // 调用指定数据库连接字符串重载方法.
+                // Call the overload that takes a connection in place of the connection string
                 FillDataset(connection, commandType, commandText, dataSet, tableNames, commandParameters);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接字符串的命令,映射数据表并填充数据集,指定存储过程参数值.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the database specified in
+        /// the connection string using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
         ///
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(connString, CommandType.StoredProcedure, "GetOrders", ds, new string[] {"orders"}, 24);
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)
         /// </param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
         public static void FillDataset(string connectionString, string spName,
             DataSet dataSet, string[] tableNames,
             params object[] parameterValues)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (dataSet == null) throw new ArgumentNullException("dataSet");
-            // 创建并打开数据库连接对象,操作完成释放对象.
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+
+            if (dataSet == null)
+            {
+                throw new ArgumentNullException("dataSet");
+            }
+            // Create & open a SqlConnection, and dispose of it after we are done
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
 
-                // 调用指定数据库连接字符串重载方法.
+                // Call the overload that takes a connection in place of the connection string
                 FillDataset(connection, spName, dataSet, tableNames, parameterValues);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,映射数据表并填充数据集.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the provided SqlConnection.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(conn, CommandType.StoredProcedure, "GetOrders", ds, new string[] {"orders"});
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)
         /// </param>
         public static void FillDataset(SqlConnection connection, CommandType commandType,
             string commandText, DataSet dataSet, string[] tableNames)
@@ -1686,20 +1888,21 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,映射数据表并填充数据集,指定参数.
+        /// Execute a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(conn, CommandType.StoredProcedure, "GetOrders", ds, new string[] {"orders"}, new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)
         /// </param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
         public static void FillDataset(SqlConnection connection, CommandType commandType,
             string commandText, DataSet dataSet, string[] tableNames,
             params SqlParameter[] commandParameters)
@@ -1708,61 +1911,74 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定数据库连接对象的命令,映射数据表并填充数据集,指定存储过程参数值.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
         ///
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(conn, "GetOrders", ds, new string[] {"orders"}, 24, 36);
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)
         /// </param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
         public static void FillDataset(SqlConnection connection, string spName,
             DataSet dataSet, string[] tableNames,
             params object[] parameterValues)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (dataSet == null) throw new ArgumentNullException("dataSet");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 如果有参数值
+            if (dataSet == null)
+            {
+                throw new ArgumentNullException("dataSet");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 给存储过程参数赋值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
-                // 调用重载方法
+                // Call the overload that takes an array of SqlParameters
                 FillDataset(connection, CommandType.StoredProcedure, spName, dataSet, tableNames, commandParameters);
             }
             else
             {
-                // 没有参数值
+                // Otherwise we can just call the SP without params
                 FillDataset(connection, CommandType.StoredProcedure, spName, dataSet, tableNames);
             }
         }
 
         /// <summary>
-        /// 执行指定数据库事务的命令,映射数据表并填充数据集.
+        /// Execute a SqlCommand (that returns a resultset and takes no parameters) against the provided SqlTransaction.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(trans, CommandType.StoredProcedure, "GetOrders", ds, new string[] {"orders"});
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)
         /// </param>
         public static void FillDataset(SqlTransaction transaction, CommandType commandType,
             string commandText,
@@ -1772,20 +1988,21 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定数据库事务的命令,映射数据表并填充数据集,指定参数.
+        /// Execute a SqlCommand (that returns a resultset) against the specified SqlTransaction
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(trans, CommandType.StoredProcedure, "GetOrders", ds, new string[] {"orders"}, new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)
         /// </param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
         public static void FillDataset(SqlTransaction transaction, CommandType commandType,
             string commandText, DataSet dataSet, string[] tableNames,
             params SqlParameter[] commandParameters)
@@ -1794,175 +2011,231 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定数据库事务的命令,映射数据表并填充数据集,指定存储过程参数值.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified
+        /// SqlTransaction using the provided parameter values.  This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
         /// <remarks>
-        /// 此方法不提供访问存储过程输出参数和返回值参数.
+        /// This method provides no access to output parameters or the stored procedure's return value parameter.
         ///
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(trans, "GetOrders", ds, new string[]{"orders"}, 24, 36);
         /// </remarks>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)
         /// </param>
-        /// <param name="parameterValues">分配给存储过程输入参数的对象数组</param>
+        /// <param name="parameterValues">An array of objects to be assigned as the input values of the stored procedure</param>
         public static void FillDataset(SqlTransaction transaction, string spName,
             DataSet dataSet, string[] tableNames,
             params object[] parameterValues)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (dataSet == null) throw new ArgumentNullException("dataSet");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 如果有参数值
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (dataSet == null)
+            {
+                throw new ArgumentNullException("dataSet");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If we receive parameter values, we need to figure out where they go
             if ((parameterValues != null) && (parameterValues.Length > 0))
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 给存储过程参数赋值
+                // Assign the provided values to these parameters based on parameter order
                 AssignParameterValues(commandParameters, parameterValues);
 
-                // 调用重载方法
+                // Call the overload that takes an array of SqlParameters
                 FillDataset(transaction, CommandType.StoredProcedure, spName, dataSet, tableNames, commandParameters);
             }
             else
             {
-                // 没有参数值
+                // Otherwise we can just call the SP without params
                 FillDataset(transaction, CommandType.StoredProcedure, spName, dataSet, tableNames);
             }
         }
 
         /// <summary>
-        /// [私有方法][内部调用]执行指定数据库连接对象/事务的命令,映射数据表并填充数据集,DataSet/TableNames/SqlParameters.
+        /// Private helper method that execute a SqlCommand (that returns a resultset) against the specified SqlTransaction and SqlConnection
+        /// using the provided parameters.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  FillDataset(conn, trans, CommandType.StoredProcedure, "GetOrders", ds, new string[] {"orders"}, new SqlParameter("@prodid", 24));
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="transaction">一个有效的连接事务</param>
-        /// <param name="commandType">命令类型 (存储过程,命令文本或其它)</param>
-        /// <param name="commandText">存储过程名称或T-SQL语句</param>
-        /// <param name="dataSet">要填充结果集的DataSet实例</param>
-        /// <param name="tableNames">表映射的数据表数组
-        /// 用户定义的表名 (可有是实际的表名.)
+        /// <param name="connection">A valid SqlConnection</param>
+        /// <param name="transaction">A valid SqlTransaction</param>
+        /// <param name="commandType">The CommandType (stored procedure, text, etc.)</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="dataSet">A dataset wich will contain the resultset generated by the command</param>
+        /// <param name="tableNames">This array will be used to create table mappings allowing the DataTables to be referenced
+        /// by a user defined name (probably the actual table name)
         /// </param>
-        /// <param name="commandParameters">分配给命令的SqlParamter参数数组</param>
-        private static void FillDataset(SqlConnection connection, SqlTransaction transaction, CommandType commandType,
+        /// <param name="commandParameters">An array of SqlParamters used to execute the command</param>
+		private static void FillDataset(SqlConnection connection, SqlTransaction transaction, CommandType commandType,
             string commandText, DataSet dataSet, string[] tableNames,
             params SqlParameter[] commandParameters)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (dataSet == null) throw new ArgumentNullException("dataSet");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 创建SqlCommand命令,并进行预处理
+            if (dataSet == null)
+            {
+                throw new ArgumentNullException("dataSet");
+            }
+
+            // Create a command and prepare it for execution
             SqlCommand command = new SqlCommand();
             bool mustCloseConnection = false;
             PrepareCommand(command, connection, transaction, commandType, commandText, commandParameters, out mustCloseConnection);
 
-            // 执行命令
+            // Create the DataAdapter & DataSet
             using (SqlDataAdapter dataAdapter = new SqlDataAdapter(command))
             {
-                // 追加表映射
+                // Add the table mappings specified by the user
                 if (tableNames != null && tableNames.Length > 0)
                 {
                     string tableName = "Table";
                     for (int index = 0; index < tableNames.Length; index++)
                     {
-                        if (tableNames[index] == null || tableNames[index].Length == 0) throw new ArgumentException("The tableNames parameter must contain a list of tables, a value was provided as null or empty string.", "tableNames");
+                        if (tableNames[index] == null || tableNames[index].Length == 0)
+                        {
+                            throw new ArgumentException("The tableNames parameter must contain a list of tables, a value was provided as null or empty string.", "tableNames");
+                        }
+
                         dataAdapter.TableMappings.Add(tableName, tableNames[index]);
                         tableName += (index + 1).ToString();
                     }
                 }
 
-                // 填充数据集使用默认表名称
+                // Fill the DataSet using default values for DataTable names, etc
                 dataAdapter.Fill(dataSet);
 
-                // 清除参数,以便再次使用.
+                // Detach the SqlParameters from the command object, so they can be used again
                 command.Parameters.Clear();
             }
 
             if (mustCloseConnection)
+            {
                 connection.Close();
+            }
         }
 
-        #endregion FillDataset 填充数据集
+        #endregion FillDataset
 
-        #region UpdateDataset 更新数据集
+        #region UpdateDataset
 
         /// <summary>
-        /// 执行数据集更新到数据库,指定inserted, updated, or deleted命令.
+        /// Executes the respective command for each inserted, updated, or deleted row in the DataSet.
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  UpdateDataset(conn, insertCommand, deleteCommand, updateCommand, dataSet, "Order");
         /// </remarks>
-        /// <param name="insertCommand">[追加记录]一个有效的T-SQL语句或存储过程</param>
-        /// <param name="deleteCommand">[删除记录]一个有效的T-SQL语句或存储过程</param>
-        /// <param name="updateCommand">[更新记录]一个有效的T-SQL语句或存储过程</param>
-        /// <param name="dataSet">要更新到数据库的DataSet</param>
-        /// <param name="tableName">要更新到数据库的DataTable</param>
+        /// <param name="insertCommand">A valid transact-SQL statement or stored procedure to insert new records into the data source</param>
+        /// <param name="deleteCommand">A valid transact-SQL statement or stored procedure to delete records from the data source</param>
+        /// <param name="updateCommand">A valid transact-SQL statement or stored procedure used to update records in the data source</param>
+        /// <param name="dataSet">The DataSet used to update the data source</param>
+        /// <param name="tableName">The DataTable used to update the data source.</param>
         public static void UpdateDataset(SqlCommand insertCommand, SqlCommand deleteCommand, SqlCommand updateCommand, DataSet dataSet, string tableName)
         {
-            if (insertCommand == null) throw new ArgumentNullException("insertCommand");
-            if (deleteCommand == null) throw new ArgumentNullException("deleteCommand");
-            if (updateCommand == null) throw new ArgumentNullException("updateCommand");
-            if (string.IsNullOrEmpty(tableName)) throw new ArgumentNullException("tableName");
+            if (insertCommand == null)
+            {
+                throw new ArgumentNullException("insertCommand");
+            }
 
-            // 创建SqlDataAdapter,当操作完成后释放.
+            if (deleteCommand == null)
+            {
+                throw new ArgumentNullException("deleteCommand");
+            }
+
+            if (updateCommand == null)
+            {
+                throw new ArgumentNullException("updateCommand");
+            }
+
+            if (tableName == null || tableName.Length == 0)
+            {
+                throw new ArgumentNullException("tableName");
+            }
+
+            // Create a SqlDataAdapter, and dispose of it after we are done
             using (SqlDataAdapter dataAdapter = new SqlDataAdapter())
             {
-                // 设置数据适配器命令
+                // Set the data adapter commands
                 dataAdapter.UpdateCommand = updateCommand;
                 dataAdapter.InsertCommand = insertCommand;
                 dataAdapter.DeleteCommand = deleteCommand;
 
-                // 更新数据集改变到数据库
+                // Update the dataset changes in the data source
                 dataAdapter.Update(dataSet, tableName);
 
-                // 提交所有改变到数据集.
+                // Commit all the changes made to the DataSet
                 dataSet.AcceptChanges();
             }
         }
 
-        #endregion UpdateDataset 更新数据集
+        #endregion UpdateDataset
 
-        #region CreateCommand 创建一条SqlCommand命令
+        #region CreateCommand
 
         /// <summary>
-        /// 创建SqlCommand命令,指定数据库连接对象,存储过程名和参数.
+        /// Simplify the creation of a Sql command object by allowing
+        /// a stored procedure and optional parameters to be provided
         /// </summary>
         /// <remarks>
-        /// 示例:
+        /// e.g.:
         ///  SqlCommand command = CreateCommand(conn, "AddCustomer", "CustomerID", "CustomerName");
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="sourceColumns">源表的列名称数组</param>
-        /// <returns>返回SqlCommand命令</returns>
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="sourceColumns">An array of string to be assigned as the source columns of the stored procedure parameters</param>
+        /// <returns>A valid SqlCommand object</returns>
         public static SqlCommand CreateCommand(SqlConnection connection, string spName, params string[] sourceColumns)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 创建命令
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // Create a SqlCommand
             SqlCommand cmd = new SqlCommand(spName, connection);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            // 如果有参数值
+            // If we receive parameter values, we need to figure out where they go
             if ((sourceColumns != null) && (sourceColumns.Length > 0))
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 将源表的列到映射到DataSet命令中.
+                // Assign the provided source columns to these parameters based on parameter order
                 for (int index = 0; index < sourceColumns.Length; index++)
+                {
                     commandParameters[index].SourceColumn = sourceColumns[index];
+                }
 
                 // Attach the discovered parameters to the SqlCommand object
                 AttachParameters(cmd, commandParameters);
@@ -1971,29 +2244,39 @@ namespace Berry.Data
             return cmd;
         }
 
-        #endregion CreateCommand 创建一条SqlCommand命令
+        #endregion CreateCommand
 
-        #region ExecuteNonQueryTypedParams 类型化参数(DataRow)
+        #region ExecuteNonQueryTypedParams
 
         /// <summary>
-        /// 执行指定连接数据库连接字符串的存储过程,使用DataRow做为参数值,返回受影响的行数.
+        /// Execute a stored procedure via a SqlCommand (that returns no resultset) against the database specified in
+        /// the connection string using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on row values.
         /// </summary>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回影响的行数</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQueryTypedParams(String connectionString, String spName, DataRow dataRow)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connectionString, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteNonQuery(connectionString, CommandType.StoredProcedure, spName, commandParameters);
@@ -2005,24 +2288,34 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定连接数据库连接对象的存储过程,使用DataRow做为参数值,返回受影响的行数.
+        /// Execute a stored procedure via a SqlCommand (that returns no resultset) against the specified SqlConnection
+        /// using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on row values.
         /// </summary>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回影响的行数</returns>
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQueryTypedParams(SqlConnection connection, String spName, DataRow dataRow)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteNonQuery(connection, CommandType.StoredProcedure, spName, commandParameters);
@@ -2034,25 +2327,39 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定连接数据库事物的存储过程,使用DataRow做为参数值,返回受影响的行数.
+        /// Execute a stored procedure via a SqlCommand (that returns no resultset) against the specified
+        /// SqlTransaction using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on row values.
         /// </summary>
-        /// <param name="transaction">一个有效的连接事务 object</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回影响的行数</returns>
+        /// <param name="transaction">A valid SqlTransaction object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>An int representing the number of rows affected by the command</returns>
         public static int ExecuteNonQueryTypedParams(SqlTransaction transaction, String spName, DataRow dataRow)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
+
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
 
             // Sf the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteNonQuery(transaction, CommandType.StoredProcedure, spName, commandParameters);
@@ -2063,29 +2370,39 @@ namespace Berry.Data
             }
         }
 
-        #endregion ExecuteNonQueryTypedParams 类型化参数(DataRow)
+        #endregion ExecuteNonQueryTypedParams
 
-        #region ExecuteDatasetTypedParams 类型化参数(DataRow)
+        #region ExecuteDatasetTypedParams
 
         /// <summary>
-        /// 执行指定连接数据库连接字符串的存储过程,使用DataRow做为参数值,返回DataSet.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the database specified in
+        /// the connection string using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on row values.
         /// </summary>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回一个包含结果集的DataSet.</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDatasetTypedParams(string connectionString, String spName, DataRow dataRow)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
-            //如果row有值,存储过程必须初始化.
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            //If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connectionString, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteDataset(connectionString, CommandType.StoredProcedure, spName, commandParameters);
@@ -2097,25 +2414,34 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定连接数据库连接对象的存储过程,使用DataRow做为参数值,返回DataSet.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the dataRow column values as the store procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on row values.
         /// </summary>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回一个包含结果集的DataSet.</returns>
-        ///
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDatasetTypedParams(SqlConnection connection, String spName, DataRow dataRow)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteDataset(connection, CommandType.StoredProcedure, spName, commandParameters);
@@ -2127,25 +2453,39 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定连接数据库事务的存储过程,使用DataRow做为参数值,返回DataSet.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlTransaction
+        /// using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on row values.
         /// </summary>
-        /// <param name="transaction">一个有效的连接事务 object</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回一个包含结果集的DataSet.</returns>
+        /// <param name="transaction">A valid SqlTransaction object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>A dataset containing the resultset generated by the command</returns>
         public static DataSet ExecuteDatasetTypedParams(SqlTransaction transaction, String spName, DataRow dataRow)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteDataset(transaction, CommandType.StoredProcedure, spName, commandParameters);
@@ -2156,29 +2496,39 @@ namespace Berry.Data
             }
         }
 
-        #endregion ExecuteDatasetTypedParams 类型化参数(DataRow)
+        #endregion ExecuteDatasetTypedParams
 
-        #region ExecuteReaderTypedParams 类型化参数(DataRow)
+        #region ExecuteReaderTypedParams
 
         /// <summary>
-        /// 执行指定连接数据库连接字符串的存储过程,使用DataRow做为参数值,返回DataReader.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the database specified in
+        /// the connection string using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReaderTypedParams(String connectionString, String spName, DataRow dataRow)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connectionString, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteReader(connectionString, CommandType.StoredProcedure, spName, commandParameters);
@@ -2190,24 +2540,34 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定连接数据库连接对象的存储过程,使用DataRow做为参数值,返回DataReader.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReaderTypedParams(SqlConnection connection, String spName, DataRow dataRow)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteReader(connection, CommandType.StoredProcedure, spName, commandParameters);
@@ -2219,25 +2579,39 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定连接数据库事物的存储过程,使用DataRow做为参数值,返回DataReader.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlTransaction
+        /// using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
-        /// <param name="transaction">一个有效的连接事务 object</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回包含结果集的SqlDataReader</returns>
+        /// <param name="transaction">A valid SqlTransaction object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>A SqlDataReader containing the resultset generated by the command</returns>
         public static SqlDataReader ExecuteReaderTypedParams(SqlTransaction transaction, String spName, DataRow dataRow)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteReader(transaction, CommandType.StoredProcedure, spName, commandParameters);
@@ -2248,29 +2622,39 @@ namespace Berry.Data
             }
         }
 
-        #endregion ExecuteReaderTypedParams 类型化参数(DataRow)
+        #endregion ExecuteReaderTypedParams
 
-        #region ExecuteScalarTypedParams 类型化参数(DataRow)
+        #region ExecuteScalarTypedParams
 
         /// <summary>
-        /// 执行指定连接数据库连接字符串的存储过程,使用DataRow做为参数值,返回结果集中的第一行第一列.
+        /// Execute a stored procedure via a SqlCommand (that returns a 1x1 resultset) against the database specified in
+        /// the connection string using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalarTypedParams(String connectionString, String spName, DataRow dataRow)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connectionString, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteScalar(connectionString, CommandType.StoredProcedure, spName, commandParameters);
@@ -2282,24 +2666,34 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定连接数据库连接对象的存储过程,使用DataRow做为参数值,返回结果集中的第一行第一列.
+        /// Execute a stored procedure via a SqlCommand (that returns a 1x1 resultset) against the specified SqlConnection
+        /// using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalarTypedParams(SqlConnection connection, String spName, DataRow dataRow)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteScalar(connection, CommandType.StoredProcedure, spName, commandParameters);
@@ -2311,25 +2705,39 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定连接数据库事务的存储过程,使用DataRow做为参数值,返回结果集中的第一行第一列.
+        /// Execute a stored procedure via a SqlCommand (that returns a 1x1 resultset) against the specified SqlTransaction
+        /// using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
-        /// <param name="transaction">一个有效的连接事务 object</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回结果集中的第一行第一列</returns>
+        /// <param name="transaction">A valid SqlTransaction object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>An object containing the value in the 1x1 resultset generated by the command</returns>
         public static object ExecuteScalarTypedParams(SqlTransaction transaction, String spName, DataRow dataRow)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteScalar(transaction, CommandType.StoredProcedure, spName, commandParameters);
@@ -2340,29 +2748,39 @@ namespace Berry.Data
             }
         }
 
-        #endregion ExecuteScalarTypedParams 类型化参数(DataRow)
+        #endregion ExecuteScalarTypedParams
 
-        #region ExecuteXmlReaderTypedParams 类型化参数(DataRow)
+        #region ExecuteXmlReaderTypedParams
 
         /// <summary>
-        /// 执行指定连接数据库连接对象的存储过程,使用DataRow做为参数值,返回XmlReader类型的结果集.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlConnection
+        /// using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回XmlReader结果集对象.</returns>
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>An XmlReader containing the resultset generated by the command</returns>
         public static XmlReader ExecuteXmlReaderTypedParams(SqlConnection connection, String spName, DataRow dataRow)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteXmlReader(connection, CommandType.StoredProcedure, spName, commandParameters);
@@ -2374,25 +2792,39 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// 执行指定连接数据库事务的存储过程,使用DataRow做为参数值,返回XmlReader类型的结果集.
+        /// Execute a stored procedure via a SqlCommand (that returns a resultset) against the specified SqlTransaction
+        /// using the dataRow column values as the stored procedure's parameters values.
+        /// This method will query the database to discover the parameters for the
+        /// stored procedure (the first time each stored procedure is called), and assign the values based on parameter order.
         /// </summary>
-        /// <param name="transaction">一个有效的连接事务 object</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="dataRow">使用DataRow作为参数值</param>
-        /// <returns>返回XmlReader结果集对象.</returns>
+        /// <param name="transaction">A valid SqlTransaction object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="dataRow">The dataRow used to hold the stored procedure's parameter values.</param>
+        /// <returns>An XmlReader containing the resultset generated by the command</returns>
         public static XmlReader ExecuteXmlReaderTypedParams(SqlTransaction transaction, String spName, DataRow dataRow)
         {
-            if (transaction == null) throw new ArgumentNullException("transaction");
-            if (transaction != null && transaction.Connection == null) throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (transaction == null)
+            {
+                throw new ArgumentNullException("transaction");
+            }
 
-            // 如果row有值,存储过程必须初始化.
+            if (transaction != null && transaction.Connection == null)
+            {
+                throw new ArgumentException("The transaction was rollbacked or commited, please provide an open transaction.", "transaction");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
+
+            // If the row has values, the store procedure parameters must be initialized
             if (dataRow != null && dataRow.ItemArray.Length > 0)
             {
-                // 从缓存中加载存储过程参数,如果缓存中不存在则从数据库中检索参数信息并加载到缓存中. ()
+                // Pull the parameters for this stored procedure from the parameter cache (or discover them & populate the cache)
                 SqlParameter[] commandParameters = SqlHelperParameterCache.GetSpParameterSet(transaction.Connection, spName);
 
-                // 分配参数值
+                // Set the parameters values
                 AssignParameterValues(commandParameters, dataRow);
 
                 return SqlHelper.ExecuteXmlReader(transaction, CommandType.StoredProcedure, spName, commandParameters);
@@ -2403,53 +2835,59 @@ namespace Berry.Data
             }
         }
 
-        #endregion ExecuteXmlReaderTypedParams 类型化参数(DataRow)
+        #endregion ExecuteXmlReaderTypedParams
     }
 
     /// <summary>
-    /// SqlHelperParameterCache提供缓存存储过程参数,并能够在运行时从存储过程中探索参数.
+    /// SqlHelperParameterCache provides functions to leverage a static cache of procedure parameters, and the
+    /// ability to discover parameters for stored procedures at run-time.
     /// </summary>
-    public static class SqlHelperParameterCache
+    public sealed class SqlHelperParameterCache
     {
-        #region 私有方法,字段,构造函数
+        #region private methods, variables, and constructors
 
-        // 私有构造函数,妨止类被实例化.
+        //Since this class provides only static methods, make the default constructor private to prevent
+        //instances from being created with "new SqlHelperParameterCache()"
+        private SqlHelperParameterCache() { }
 
-        // 这个方法要注意
-        private static readonly Hashtable ParamCache = Hashtable.Synchronized(new Hashtable());
+        private static Hashtable paramCache = Hashtable.Synchronized(new Hashtable());
 
         /// <summary>
-        /// 探索运行时的存储过程,返回SqlParameter参数数组.
-        /// 初始化参数值为 DBNull.Value.
+        /// Resolve at run time the appropriate set of SqlParameters for a stored procedure
         /// </summary>
-        /// <param name="connection">一个有效的数据库连接</param>
-        /// <param name="spName">存储过程名称</param>
-        /// <param name="includeReturnValueParameter">是否包含返回值参数</param>
-        /// <returns>返回SqlParameter参数数组</returns>
-        private static SqlParameter[] DiscoverSpParameterSet(SqlConnection connection, string spName, bool includeReturnValueParameter)
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="includeReturnValueParameter">Whether or not to include their return value parameter</param>
+        /// <returns>The parameter array discovered.</returns>
+		private static SqlParameter[] DiscoverSpParameterSet(SqlConnection connection, string spName, bool includeReturnValueParameter)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
 
             SqlCommand cmd = new SqlCommand(spName, connection);
             cmd.CommandType = CommandType.StoredProcedure;
 
             connection.Open();
-            // 检索cmd指定的存储过程的参数信息,并填充到cmd的Parameters参数集中.
             SqlCommandBuilder.DeriveParameters(cmd);
             connection.Close();
-            // 如果不包含返回值参数,将参数集中的每一个参数删除.
+
             if (!includeReturnValueParameter)
             {
                 cmd.Parameters.RemoveAt(0);
             }
 
-            // 创建参数数组
             SqlParameter[] discoveredParameters = new SqlParameter[cmd.Parameters.Count];
-            // 将cmd的Parameters参数集复制到discoveredParameters数组.
+
             cmd.Parameters.CopyTo(discoveredParameters, 0);
 
-            // 初始化参数值为 DBNull.Value.
+            // Init the parameters with a DBNull value
             foreach (SqlParameter discoveredParameter in discoveredParameters)
             {
                 discoveredParameter.Value = DBNull.Value;
@@ -2458,10 +2896,10 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// SqlParameter参数数组的深层拷贝.
+        /// Deep copy of cached SqlParameter array
         /// </summary>
-        /// <param name="originalParameters">原始参数数组</param>
-        /// <returns>返回一个同样的参数数组</returns>
+        /// <param name="originalParameters"></param>
+        /// <returns></returns>
         private static SqlParameter[] CloneParameters(SqlParameter[] originalParameters)
         {
             SqlParameter[] clonedParameters = new SqlParameter[originalParameters.Length];
@@ -2474,40 +2912,54 @@ namespace Berry.Data
             return clonedParameters;
         }
 
-        #endregion 私有方法,字段,构造函数
+        #endregion private methods, variables, and constructors
 
-        #region 缓存方法
+        #region caching functions
 
         /// <summary>
-        /// 追加参数数组到缓存.
+        /// Add parameter array to the cache
         /// </summary>
-        /// <param name="connectionString">一个有效的数据库连接字符串</param>
-        /// <param name="commandText">存储过程名或SQL语句</param>
-        /// <param name="commandParameters">要缓存的参数数组</param>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <param name="commandParameters">An array of SqlParamters to be cached</param>
         public static void CacheParameterSet(string connectionString, string commandText, params SqlParameter[] commandParameters)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(commandText)) throw new ArgumentNullException("commandText");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+
+            if (commandText == null || commandText.Length == 0)
+            {
+                throw new ArgumentNullException("commandText");
+            }
 
             string hashKey = connectionString + ":" + commandText;
 
-            ParamCache[hashKey] = commandParameters;
+            paramCache[hashKey] = commandParameters;
         }
 
         /// <summary>
-        /// 从缓存中获取参数数组.
+        /// Retrieve a parameter array from the cache
         /// </summary>
-        /// <param name="connectionString">一个有效的数据库连接字符</param>
-        /// <param name="commandText">存储过程名或SQL语句</param>
-        /// <returns>参数数组</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="commandText">The stored procedure name or T-SQL command</param>
+        /// <returns>An array of SqlParamters</returns>
         public static SqlParameter[] GetCachedParameterSet(string connectionString, string commandText)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(commandText)) throw new ArgumentNullException("commandText");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+
+            if (commandText == null || commandText.Length == 0)
+            {
+                throw new ArgumentNullException("commandText");
+            }
 
             string hashKey = connectionString + ":" + commandText;
 
-            SqlParameter[] cachedParameters = ParamCache[hashKey] as SqlParameter[];
+            SqlParameter[] cachedParameters = paramCache[hashKey] as SqlParameter[];
             if (cachedParameters == null)
             {
                 return null;
@@ -2518,38 +2970,45 @@ namespace Berry.Data
             }
         }
 
-        #endregion 缓存方法
+        #endregion caching functions
 
-        #region 检索指定的存储过程的参数集
+        #region Parameter Discovery Functions
 
         /// <summary>
-        /// 返回指定的存储过程的参数集
+        /// Retrieves the set of SqlParameters appropriate for the stored procedure
         /// </summary>
         /// <remarks>
-        /// 这个方法将查询数据库,并将信息存储到缓存.
+        /// This method will query the database for this information, and then store it in a cache for future requests.
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符</param>
-        /// <param name="spName">存储过程名</param>
-        /// <returns>返回SqlParameter参数数组</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <returns>An array of SqlParameters</returns>
         public static SqlParameter[] GetSpParameterSet(string connectionString, string spName)
         {
             return GetSpParameterSet(connectionString, spName, false);
         }
 
         /// <summary>
-        /// 返回指定的存储过程的参数集
+        /// Retrieves the set of SqlParameters appropriate for the stored procedure
         /// </summary>
         /// <remarks>
-        /// 这个方法将查询数据库,并将信息存储到缓存.
+        /// This method will query the database for this information, and then store it in a cache for future requests.
         /// </remarks>
-        /// <param name="connectionString">一个有效的数据库连接字符.</param>
-        /// <param name="spName">存储过程名</param>
-        /// <param name="includeReturnValueParameter">是否包含返回值参数</param>
-        /// <returns>返回SqlParameter参数数组</returns>
+        /// <param name="connectionString">A valid connection string for a SqlConnection</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="includeReturnValueParameter">A bool value indicating whether the return value parameter should be included in the results</param>
+        /// <returns>An array of SqlParameters</returns>
         public static SqlParameter[] GetSpParameterSet(string connectionString, string spName, bool includeReturnValueParameter)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException("connectionString");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connectionString == null || connectionString.Length == 0)
+            {
+                throw new ArgumentNullException("connectionString");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -2558,34 +3017,36 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// [内部]返回指定的存储过程的参数集(使用连接对象).
+        /// Retrieves the set of SqlParameters appropriate for the stored procedure
         /// </summary>
         /// <remarks>
-        /// 这个方法将查询数据库,并将信息存储到缓存.
+        /// This method will query the database for this information, and then store it in a cache for future requests.
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接字符</param>
-        /// <param name="spName">存储过程名</param>
-        /// <returns>返回SqlParameter参数数组</returns>
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <returns>An array of SqlParameters</returns>
         internal static SqlParameter[] GetSpParameterSet(SqlConnection connection, string spName)
         {
             return GetSpParameterSet(connection, spName, false);
         }
 
         /// <summary>
-        /// [内部]返回指定的存储过程的参数集(使用连接对象)
+        /// Retrieves the set of SqlParameters appropriate for the stored procedure
         /// </summary>
         /// <remarks>
-        /// 这个方法将查询数据库,并将信息存储到缓存.
+        /// This method will query the database for this information, and then store it in a cache for future requests.
         /// </remarks>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名</param>
-        /// <param name="includeReturnValueParameter">
-        /// 是否包含返回值参数
-        /// </param>
-        /// <returns>返回SqlParameter参数数组</returns>
-        private static SqlParameter[] GetSpParameterSet(SqlConnection connection, string spName, bool includeReturnValueParameter)
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="includeReturnValueParameter">A bool value indicating whether the return value parameter should be included in the results</param>
+        /// <returns>An array of SqlParameters</returns>
+        internal static SqlParameter[] GetSpParameterSet(SqlConnection connection, string spName, bool includeReturnValueParameter)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
+
             using (SqlConnection clonedConnection = (SqlConnection)((ICloneable)connection).Clone())
             {
                 return GetSpParameterSetInternal(clonedConnection, spName, includeReturnValueParameter);
@@ -2593,32 +3054,39 @@ namespace Berry.Data
         }
 
         /// <summary>
-        /// [私有]返回指定的存储过程的参数集(使用连接对象)
+        /// Retrieves the set of SqlParameters appropriate for the stored procedure
         /// </summary>
-        /// <param name="connection">一个有效的数据库连接对象</param>
-        /// <param name="spName">存储过程名</param>
-        /// <param name="includeReturnValueParameter">是否包含返回值参数</param>
-        /// <returns>返回SqlParameter参数数组</returns>
+        /// <param name="connection">A valid SqlConnection object</param>
+        /// <param name="spName">The name of the stored procedure</param>
+        /// <param name="includeReturnValueParameter">A bool value indicating whether the return value parameter should be included in the results</param>
+        /// <returns>An array of SqlParameters</returns>
         private static SqlParameter[] GetSpParameterSetInternal(SqlConnection connection, string spName, bool includeReturnValueParameter)
         {
-            if (connection == null) throw new ArgumentNullException("connection");
-            if (string.IsNullOrEmpty(spName)) throw new ArgumentNullException("spName");
+            if (connection == null)
+            {
+                throw new ArgumentNullException("connection");
+            }
+
+            if (spName == null || spName.Length == 0)
+            {
+                throw new ArgumentNullException("spName");
+            }
 
             string hashKey = connection.ConnectionString + ":" + spName + (includeReturnValueParameter ? ":include ReturnValue Parameter" : "");
 
             SqlParameter[] cachedParameters;
 
-            cachedParameters = ParamCache[hashKey] as SqlParameter[];
+            cachedParameters = paramCache[hashKey] as SqlParameter[];
             if (cachedParameters == null)
             {
                 SqlParameter[] spParameters = DiscoverSpParameterSet(connection, spName, includeReturnValueParameter);
-                ParamCache[hashKey] = spParameters;
+                paramCache[hashKey] = spParameters;
                 cachedParameters = spParameters;
             }
 
             return CloneParameters(cachedParameters);
         }
 
-        #endregion 检索指定的存储过程的参数集
+        #endregion Parameter Discovery Functions
     }
 }

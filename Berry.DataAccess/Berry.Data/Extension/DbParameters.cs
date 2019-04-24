@@ -22,7 +22,7 @@ namespace Berry.Data.Extension
         public static string CreateDbParmCharacter()
         {
             string character;
-            switch (SqlHelper.DbType)
+            switch (DbHandlingCenter.DbType)
             {
                 case DatabaseType.SqlServer:
                     character = "@";
@@ -54,7 +54,7 @@ namespace Berry.Data.Extension
         public static DbParameter CreateDbParameter()
         {
             DbParameter parameter;
-            switch (SqlHelper.DbType)
+            switch (DbHandlingCenter.DbType)
             {
                 case DatabaseType.SqlServer:
                     parameter = new SqlParameter();
@@ -112,7 +112,7 @@ namespace Berry.Data.Extension
             int i = 0;
             int size = parameter.Length;
             DbParameter[] dbParameter = null;
-            switch (SqlHelper.DbType)
+            switch (DbHandlingCenter.DbType)
             {
                 case DatabaseType.SqlServer:
                     dbParameter = new DbParameter[size];
