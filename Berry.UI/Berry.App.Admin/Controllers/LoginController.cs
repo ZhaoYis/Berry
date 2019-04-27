@@ -127,7 +127,7 @@ namespace Berry.App.Admin.Controllers
                 OperateUserId = username,
                 OperateTime = DateTime.Now,
                 IPAddress = NetHelper.Ip,
-                IPAddressName = NetHelper.GetAddressByIP(NetHelper.Ip),
+                IPAddressName = "",//NetHelper.GetAddressByIP(NetHelper.Ip),
                 Browser = NetHelper.Browser,
                 Module = ConfigHelper.GetValue("SoftName")
             };
@@ -169,7 +169,7 @@ namespace Berry.App.Admin.Controllers
                             CompanyId = user.OrganizeId,
                             DepartmentId = user.DepartmentId,
                             IPAddress = NetHelper.Ip,
-                            IPAddressName = NetHelper.GetAddressByIP(NetHelper.Ip),
+                            IPAddressName = "",//NetHelper.GetAddressByIP(NetHelper.Ip),
                             ObjectId = objId,
                             LoginTime = DateTime.Now,
                             Token = DESEncryptHelper.Encrypt(CommonHelper.GetGuid(), user.Secretkey)

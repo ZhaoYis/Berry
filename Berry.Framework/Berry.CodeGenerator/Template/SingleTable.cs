@@ -212,7 +212,6 @@ namespace Berry.CodeGenerator.Template
             StringBuilder sb = new StringBuilder();
             sb.Append("using Berry.Entity." + baseConfigModel.OutputAreas + ";\r\n");
             sb.Append("using Berry.IService." + baseConfigModel.OutputAreas + ";\r\n");
-            sb.Append("using Berry.Data.Repository;\r\n");
             sb.Append("using Berry.Entity.CommonEntity;\r\n");
             sb.Append("using System.Collections.Generic;\r\n");
             sb.Append("using System.Linq;\r\n\r\n");
@@ -226,7 +225,7 @@ namespace Berry.CodeGenerator.Template
             sb.Append("    /// 日 期：" + baseConfigModel.CreateDate + "\r\n");
             sb.Append("    /// 描 述：" + baseConfigModel.Description + "\r\n");
             sb.Append("    /// </summary>\r\n");
-            sb.Append("    public class " + baseConfigModel.ServiceClassName + " : RepositoryFactory<" + baseConfigModel.EntityClassName + ">, " + baseConfigModel.IServiceClassName + "\r\n");
+            sb.Append("    public class " + baseConfigModel.ServiceClassName + " : BaseService<" + baseConfigModel.EntityClassName + ">, " + baseConfigModel.IServiceClassName + "\r\n");
             sb.Append("    {\r\n");
 
             sb.Append("        #region 获取数据\r\n");
@@ -240,7 +239,11 @@ namespace Berry.CodeGenerator.Template
                 sb.Append("        /// <returns>返回分页列表</returns>\r\n");
                 sb.Append("        public IEnumerable<" + baseConfigModel.EntityClassName + "> GetPageList(PaginationEntity pagination, string queryJson)\r\n");
                 sb.Append("        {\r\n");
+
+
                 sb.Append("            return this.BaseRepository().FindList(pagination);\r\n");
+
+
                 sb.Append("        }\r\n");
             }
             sb.Append("        /// <summary>\r\n");
@@ -259,7 +262,25 @@ namespace Berry.CodeGenerator.Template
             sb.Append("        /// <returns></returns>\r\n");
             sb.Append("        public " + baseConfigModel.EntityClassName + " GetEntity(string keyValue)\r\n");
             sb.Append("        {\r\n");
-            sb.Append("            return this.BaseRepository().FindEntity(keyValue);\r\n");
+
+
+            sb.Append("            " + baseConfigModel.EntityClassName + " res = null;\r\n");
+            sb.Append("            IDbTransaction tran = null;\r\n");
+            sb.Append("            Logger(this.GetType(), \"GetEntity - 获取实体\", () =>\r\n");
+            sb.Append("            {\r\n");
+            sb.Append("                 using (var conn = this.BaseRepository().GetBaseConnection())\r\n");
+            sb.Append("                 {\r\n");
+            sb.Append("                     tran = conn.BeginTransaction();\r\n");
+            sb.Append("                     res = this.BaseRepository().FindEntity<" + baseConfigModel.EntityClassName + ">(conn, keyValue, tran);\r\n");
+            sb.Append("                     tran.Commit();\r\n");
+            sb.Append("                  }\r\n");
+            sb.Append("            }, e =>\r\n");
+            sb.Append("            {\r\n");
+            sb.Append("                 Trace.WriteLine(e.Message);\r\n");
+            sb.Append("            });\r\n");
+            sb.Append("            return res;\r\n");
+
+
             sb.Append("        }\r\n");
             sb.Append("        #endregion\r\n\r\n");
 
@@ -270,7 +291,25 @@ namespace Berry.CodeGenerator.Template
             sb.Append("        /// <param name=\"keyValue\">主键</param>\r\n");
             sb.Append("        public void RemoveForm(string keyValue)\r\n");
             sb.Append("        {\r\n");
-            sb.Append("            this.BaseRepository().Delete(keyValue);\r\n");
+
+
+            //sb.Append("            this.BaseRepository().Delete(keyValue);\r\n");
+
+            sb.Append("            IDbTransaction tran = null;\r\n");
+            sb.Append("            Logger(this.GetType(), \"RemoveForm - 删除数据\", () =>\r\n");
+            sb.Append("            {\r\n");
+            sb.Append("                 using (var conn = this.BaseRepository().GetBaseConnection())\r\n");
+            sb.Append("                 {\r\n");
+            sb.Append("                     tran = conn.BeginTransaction();\r\n");
+            sb.Append("                     this.BaseRepository().Delete<" + baseConfigModel.EntityClassName + ">(conn, keyValue, tran);\r\n");
+            sb.Append("                     tran.Commit();\r\n");
+            sb.Append("                  }\r\n");
+            sb.Append("            }, e =>\r\n");
+            sb.Append("            {\r\n");
+            sb.Append("                 Trace.WriteLine(e.Message);\r\n");
+            sb.Append("            });\r\n");
+
+
             sb.Append("        }\r\n");
             sb.Append("        /// <summary>\r\n");
             sb.Append("        /// 保存表单（新增、修改）\r\n");
@@ -280,16 +319,35 @@ namespace Berry.CodeGenerator.Template
             sb.Append("        /// <returns></returns>\r\n");
             sb.Append("        public void SaveForm(string keyValue, " + baseConfigModel.EntityClassName + " entity)\r\n");
             sb.Append("        {\r\n");
+
+
+            sb.Append("            IDbTransaction tran = null;\r\n");
+            sb.Append("            Logger(this.GetType(), \"SaveForm - 保存表单（新增、修改）\", () =>\r\n");
+            sb.Append("            {\r\n");
+            sb.Append("                 using (var conn = this.BaseRepository().GetBaseConnection())\r\n");
+            sb.Append("                 {\r\n");
+            sb.Append("                     tran = conn.BeginTransaction();\r\n");
+
+            //sb.Append("                     res = this.BaseRepository().Delete<" + baseConfigModel.EntityClassName + ">(conn, keyValue, tran);\r\n");
             sb.Append("            if (!string.IsNullOrEmpty(keyValue))\r\n");
             sb.Append("            {\r\n");
             sb.Append("                entity.Modify(keyValue);\r\n");
-            sb.Append("                this.BaseRepository().Update(entity);\r\n");
+            sb.Append("                this.BaseRepository().Update<" + baseConfigModel.EntityClassName + ">(conn, entity, tran);\r\n");
             sb.Append("            }\r\n");
             sb.Append("            else\r\n");
             sb.Append("            {\r\n");
             sb.Append("                entity.Create();\r\n");
-            sb.Append("                this.BaseRepository().Insert(entity);\r\n");
+            sb.Append("                this.BaseRepository().Insert<" + baseConfigModel.EntityClassName + ">(conn, entity, tran);\r\n");
             sb.Append("            }\r\n");
+
+            sb.Append("                     tran.Commit();\r\n");
+            sb.Append("                  }\r\n");
+            sb.Append("            }, e =>\r\n");
+            sb.Append("            {\r\n");
+            sb.Append("                 Trace.WriteLine(e.Message);\r\n");
+            sb.Append("            });\r\n");
+
+
             sb.Append("        }\r\n");
             sb.Append("        #endregion\r\n");
             sb.Append("    }\r\n");
@@ -397,7 +455,7 @@ namespace Berry.CodeGenerator.Template
             sb.Append("    /// 日 期：" + baseConfigModel.CreateDate + "\r\n");
             sb.Append("    /// 描 述：" + baseConfigModel.Description + "\r\n");
             sb.Append("    /// </summary>\r\n");
-            sb.Append("    public class " + baseConfigModel.BusinesClassName + " : I" + baseConfigModel.BusinesClassName + "\r\n");
+            sb.Append("    public class " + baseConfigModel.BusinesClassName + " : BaseBLL<" + baseConfigModel.EntityClassName + ">, I" + baseConfigModel.BusinesClassName + "\r\n");
             sb.Append("    {\r\n");
             sb.Append("        private " + baseConfigModel.IServiceClassName + " service = new " + baseConfigModel.ServiceClassName + "();\r\n\r\n");
 
@@ -711,7 +769,8 @@ namespace Berry.CodeGenerator.Template
             sb.Append("                $('#gridTable').setGridWidth(($('.gridPanel').width()));\r\n");
             if (baseConfigModel.gridModel.IsPage == true)
             {
-                sb.Append("                $('#gridTable').setGridHeight($(window).height() - 169.5);\r\n");
+                sb.Append("                $('#gridTable').setGridHeight($(window).height() - 141);\r\n");
+                sb.Append("                $('#itemTree').setTreeHeight($(window).height() - 52);\r\n");
             }
             else
             {
@@ -993,7 +1052,7 @@ namespace Berry.CodeGenerator.Template
                     break;
 
                 case "textarea"://多行文本框
-                    sbControl.Append("<textarea id=\"" + ControlId + "\" class=\"form-control\" " + validator_html + "></textarea>");
+                    sbControl.Append("<textarea type=\"text\" id=\"" + ControlId + "\" class=\"form-control\" " + validator_html + "></textarea>");
                     break;
 
                 default:
