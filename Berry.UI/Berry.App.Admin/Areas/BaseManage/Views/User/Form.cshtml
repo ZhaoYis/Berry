@@ -28,7 +28,7 @@
             //加载角色
             $("#RoleId").ComboBox({
                 url: "../../BaseManage/Role/GetListJson?organizeId=" + value,
-                id: "RoleId",
+                id: "Id",
                 text: "FullName",
                 description: "==请选择==",
                 allowSearch: true
@@ -36,7 +36,7 @@
             //加载岗位
             $("#DutyId").ComboBox({
                 url: "../../BaseManage/Post/GetListJson?organizeId=" + value,
-                id: "RoleId",
+                id: "Id",
                 text: "FullName",
                 description: "==请选择==",
                 allowSearch: true
@@ -52,7 +52,7 @@
             //加载职位
             $("#PostId").ComboBox({
                 url: "../../BaseManage/Job/GetListJson?organizeId=" + value,
-                id: "RoleId",
+                id: "Id",
                 text: "FullName",
                 description: "==请选择==",
                 allowSearch: true
@@ -60,7 +60,7 @@
             //加载主管
             $("#ManagerId").ComboBox({
                 url: "../../BaseManage/User/GetListJson?departmentId=" + value,
-                id: "UserId",
+                id: "Id",
                 text: "RealName",
                 title: "Account",
                 description: "==请选择==",
@@ -130,12 +130,10 @@
                     $("#PostId").ComboBoxSetValue(data.PostId)
                     $("#ManagerId").ComboBoxSetValue(data.ManagerId);
                     $("#Birthday").val(formatDate(data.Birthday, "yyyy-MM-dd"));
-                    $("#Password").val("******").attr('disabled', 'disabled');
+                    $("#Password").attr('disabled', 'disabled');
                 }
             });
         }
-
-
     }
     //保存表单
     function AcceptClick() {
@@ -208,9 +206,9 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="formTitle">角色</td>
+                    <td class="formTitle">角色<font face="宋体">*</font></td>
                     <td class="formValue">
-                        <div id="RoleId" type="select" class="ui-select"></div>
+                        <div id="RoleId" type="select" class="ui-select" isvalid="yes" checkexpession="NotNull" ></div>
                     </td>
                     <td class="formTitle">主管</td>
                     <td class="formValue">
@@ -227,9 +225,9 @@
                             </ul>
                         </div>
                     </td>
-                    <td class="formTitle">生日<font face="宋体">*</font></td>
+                    <td class="formTitle">生日</td>
                     <td class="formValue">
-                        <input id="Birthday" type="text" class="form-control input-wdatepicker" onfocus="WdatePicker()" isvalid="yes" checkexpession="NotNull" />
+                        <input id="Birthday" type="text" class="form-control input-wdatepicker" onfocus="WdatePicker()" />
                     </td>
                 </tr>
                 <tr>
@@ -278,4 +276,3 @@
         </div>
     </div>
 </div>
-

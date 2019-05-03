@@ -268,9 +268,9 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
         [AjaxOnly]
         public ActionResult SaveAuthorize(string userId, string moduleIds, string moduleButtonIds, string moduleColumnIds, string authorizeDataJson)
         {
-            List<AuthorizeDataEntity> authorize = authorizeDataJson.JsonToList<AuthorizeDataEntity>();
+            //List<AuthorizeDataEntity> authorize = authorizeDataJson.JsonToList<AuthorizeDataEntity>();
 
-            permissionBLL.SaveAuthorize(AuthorizeTypeEnum.User, userId, moduleIds.Split(','), moduleButtonIds.Split(','), moduleColumnIds.Split(','), authorize);
+            permissionBLL.SaveAuthorize(AuthorizeTypeEnum.User, userId, moduleIds, moduleButtonIds, moduleColumnIds, authorizeDataJson);
             return Success("保存成功。");
         }
 

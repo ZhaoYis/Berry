@@ -1,6 +1,7 @@
 ﻿using Berry.Code;
 using Berry.Entity.AuthorizeManage;
 using Berry.Entity.BaseManage;
+using Berry.Extension;
 using Berry.IBLL.AuthorizeManage;
 using Berry.IService.AuthorizeManage;
 using Berry.Service.AuthorizeManage;
@@ -91,9 +92,10 @@ namespace Berry.BLL.AuthorizeManage
         /// <param name="authorizeType">权限分类</param>
         /// <param name="objectId">对象Id</param>
         /// <param name="userIds">成员Id</param>
-        public void SaveMember(AuthorizeTypeEnum authorizeType, string objectId, string[] userIds)
+        public void SaveMember(AuthorizeTypeEnum authorizeType, string objectId, string userIds)
         {
-            permissionService.SaveMember(authorizeType, objectId, userIds);
+            string[] arrayUserId = userIds.Split(',');
+            permissionService.SaveMember(authorizeType, objectId, arrayUserId);
         }
 
         /// <summary>
@@ -104,11 +106,19 @@ namespace Berry.BLL.AuthorizeManage
         /// <param name="moduleIds">功能Id</param>
         /// <param name="moduleButtonIds">按钮Id</param>
         /// <param name="moduleColumnIds">视图Id</param>
-        /// <param name="authorizeDataList">数据权限</param>
-        public void SaveAuthorize(AuthorizeTypeEnum authorizeType, string objectId, string[] moduleIds, string[] moduleButtonIds,
-            string[] moduleColumnIds, IEnumerable<AuthorizeDataEntity> authorizeDataList)
+        /// <param name="authorizeDataJson">数据权限</param>
+        public void SaveAuthorize(AuthorizeTypeEnum authorizeType, string objectId, string moduleIds, string moduleButtonIds, string moduleColumnIds, string authorizeDataJson)
         {
-            permissionService.SaveAuthorize(authorizeType, objectId, moduleIds, moduleButtonIds, moduleColumnIds, authorizeDataList);
+            List<AuthorizeDataEntity> authorize = new List<AuthorizeDataEntity>();
+            if (!string.IsNullOrEmpty(authorizeDataJson))
+            {
+                authorize = authorizeDataJson.JsonToList<AuthorizeDataEntity>();
+            }
+            string[] arrayModuleId = moduleIds.Split(',');
+            string[] arrayModuleButtonId = moduleButtonIds.Split(',');
+            string[] arrayModuleColumnId = moduleColumnIds.Split(',');
+
+            permissionService.SaveAuthorize(authorizeType, objectId, arrayModuleId, arrayModuleButtonId, arrayModuleColumnId, authorize);
         }
     }
 }

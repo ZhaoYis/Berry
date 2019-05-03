@@ -1,4 +1,5 @@
-﻿using Berry.Code.Operator;
+﻿using Berry.Cache.Core.Base;
+using Berry.Code.Operator;
 using Berry.Entity.AuthorizeManage;
 using Berry.Extension;
 using Berry.IService.AuthorizeManage;
@@ -6,12 +7,9 @@ using Berry.Service.Base;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Berry.Cache.Core.Base;
-using Berry.Data.Extension;
 
 namespace Berry.Service.AuthorizeManage
 {
@@ -53,7 +51,7 @@ namespace Berry.Service.AuthorizeManage
                                         ObjectId IN (
                                                 SELECT  ObjectId
                                                 FROM    Base_UserRelation
-                                                WHERE   Id = @Id)";
+                                                WHERE   UserId = @Id)";
                     }
                     else
                     {
@@ -63,7 +61,7 @@ namespace Berry.Service.AuthorizeManage
                                         ObjectId IN (
                                                 SELECT  ObjectId
                                                 FROM    Base_UserRelation
-                                                WHERE   Id = @Id)";
+                                                WHERE   UserId = @Id)";
                     }
                     whereSb.Append(string.Format("AND ( Id ='{0}'", userId));
 
@@ -75,21 +73,21 @@ namespace Berry.Service.AuthorizeManage
                             case 0://0代表最大权限
 
                                 break;
-                            case 2://本人及下属
+                            case -2://本人及下属
                                 whereSb.Append("  OR ManagerId ='{0}'");
                                 break;
 
-                            case 3://所在部门
+                            case -3://所在部门
                                 whereSb.Append(@"  OR DepartmentId = (SELECT DepartmentId FROM Base_User WHERE Id ='{0}')");
                                 break;
 
-                            case 4://所在公司
+                            case -4://所在公司
                                 whereSb.Append(@"  OR OrganizeId = (SELECT OrganizeId  FROM Base_User WHERE Id ='{0}' )");
                                 break;
 
-                                //case 5:
-                                //    whereSb.Append(string.Format(@"  OR DepartmentId = '{1}' OR OrganizeId = '{1}'", userId, item.ResourceId));
-                                //    break;
+                            case -5:
+                                whereSb.Append(string.Format(@"  OR DepartmentId = '{1}' OR OrganizeId = '{1}'", userId, item.ResourceId));
+                                break;
                         }
                     }
                     whereSb.Append(")");
@@ -186,12 +184,12 @@ namespace Berry.Service.AuthorizeManage
                                             OR ObjectId = @Id )
                                     AND ActionAddress IS NOT NULL");
 
-                    DbParameter[] parameter =
-                    {
-                        DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
-                    };
+                    //DbParameter[] parameter =
+                    //{
+                    //    DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
+                    //};
 
-                    DataTable data = this.BaseRepository().FindTable(conn, strSql.ToString(), parameter, tran);
+                    DataTable data = this.BaseRepository().FindTable(conn, strSql.ToString(), new { Id = userId }, tran);
                     if (data.IsExistRows())
                     {
                         res = data.DataTableToList<AuthorizeUrlModel>();

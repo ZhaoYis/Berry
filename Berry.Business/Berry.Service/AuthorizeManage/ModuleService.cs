@@ -45,16 +45,16 @@ namespace Berry.Service.AuthorizeManage
                                             AND ( ObjectId IN (
                                                   SELECT    ObjectId
                                                   FROM      Base_UserRelation
-                                                  WHERE     Id = @Id ) )
+                                                  WHERE     UserId = @Id ) )
                                             OR ObjectId = @Id )
                             AND EnabledMark = 1  AND DeleteMark = 0 Order By SortCode");
 
-                    DbParameter[] parameter =
-                    {
-                        //new SqlParameter("@Id",SqlDbType.NVarChar,36)
-                        DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
-                    };
-                    res = this.BaseRepository().FindList<ModuleEntity>(conn, strSql.ToString(), parameter, tran).ToList();
+                    //DbParameter[] parameter =
+                    //{
+                    //    //new SqlParameter("@Id",SqlDbType.NVarChar,36)
+                    //    DbParameters.CreateDbParameter(DbParameters.CreateDbParmCharacter() + "Id", userId, DbType.String)
+                    //};
+                    res = this.BaseRepository().FindList<ModuleEntity>(conn, strSql.ToString(), new { Id = userId }, tran).ToList();
 
                     tran.Commit();
                 }

@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using Berry.Log;
+﻿using Berry.Log;
 using Berry.Util;
 using Berry.Util.LambdaToSQL;
 using Dapper;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
 
 namespace Berry.Data.Dapper
 {
@@ -107,7 +106,10 @@ namespace Berry.Data.Dapper
                 res = connection.Execute(strSql, parameters, transaction, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -135,7 +137,10 @@ namespace Berry.Data.Dapper
                 res = connection.Query<TR>(strSql, parameters, transaction, true, timeout, CommandType.Text);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -163,7 +168,10 @@ namespace Berry.Data.Dapper
                 res = connection.ExecuteScalar<TR>(strSql, parameters, transaction, timeout, CommandType.Text);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -201,7 +209,10 @@ namespace Berry.Data.Dapper
                 res = connection.Execute(procName, parameters, transaction, timeout, CommandType.StoredProcedure);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -246,7 +257,10 @@ namespace Berry.Data.Dapper
                 res = connection.Query<TR>(procName, parameters, transaction, true, timeout, CommandType.StoredProcedure).ToList();
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -274,11 +288,17 @@ namespace Berry.Data.Dapper
             int res = 0;
             this.Logger(this.GetType(), "实体插入-Insert", () =>
             {
-                string sql = DatabaseCommon.InsertSql<T>(entity).ToString();
-                res = connection.Execute(sql, entity, transaction, timeout);
+                if (entity != null)
+                {
+                    string sql = DatabaseCommon.InsertSql<T>(entity).ToString();
+                    res = connection.Execute(sql, entity, transaction, timeout);
+                }
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -303,11 +323,17 @@ namespace Berry.Data.Dapper
             int res = 0;
             this.Logger(this.GetType(), "实体批量插入-Insert", () =>
             {
-                string sql = DatabaseCommon.InsertSql<T>(entities.FirstOrDefault()).ToString();
-                res = connection.Execute(sql, entities, transaction, timeout);
+                if (entities != null && entities.Count > 0)
+                {
+                    string sql = DatabaseCommon.InsertSql<T>(entities.FirstOrDefault()).ToString();
+                    res = connection.Execute(sql, entities, transaction, timeout);
+                }
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -333,7 +359,10 @@ namespace Berry.Data.Dapper
                 res = connection.Execute(sql, null, transaction, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -362,7 +391,10 @@ namespace Berry.Data.Dapper
                 res = connection.Execute(sql, entity, transaction, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -387,11 +419,17 @@ namespace Berry.Data.Dapper
             int res = 0;
             this.Logger(this.GetType(), "批量删除-Delete", () =>
             {
-                string sql = DatabaseCommon.DeleteSql<T>(entities.FirstOrDefault()).ToString();
-                res = connection.Execute(sql, entities, transaction, timeout);
+                if (entities != null && entities.Count > 0)
+                {
+                    string sql = DatabaseCommon.DeleteSql<T>(entities.FirstOrDefault()).ToString();
+                    res = connection.Execute(sql, entities, transaction, timeout);
+                }
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -424,7 +462,10 @@ namespace Berry.Data.Dapper
                 res = connection.Execute(sql, null, transaction, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -458,7 +499,10 @@ namespace Berry.Data.Dapper
                 res = connection.Execute(sql, null, transaction, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -487,7 +531,10 @@ namespace Berry.Data.Dapper
                 res = connection.Execute(sql, entity, transaction, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -521,7 +568,10 @@ namespace Berry.Data.Dapper
                 res = connection.Execute(sql, entity, transaction, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -560,7 +610,10 @@ namespace Berry.Data.Dapper
                 res = connection.Query<T>(sql, null, transaction, true, timeout).FirstOrDefault();
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -594,7 +647,10 @@ namespace Berry.Data.Dapper
                 res = connection.Query<T>(sql, null, transaction, true, timeout).FirstOrDefault();
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -616,7 +672,7 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public DataTable FindTable<T>(IDbConnection connection, Expression<Func<T, bool>> condition, IDbTransaction transaction = null, int? timeout = Timeout) where T : class
         {
-            DataTable res = null;
+            DataTable res = new DataTable();
             this.Logger(this.GetType(), "根据条件查询一个DataTable-FindDataTable", () =>
             {
                 LambdaExpConditions<T> lambda = new LambdaExpConditions<T>();
@@ -625,10 +681,14 @@ namespace Berry.Data.Dapper
 
                 string sql = DatabaseCommon.SelectSql<T>(where, true).ToString();
 
-                res = connection.ExecuteReader(sql, null, transaction, timeout, CommandType.Text).GetSchemaTable();
+                var reader = connection.ExecuteReader(sql, null, transaction, timeout, CommandType.Text);
+                res.Load(reader);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -650,13 +710,17 @@ namespace Berry.Data.Dapper
         /// <returns></returns>
         public DataTable FindTable(IDbConnection connection, string strSql, object parameters, IDbTransaction transaction = null, int? timeout = Timeout)
         {
-            DataTable res = null;
+            DataTable res = new DataTable();
             this.Logger(this.GetType(), "查询一个DataTable-FindDataTable", () =>
             {
-                res = connection.ExecuteReader(strSql, parameters, transaction, timeout, CommandType.Text).GetSchemaTable();
+                var reader = connection.ExecuteReader(strSql, parameters, transaction, timeout, CommandType.Text);
+                res.Load(reader);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -700,7 +764,7 @@ namespace Berry.Data.Dapper
         public Tuple<DataTable, int> FindTable(IDbConnection connection, string strSql, object parameters, string orderField, bool isAsc, int pageSize, int pageIndex, IDbTransaction transaction = null, int? timeout = Timeout)
         {
             int total = 0;
-            DataTable res = null;
+            DataTable res = new DataTable();
             this.Logger(this.GetType(), "获取分页DataTable-FindTable", () =>
             {
                 StringBuilder sb = new StringBuilder();
@@ -733,10 +797,14 @@ namespace Berry.Data.Dapper
                 string selectCountSql = "Select Count(*) From (" + strSql + ") AS t";
                 total = connection.ExecuteScalar<int>(selectCountSql, parameters, transaction, timeout);
 
-                res = connection.ExecuteReader(sb.ToString(), null, transaction, timeout, CommandType.Text).GetSchemaTable();
+                var reader = connection.ExecuteReader(sb.ToString(), null, transaction, timeout, CommandType.Text);
+                res.Load(reader);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -764,7 +832,10 @@ namespace Berry.Data.Dapper
                 res = (IQueryable<T>)connection.Query<T>(sql, null, transaction, true, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -797,7 +868,10 @@ namespace Berry.Data.Dapper
                 res = (IQueryable<T>)connection.Query<T>(sql, null, transaction, true, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -825,7 +899,10 @@ namespace Berry.Data.Dapper
                 res = connection.Query<T>(sql, null, transaction, true, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -858,7 +935,10 @@ namespace Berry.Data.Dapper
                 res = connection.Query<T>(sql, null, transaction, true, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -901,7 +981,10 @@ namespace Berry.Data.Dapper
                 res = connection.Query<T>(strSql, parameters, transaction, true, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();
@@ -969,10 +1052,13 @@ namespace Berry.Data.Dapper
                 string selectCountSql = "Select Count(*) From " + table + " WHERE 1 = 1";
                 temp = (int)connection.ExecuteScalar(selectCountSql, null, transaction);
 
-                res = connection.Query<T>(strSql, null, transaction, true, timeout);
+                res = connection.Query<T>(sb.ToString(), null, transaction, true, timeout);
             }, e =>
             {
-                if (transaction != null) transaction.Rollback();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
 
                 connection.Close();
                 connection.Dispose();

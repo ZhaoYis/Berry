@@ -4,6 +4,7 @@ using Berry.Entity.BaseManage;
 using Berry.Entity.CommonEntity;
 using Berry.Extension;
 using Berry.IService.BaseManage;
+using Berry.Service.AuthorizeManage;
 using Berry.Service.Base;
 using Berry.Util;
 using Newtonsoft.Json.Linq;
@@ -14,7 +15,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using Berry.Service.AuthorizeManage;
 
 namespace Berry.Service.BaseManage
 {
@@ -43,7 +43,7 @@ namespace Berry.Service.BaseManage
                     {
                         data = data.Where(d => d.Id != keyValue).ToList();
                     }
-                    res = data.Count == 0;
+                    res = data.Count > 0;
 
                     tran.Commit();
                 }
@@ -71,7 +71,10 @@ namespace Berry.Service.BaseManage
                     tran = conn.BeginTransaction();
 
                     string authorSql = authorizeService.GetDataAuthor(operators, isWrite);
-                    if (string.IsNullOrEmpty(authorSql)) res = "";
+                    if (string.IsNullOrEmpty(authorSql))
+                    {
+                        res = "";
+                    }
 
                     List<UserEntity> userList = this.BaseRepository().FindList<UserEntity>(conn, authorSql, tran).ToList();
                     StringBuilder user = new StringBuilder("");
@@ -109,6 +112,13 @@ namespace Berry.Service.BaseManage
                     tran = conn.BeginTransaction();
 
                     userEntity.Create();
+                    string key = CommonHelper.GetGuid();
+                    string md5 = Md5Helper.Md5(userEntity.Password);
+                    string realPassword = Md5Helper.Md5(DESEncryptHelper.Encrypt(md5, key));
+
+                    userEntity.Password = realPassword;
+                    userEntity.Secretkey = key;
+
                     int res = this.BaseRepository().Insert(conn, userEntity, tran);
 
                     if (res > 0)
@@ -154,7 +164,7 @@ namespace Berry.Service.BaseManage
                         {
                             userRelation.Add(new UserRelationEntity
                             {
-                                Category = 3,
+                                Category = 4,
                                 Id = CommonHelper.GetGuid(),
                                 UserId = userEntity.Id,
                                 ObjectId = userEntity.PostId,
@@ -186,16 +196,11 @@ namespace Berry.Service.BaseManage
         /// <param name="users">用户实体集合</param>
         public void AddUser(List<UserEntity> users)
         {
-            IDbTransaction tran = null;
             Logger(this.GetType(), "AddUser-批量新增用户", () =>
             {
-                using (var conn = this.BaseRepository().GetBaseConnection())
+                foreach (UserEntity user in users)
                 {
-                    tran = conn.BeginTransaction();
-
-                    int res = this.BaseRepository().Insert<UserEntity>(conn, users, tran);
-
-                    tran.Commit();
+                    this.AddUser(user);
                 }
             }, e =>
             {
@@ -224,6 +229,8 @@ namespace Berry.Service.BaseManage
                     {
                         //更新操作
                         userEntity.Modify(keyValue);
+                        userEntity.EnabledMark = true;
+                        userEntity.DeleteMark = false;
                         int res = this.BaseRepository().Update<UserEntity>(conn, userEntity, tran);
                         isSucc = res > 0;
                     }
@@ -231,6 +238,13 @@ namespace Berry.Service.BaseManage
                     {
                         //新增操作
                         userEntity.Create();
+
+                        string key = CommonHelper.GetGuid();
+                        string md5 = Md5Helper.Md5(userEntity.Password);
+                        string realPassword = Md5Helper.Md5(DESEncryptHelper.Encrypt(md5, key));
+
+                        userEntity.Password = realPassword;
+                        userEntity.Secretkey = key;
 
                         int res = this.BaseRepository().Insert<UserEntity>(conn, userEntity, tran);
                         isSucc = res > 0;
@@ -277,7 +291,7 @@ namespace Berry.Service.BaseManage
                     {
                         userRelation.Add(new UserRelationEntity
                         {
-                            Category = 3,
+                            Category = 4,
                             Id = CommonHelper.GetGuid(),
                             UserId = userEntity.Id,
                             ObjectId = userEntity.PostId,
@@ -288,7 +302,10 @@ namespace Berry.Service.BaseManage
                         });
                     }
                     //保持用户角色关系
-                    this.BaseRepository().Insert<UserRelationEntity>(conn, userRelation, tran);
+                    if (userRelation.Count > 0)
+                    {
+                        int res1 = this.BaseRepository().Insert<UserRelationEntity>(conn, userRelation, tran);
+                    }
 
                     #endregion 添加角色、岗位、职位信息
 
@@ -728,7 +745,7 @@ namespace Berry.Service.BaseManage
                     tran = conn.BeginTransaction();
 
                     res = this.BaseRepository()
-                        .FindList<UserEntity>(conn, t => t.Id != "System" && t.EnabledMark == true && t.DeleteMark == false, tran)
+                        .FindList<UserEntity>(conn, t => t.Account != "System" && t.EnabledMark == true && t.DeleteMark == false, tran)
                         .OrderByDescending(u => u.CreateDate).ToList();
 
                     tran.Commit();

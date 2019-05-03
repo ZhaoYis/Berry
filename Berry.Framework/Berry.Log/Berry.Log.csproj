@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="log4net.config" />
     <None Include="packages.config" />
     <None Include="资源文件\log4net.config" />
   </ItemGroup>

@@ -227,14 +227,15 @@ namespace Berry.Service.AuthorizeManage
                     {
                         //组装数据
                         List<UserRelationEntity> list = new List<UserRelationEntity>();
-                        for (int i = 1; i <= userIds.Length; i++)
+                        int sortCode = 1;
+                        foreach (string userId in userIds)
                         {
                             UserRelationEntity userRelationEntity = new UserRelationEntity
                             {
                                 Category = (int)authorizeType,
                                 ObjectId = objectId,
-                                UserId = userIds[i - 1],
-                                SortCode = i
+                                UserId = userId,
+                                SortCode = sortCode++
                             };
                             userRelationEntity.Create();
 
@@ -273,7 +274,8 @@ namespace Berry.Service.AuthorizeManage
                     tran = conn.BeginTransaction();
 
                     //先清除历史授权数据
-                    int isSucc = this.BaseRepository().Delete<AuthorizeDataEntity>(conn, u => u.ObjectId == objectId, tran);
+                    int isSucc = this.BaseRepository().Delete<AuthorizeEntity>(conn, u => u.ObjectId == objectId, tran);
+
                     if (isSucc >= 0)
                     {
                         #region 功能
@@ -345,8 +347,7 @@ namespace Berry.Service.AuthorizeManage
                         #region 数据权限
 
                         //清除数据权限
-                        isSucc = this
-                            .BaseRepository().Delete<AuthorizeDataEntity>(conn, u => u.ObjectId == objectId, tran);
+                        isSucc = this.BaseRepository().Delete<AuthorizeDataEntity>(conn, u => u.ObjectId == objectId, tran);
                         int sortCode = 1;
                         List<AuthorizeDataEntity> authorizeDataTempList = new List<AuthorizeDataEntity>();
 
@@ -360,7 +361,7 @@ namespace Berry.Service.AuthorizeManage
                             authorizeDataTempList.Add(authorizeData);
                         }
                         //保存
-                        this.BaseRepository().Insert(conn, authorizeDataTempList, tran);
+                        res = this.BaseRepository().Insert(conn, authorizeDataTempList, tran);
 
                         #endregion 数据权限
                     }

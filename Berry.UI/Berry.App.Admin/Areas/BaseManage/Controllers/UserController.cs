@@ -24,9 +24,9 @@ namespace Berry.App.Admin.Areas.BaseManage.Controllers
     {
         private UserBLL userBLL = new UserBLL();
         private UserCache userCache = new UserCache();
-        private OrganizeBLL organizeBLL = new OrganizeBLL();
+        //private OrganizeBLL organizeBLL = new OrganizeBLL();
         private OrganizeCache organizeCache = new OrganizeCache();
-        private DepartmentBLL departmentBLL = new DepartmentBLL();
+        //private DepartmentBLL departmentBLL = new DepartmentBLL();
         private DepartmentCache departmentCache = new DepartmentCache();
         private ModuleFormInstanceBLL moduleFormInstanceBll = new ModuleFormInstanceBLL();
 

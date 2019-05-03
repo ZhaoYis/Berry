@@ -376,7 +376,7 @@ $.removeTab = function (type) {
         case "closeOther":
             $tab.find("div.tab_close").each(function () {
                 var id = $(this).parents('.inner').attr('id');
-                if (Id != id) {
+                if (Id !== id) {
                     remove(id);
                 }
             });

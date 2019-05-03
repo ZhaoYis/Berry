@@ -60,6 +60,9 @@
     <Compile Include="JsonExtension.cs" />
     <Compile Include="LambdaExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryableEx\QueryableExtension.cs" />
+    <Compile Include="QueryableEx\PropertySortCondition.cs" />
+    <Compile Include="QueryableEx\QueryableHelper.cs" />
     <Compile Include="SignExtension.cs" />
     <Compile Include="SortExtention.cs" />
     <Compile Include="ValidateExtension.cs" />

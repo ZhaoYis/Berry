@@ -71,7 +71,7 @@ namespace Berry.IBLL.AuthorizeManage
         /// <param name="authorizeType">权限分类</param>
         /// <param name="objectId">对象Id</param>
         /// <param name="userIds">成员Id</param>
-        void SaveMember(AuthorizeTypeEnum authorizeType, string objectId, string[] userIds);
+        void SaveMember(AuthorizeTypeEnum authorizeType, string objectId, string userIds);
 
         /// <summary>
         /// 添加授权
@@ -81,8 +81,8 @@ namespace Berry.IBLL.AuthorizeManage
         /// <param name="moduleIds">功能Id</param>
         /// <param name="moduleButtonIds">按钮Id</param>
         /// <param name="moduleColumnIds">视图Id</param>
-        /// <param name="authorizeDataList">数据权限</param>
-        void SaveAuthorize(AuthorizeTypeEnum authorizeType, string objectId, string[] moduleIds, string[] moduleButtonIds, string[] moduleColumnIds, IEnumerable<AuthorizeDataEntity> authorizeDataList);
+        /// <param name="authorizeDataJson">数据权限</param>
+        void SaveAuthorize(AuthorizeTypeEnum authorizeType, string objectId, string moduleIds, string moduleButtonIds, string moduleColumnIds, string authorizeDataJson);
 
         #endregion 提交数据
     }

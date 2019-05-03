@@ -21,7 +21,7 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
     public class PermissionUserGroupController : BaseController
     {
         private OrganizeBLL organizeBLL = new OrganizeBLL();
-        private DepartmentBLL departmentBLL = new DepartmentBLL();
+        //private DepartmentBLL departmentBLL = new DepartmentBLL();
         private DepartmentCache departmentCache = new DepartmentCache();
         private RoleBLL roleBLL = new RoleBLL();
         private UserBLL userBLL = new UserBLL();
@@ -343,7 +343,7 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
         [AjaxOnly]
         public ActionResult SaveMember(string userGroupId, string userIds)
         {
-            permissionBLL.SaveMember(AuthorizeTypeEnum.UserGroup, userGroupId, new []{ userIds });
+            permissionBLL.SaveMember(AuthorizeTypeEnum.UserGroup, userGroupId, userIds);
             return Success("保存成功。");
         }
 
@@ -361,8 +361,8 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
         [AjaxOnly]
         public ActionResult SaveAuthorize(string userGroupId, string moduleIds, string moduleButtonIds, string moduleColumnIds, string authorizeDataJson)
         {
-            List<AuthorizeDataEntity> authorize = authorizeDataJson.JsonToList<AuthorizeDataEntity>();
-            permissionBLL.SaveAuthorize(AuthorizeTypeEnum.UserGroup, userGroupId, new[] { moduleIds }, new[] { moduleButtonIds }, new[] { moduleColumnIds }, authorize);
+            //List<AuthorizeDataEntity> authorize = authorizeDataJson.JsonToList<AuthorizeDataEntity>();
+            permissionBLL.SaveAuthorize(AuthorizeTypeEnum.UserGroup, userGroupId, moduleIds, moduleButtonIds, moduleColumnIds, authorizeDataJson);
             return Success("保存成功。");
         }
 

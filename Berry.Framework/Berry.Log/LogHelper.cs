@@ -1,7 +1,7 @@
-﻿using System;
-using Berry.Code;
-using Berry.Util;
+﻿using Berry.Util;
 using log4net;
+using System;
+using System.Reflection;
 
 namespace Berry.Log
 {
@@ -31,6 +31,23 @@ namespace Berry.Log
         {
             _log = LogManager.GetLogger(typeName);
         }
+        #endregion
+
+        #region 初始化配置
+
+        /// <summary>
+        /// 初始化配置文件
+        /// </summary>
+        public static void InitLog4net()
+        {
+            ////log4net配置
+            //[assembly: log4net.Config.XmlConfigurator(ConfigFile = "XmlConfig/log4net.config", Watch = true)]
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            var config = assembly.GetManifestResourceStream("Berry.Log.log4net.config");
+            log4net.Config.XmlConfigurator.Configure(config);
+        }
+
         #endregion
 
         #region 获取日志对象

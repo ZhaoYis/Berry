@@ -296,7 +296,7 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
         [AjaxOnly]
         public ActionResult SaveMember(string jobId, string userIds)
         {
-            permissionBLL.SaveMember(AuthorizeTypeEnum.Job, jobId, new []{ userIds });
+            permissionBLL.SaveMember(AuthorizeTypeEnum.Job, jobId, userIds);
             return Success("保存成功。");
         }
 
@@ -314,8 +314,7 @@ namespace Berry.App.Admin.Areas.AuthorizeManage.Controllers
         [AjaxOnly]
         public ActionResult SaveAuthorize(string jobId, string moduleIds, string moduleButtonIds, string moduleColumnIds, string authorizeDataJson)
         {
-            List<AuthorizeDataEntity> authorize = authorizeDataJson.JsonToList<AuthorizeDataEntity>();
-            permissionBLL.SaveAuthorize(AuthorizeTypeEnum.Job, jobId, new []{ moduleIds }, new []{ moduleButtonIds }, new []{ moduleColumnIds }, authorize);
+            permissionBLL.SaveAuthorize(AuthorizeTypeEnum.Job, jobId, moduleIds, moduleButtonIds, moduleColumnIds, authorizeDataJson);
             return Success("保存成功。");
         }
 
